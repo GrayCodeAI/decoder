@@ -32,12 +32,35 @@ func resolveAppDir(root string) string {
 	return filepath.Join(root, appName)
 }
 
+// legacyAppDir returns the legacy ~/.decoder directory when the new ~/.reflect
+// directory does not yet exist, so existing installs keep resolving to their
+// data until an explicit migration runs. Returns "" when no legacy dir exists.
+func legacyAppDir(root string) string {
+	newDir := filepath.Join(root, appName)
+	if _, err := os.Stat(newDir); err == nil {
+		return ""
+	}
+	oldDir := filepath.Join(root, "decoder")
+	if info, err := os.Stat(oldDir); err == nil && info.IsDir() {
+		return oldDir
+	}
+	return ""
+}
+
 // ConfigDir returns the per-user configuration directory for Reflect.
 func ConfigDir() string {
 	if dir := cleanEnvDir(envConfigDir); dir != "" {
 		return dir
 	}
 	if dir := legacyEnvDir("HAWK_CONFIG_DIR"); dir != "" {
+		return dir
+	}
+	if dir := legacyEnvDir("DECODER_CONFIG_DIR"); dir != "" {
+		return dir
+	}
+	// Migration shim: reuse an existing ~/.decoder tree until the user
+	// migrates to ~/.reflect, so prior installs keep working.
+	if dir := legacyAppDir(mustUserConfigDir()); dir != "" {
 		return dir
 	}
 	return resolveAppDir(mustUserConfigDir())
@@ -51,8 +74,15 @@ func StateDir() string {
 	if dir := legacyEnvDir("HAWK_STATE_DIR"); dir != "" {
 		return dir
 	}
+	if dir := legacyEnvDir("DECODER_STATE_DIR"); dir != "" {
+		return dir
+	}
 	if dir := cleanEnvDir("XDG_STATE_HOME"); dir != "" {
 		return filepath.Join(dir, appName)
+	}
+	// Migration shim: reuse an existing ~/.decoder tree until the user migrates.
+	if base := legacyAppDir(mustUserConfigDir()); base != "" {
+		return filepath.Join(base, "state")
 	}
 	// State lives under the config root in both the current and legacy layout,
 	// so resolve the app dir once and append "state".
@@ -66,6 +96,13 @@ func CacheDir() string {
 	}
 	if dir := legacyEnvDir("HAWK_CACHE_DIR"); dir != "" {
 		return dir
+	}
+	if dir := legacyEnvDir("DECODER_CACHE_DIR"); dir != "" {
+		return dir
+	}
+	// Migration shim: reuse an existing ~/.decoder tree until the user migrates.
+	if base := legacyAppDir(mustUserCacheDir()); base != "" {
+		return base
 	}
 	return resolveAppDir(mustUserCacheDir())
 }

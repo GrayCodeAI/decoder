@@ -53,11 +53,22 @@ func HomeDir() (string, error) {
 	if env := strings.TrimSpace(os.Getenv("REFLECT_HOME")); env != "" {
 		return env, nil
 	}
+	if env := strings.TrimSpace(os.Getenv("DECODER_HOME")); env != "" {
+		return env, nil
+	}
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return "", fmt.Errorf("identity: cannot determine home directory: %w", err)
 	}
-	return filepath.Join(home, ".reflect"), nil
+	newDir := filepath.Join(home, ".reflect")
+	if _, err := os.Stat(newDir); err == nil {
+		return newDir, nil
+	}
+	oldDir := filepath.Join(home, ".decoder")
+	if info, err := os.Stat(oldDir); err == nil && info.IsDir() {
+		return oldDir, nil
+	}
+	return newDir, nil
 }
 
 // Identity is one resolved anonymous user id.
