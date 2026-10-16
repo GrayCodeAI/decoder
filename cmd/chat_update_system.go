@@ -53,7 +53,7 @@ func (m chatModel) updateBlurMsg(msg tea.BlurMsg) (tea.Model, tea.Cmd) {
 
 func (m chatModel) updateInterruptMsg(msg tea.InterruptMsg) (tea.Model, tea.Cmd) {
 	// External SIGINT delivered while the terminal is not in raw mode
-	// (e.g. `kill -INT`, __TRELAY_PROTECT__/screen `prefix` + ctrl+c). Bubble Tea would
+	// (e.g. `kill -INT`, tmux/screen `prefix` + ctrl+c). Bubble Tea would
 	// otherwise exit without saving the session.
 	return m.quitModel()
 }

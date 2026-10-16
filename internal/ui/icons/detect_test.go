@@ -53,7 +53,7 @@ func TestMode_NonTTYForcesAscii(t *testing.T) {
 }
 
 func TestMode_TTYDefaultsToNerd(t *testing.T) {
-	for _, term := range []string{"xterm-256color", "__TRELAY_PROTECT__-256color", "screen-256color", "alacritty", "wezterm", "kitty", "ghostty"} {
+	for _, term := range []string{"xterm-256color", "tmux-256color", "screen-256color", "alacritty", "wezterm", "kitty", "ghostty"} {
 		t.Run(term, func(t *testing.T) {
 			t.Setenv("REFLECT_ICONS", "")
 			t.Setenv("NO_COLOR", "")
