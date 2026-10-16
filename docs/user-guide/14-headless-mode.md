@@ -1,6 +1,6 @@
 # Headless Mode and Scripting
 
-Headless mode runs Decoder non-interactively from the command line. It accepts a prompt, executes tools, and returns results — ideal for automation and CI/CD.
+Headless mode runs Reflect non-interactively from the command line. It accepts a prompt, executes tools, and returns results — ideal for automation and CI/CD.
 
 ---
 
@@ -9,10 +9,10 @@ Headless mode runs Decoder non-interactively from the command line. It accepts a
 Pass a prompt to run headless:
 
 ```bash
-decoder -p "Your prompt here"
+reflect -p "Your prompt here"
 ```
 
-Decoder processes the prompt and prints the result to stdout.
+Reflect processes the prompt and prints the result to stdout.
 
 ---
 
@@ -23,7 +23,7 @@ Decoder processes the prompt and prints the result to stdout.
 Human-readable text:
 
 ```bash
-decoder -p "Summarize this codebase"
+reflect -p "Summarize this codebase"
 ```
 
 ### json
@@ -31,7 +31,7 @@ decoder -p "Summarize this codebase"
 Single JSON object after completion:
 
 ```bash
-decoder -p "Summarize this codebase" --output-format json | jq -r '.response'
+reflect -p "Summarize this codebase" --output-format json | jq -r '.response'
 ```
 
 Output includes:
@@ -44,7 +44,7 @@ Output includes:
 NDJSON events in real time:
 
 ```bash
-decoder -p "Summarize" --output-format stream-json | jq -r 'select(.type=="content") | .content'
+reflect -p "Summarize" --output-format stream-json | jq -r 'select(.type=="content") | .content'
 ```
 
 Event types:
@@ -59,20 +59,20 @@ Event types:
 
 ### Named Session
 
-Each `decoder -p` creates a fresh session by default. To continue a session:
+Each `reflect -p` creates a fresh session by default. To continue a session:
 
 ```bash
 # Get session ID
-decoder -p "Initial prompt" --output-format json | jq -r '.sessionId'
+reflect -p "Initial prompt" --output-format json | jq -r '.sessionId'
 
 # Resume the session
-decoder -p "Follow-up" --resume <session-id>
+reflect -p "Follow-up" --resume <session-id>
 ```
 
 ### Continue Most Recent
 
 ```bash
-decoder -p "Continue" --continue
+reflect -p "Continue" --continue
 ```
 
 ---
@@ -83,10 +83,10 @@ Restrict available tools:
 
 ```bash
 # Allow only read tools
-decoder -p "Explain this" --tools "Read,Grep,LS"
+reflect -p "Explain this" --tools "Read,Grep,LS"
 
 # Deny specific tools
-decoder -p "Review" --disallowed-tools "Bash,WebSearch"
+reflect -p "Review" --disallowed-tools "Bash,WebSearch"
 ```
 
 ---
@@ -97,10 +97,10 @@ Control tool permissions:
 
 ```bash
 # Allow shell commands through the explicit tool policy flag
-decoder -p "Build" --allowed-tools "Bash(git:*) Bash(npm:*)"
+reflect -p "Build" --allowed-tools "Bash(git:*) Bash(npm:*)"
 
 # Deny dangerous commands
-decoder -p "Clean" --disallowed-tools "Bash(rm:*) Bash(sudo:*)"
+reflect -p "Clean" --disallowed-tools "Bash(rm:*) Bash(sudo:*)"
 ```
 
 ---
@@ -110,8 +110,8 @@ decoder -p "Clean" --disallowed-tools "Bash(rm:*) Bash(sudo:*)"
 Use `--auto` for fully automated runs:
 
 ```bash
-decoder -p "Format all files" --dangerously-skip-permissions
-decoder exec --auto full "Add error handling"
+reflect -p "Format all files" --dangerously-skip-permissions
+reflect exec --auto full "Add error handling"
 ```
 
 **Warning:** This grants full autonomy. Use only in trusted environments.
@@ -124,14 +124,14 @@ decoder exec --auto full "Add error handling"
 
 ```bash
 #!/bin/bash
-decoder -p "Review staged changes for bugs. Reply OK if fine." \
+reflect -p "Review staged changes for bugs. Reply OK if fine." \
   --dangerously-skip-permissions --output-format json | jq -r '.response' | grep -q "^OK" || exit 1
 ```
 
 ### Code Review
 
 ```bash
-decoder -p "Review PR for security issues" \
+reflect -p "Review PR for security issues" \
   --output-format json --dangerously-skip-permissions | jq -r '.response' > review.md
 ```
 
@@ -139,7 +139,7 @@ decoder -p "Review PR for security issues" \
 
 ```bash
 for file in src/*.go; do
-  decoder -p "Format $file" --auto
+  reflect -p "Format $file" --auto
 done
 ```
 
@@ -149,8 +149,8 @@ done
 
 ```bash
 export XAI_API_KEY="xai-..."     # API key
-export DECODER_HOME="/path"          # Custom config location
-export DECODER_LOG_FILE="/tmp/decoder.log"  # Log file
+export REFLECT_HOME="/path"          # Custom config location
+export REFLECT_LOG_FILE="/tmp/reflect.log"  # Log file
 ```
 
 ---

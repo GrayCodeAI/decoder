@@ -9,13 +9,13 @@ import (
 )
 
 const (
-	appName          = "decoder"
-	legacyAppName    = "hawk"
-	envConfigDir     = "DECODER_CONFIG_DIR"
-	envMuxConfigDir  = "MUX_CONFIG_DIR"
-	envStateDir      = "DECODER_STATE_DIR"
-	envCacheDir      = "DECODER_CACHE_DIR"
-	projectIDHashLen = 12
+	appName           = "reflect"
+	legacyAppName     = "hawk"
+	envConfigDir      = "REFLECT_CONFIG_DIR"
+	envRelayConfigDir = "RELAY_CONFIG_DIR"
+	envStateDir       = "REFLECT_STATE_DIR"
+	envCacheDir       = "REFLECT_CACHE_DIR"
+	projectIDHashLen  = 12
 )
 
 // legacyEnvDir reads a legacy HAWK_* override (e.g. HAWK_STATE_DIR) so an
@@ -24,15 +24,15 @@ func legacyEnvDir(legacyKey string) string {
 	return strings.TrimSpace(os.Getenv(legacyKey))
 }
 
-// resolveAppDir returns the current Decoder app directory under root. Legacy
+// resolveAppDir returns the current Reflect app directory under root. Legacy
 // environment-variable overrides remain supported explicitly, but an
-// auto-detected Hawk directory must not silently become Decoder's active state:
+// auto-detected Hawk directory must not silently become Reflect's active state:
 // it produces confusing paths and can be unwritable after the rebrand.
 func resolveAppDir(root string) string {
 	return filepath.Join(root, appName)
 }
 
-// ConfigDir returns the per-user configuration directory for Decoder.
+// ConfigDir returns the per-user configuration directory for Reflect.
 func ConfigDir() string {
 	if dir := cleanEnvDir(envConfigDir); dir != "" {
 		return dir
@@ -75,12 +75,12 @@ func SettingsPath() string {
 }
 
 func ProviderConfigPath() string {
-	// Mux owns provider routing state and resolves it from MUX_CONFIG_DIR,
+	// Relay owns provider routing state and resolves it from RELAY_CONFIG_DIR,
 	// defaulting to its own directory under the user config root.
-	if dir := cleanEnvDir(envMuxConfigDir); dir != "" {
+	if dir := cleanEnvDir(envRelayConfigDir); dir != "" {
 		return filepath.Join(dir, "provider.json")
 	}
-	return filepath.Join(mustUserConfigDir(), "mux", "provider.json")
+	return filepath.Join(mustUserConfigDir(), "relay", "provider.json")
 }
 
 func SessionsDir() string {
@@ -149,8 +149,8 @@ func mustUserConfigDir() string {
 		// (e.g. unset HOME in a cron/daemon context). Fall back to a
 		// stable, writable location under the OS temp dir so the process
 		// still functions; the effective paths are also overridable via
-		// DECODER_CONFIG_DIR / DECODER_STATE_DIR / DECODER_CACHE_DIR.
-		return filepath.Join(os.TempDir(), "decoder-config")
+		// REFLECT_CONFIG_DIR / REFLECT_STATE_DIR / REFLECT_CACHE_DIR.
+		return filepath.Join(os.TempDir(), "reflect-config")
 	}
 	return dir
 }
@@ -158,7 +158,7 @@ func mustUserConfigDir() string {
 func mustUserCacheDir() string {
 	dir, err := os.UserCacheDir()
 	if err != nil || dir == "" {
-		return filepath.Join(os.TempDir(), "decoder-cache")
+		return filepath.Join(os.TempDir(), "reflect-cache")
 	}
 	return dir
 }

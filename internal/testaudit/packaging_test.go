@@ -39,7 +39,7 @@ func parseSystemdUnit(t *testing.T, data string) map[string][]string {
 }
 
 func TestSystemdUnitStateIsReachableUnderHardening(t *testing.T) {
-	unit := parseSystemdUnit(t, string(readRepoFile(t, "packaging/systemd/decoder-daemon.service")))
+	unit := parseSystemdUnit(t, string(readRepoFile(t, "packaging/systemd/reflect-daemon.service")))
 	one := func(key string) string {
 		t.Helper()
 		if len(unit[key]) != 1 {
@@ -72,11 +72,11 @@ func TestSystemdUnitStateIsReachableUnderHardening(t *testing.T) {
 		k, v, _ := strings.Cut(e, "=")
 		env[k] = v
 	}
-	if want := "/var/lib/" + state; env["HOME"] != want || !strings.HasPrefix(env["DECODER_STATE_DIR"], want) || !strings.HasPrefix(env["DECODER_CONFIG_DIR"], want) {
-		t.Errorf("HOME/DECODER_STATE_DIR/DECODER_CONFIG_DIR must live in the StateDirectory %s, got %v", want, env)
+	if want := "/var/lib/" + state; env["HOME"] != want || !strings.HasPrefix(env["REFLECT_STATE_DIR"], want) || !strings.HasPrefix(env["REFLECT_CONFIG_DIR"], want) {
+		t.Errorf("HOME/REFLECT_STATE_DIR/REFLECT_CONFIG_DIR must live in the StateDirectory %s, got %v", want, env)
 	}
-	if _, ok := env["DECODER_DAEMON_API_KEY"]; ok {
-		t.Error("do not set DECODER_DAEMON_API_KEY inline; load it from the EnvironmentFile")
+	if _, ok := env["REFLECT_DAEMON_API_KEY"]; ok {
+		t.Error("do not set REFLECT_DAEMON_API_KEY inline; load it from the EnvironmentFile")
 	}
 
 	exec := one("ExecStart")
@@ -88,8 +88,8 @@ func TestSystemdUnitStateIsReachableUnderHardening(t *testing.T) {
 	}
 
 	for _, doc := range strings.Fields(one("Documentation")) {
-		if !strings.HasPrefix(doc, "https://github.com/GrayCodeAI/decoder/") {
-			t.Errorf("Documentation=%s must point at the decoder repository", doc)
+		if !strings.HasPrefix(doc, "https://github.com/GrayCodeAI/reflect/") {
+			t.Errorf("Documentation=%s must point at the reflect repository", doc)
 		}
 	}
 }

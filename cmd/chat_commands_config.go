@@ -6,8 +6,8 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
-	decoderconfig "github.com/GrayCodeAI/decoder/internal/config"
-	configfeature "github.com/GrayCodeAI/decoder/internal/features/config"
+	reflectconfig "github.com/GrayCodeAI/reflect/internal/config"
+	configfeature "github.com/GrayCodeAI/reflect/internal/features/config"
 )
 
 // handleConfigCommand handles /config policy through the feature parser and
@@ -21,7 +21,7 @@ func (m *chatModel) handleConfigCommand(parts []string, text string) (tea.Model,
 
 	switch command.Action {
 	case configfeature.ActionProvider:
-		if err := decoderconfig.SetGlobalSetting("provider", command.Value); err != nil {
+		if err := reflectconfig.SetGlobalSetting("provider", command.Value); err != nil {
 			m.messages = append(m.messages, displayMsg{role: "error", content: err.Error()})
 			return m, nil
 		}
@@ -31,9 +31,9 @@ func (m *chatModel) handleConfigCommand(parts []string, text string) (tea.Model,
 		modelCacheMu.RUnlock()
 		if cacheHit && len(cached) > 0 {
 			m.session.SetModel(cached[0].ID)
-			_ = decoderconfig.SetGlobalSetting("model", cached[0].ID)
+			_ = reflectconfig.SetGlobalSetting("model", cached[0].ID)
 		}
-		m.messages = append(m.messages, displayMsg{role: "system", content: fmt.Sprintf("Provider set to: %s\nModel: %s\nSaved in mux (provider.json).", command.Value, m.session.Model())})
+		m.messages = append(m.messages, displayMsg{role: "system", content: fmt.Sprintf("Provider set to: %s\nModel: %s\nSaved in relay (provider.json).", command.Value, m.session.Model())})
 		return m, nil
 
 	case configfeature.ActionModel:
@@ -53,12 +53,12 @@ func (m *chatModel) handleConfigCommand(parts []string, text string) (tea.Model,
 				return m, nil
 			}
 		}
-		if err := decoderconfig.SetGlobalSetting("model", value); err != nil {
+		if err := reflectconfig.SetGlobalSetting("model", value); err != nil {
 			m.messages = append(m.messages, displayMsg{role: "error", content: err.Error()})
 			return m, nil
 		}
 		m.syncSessionSelection()
-		m.messages = append(m.messages, displayMsg{role: "system", content: fmt.Sprintf("Model switched to: %s\nSaved in mux (provider.json).", m.session.Model())})
+		m.messages = append(m.messages, displayMsg{role: "system", content: fmt.Sprintf("Model switched to: %s\nSaved in relay (provider.json).", m.session.Model())})
 		return m, nil
 
 	case configfeature.ActionKeys:
@@ -74,7 +74,7 @@ func (m *chatModel) handleConfigCommand(parts []string, text string) (tea.Model,
 			m.messages = append(m.messages, displayMsg{role: "error", content: err.Error()})
 			return m, nil
 		}
-		value, ok := decoderconfig.SettingValue(settings, command.Key)
+		value, ok := reflectconfig.SettingValue(settings, command.Key)
 		if !ok {
 			m.messages = append(m.messages, displayMsg{role: "error", content: fmt.Sprintf("Unsupported setting key %q", command.Key)})
 			return m, nil
@@ -86,7 +86,7 @@ func (m *chatModel) handleConfigCommand(parts []string, text string) (tea.Model,
 		return m, nil
 
 	case configfeature.ActionSet:
-		if err := decoderconfig.SetGlobalSetting(command.Key, command.Value); err != nil {
+		if err := reflectconfig.SetGlobalSetting(command.Key, command.Value); err != nil {
 			m.messages = append(m.messages, displayMsg{role: "error", content: err.Error()})
 			return m, nil
 		}

@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/GrayCodeAI/decoder/internal/intelligence/memory"
-	"github.com/GrayCodeAI/decoder/internal/observability/logger"
-	"github.com/GrayCodeAI/decoder/internal/types"
+	"github.com/GrayCodeAI/reflect/internal/intelligence/memory"
+	"github.com/GrayCodeAI/reflect/internal/observability/logger"
+	"github.com/GrayCodeAI/reflect/internal/types"
 )
 
 // MemoryService is the Session's view of the memory layer: recall/remember
@@ -106,7 +106,7 @@ func (s *MemoryService) OnSessionEnd(success bool) {
 
 // Finalize performs memory-side session bookkeeping from a transcript
 // snapshot. The agent loop does not need to know which backend is installed.
-func (s *MemoryService) Finalize(messages []types.MuxMessage, success bool) {
+func (s *MemoryService) Finalize(messages []types.RelayMessage, success bool) {
 	if s == nil {
 		return
 	}

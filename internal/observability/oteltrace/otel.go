@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GrayCodeAI/decoder"
+	reflectmod "github.com/GrayCodeAI/reflect"
 )
 
 // TelemetryConfig controls OpenTelemetry initialization.
@@ -28,8 +28,8 @@ type TelemetryConfig struct {
 // DefaultTelemetryConfig returns a config populated from environment variables.
 func DefaultTelemetryConfig() TelemetryConfig {
 	cfg := TelemetryConfig{
-		ServiceName:     "decoder",
-		ServiceVersion:  decoder.Version,
+		ServiceName:     "reflect",
+		ServiceVersion:  reflectmod.Version,
 		ExporterProto:   envOr("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf"),
 		Endpoint:        os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT"),
 		MetricsInterval: 60 * time.Second,
@@ -38,16 +38,16 @@ func DefaultTelemetryConfig() TelemetryConfig {
 		ShutdownTimeout: 2 * time.Second,
 	}
 
-	// Telemetry is opt-in: only the explicit DECODER_ENABLE_TELEMETRY=1
+	// Telemetry is opt-in: only the explicit REFLECT_ENABLE_TELEMETRY=1
 	// flag enables it. Setting the standard OTEL_EXPORTER_OTLP_ENDPOINT must
-	// not implicitly enable decoder telemetry (Phase 3 hardening).
-	cfg.Enabled = os.Getenv("DECODER_ENABLE_TELEMETRY") == "1"
+	// not implicitly enable reflect telemetry (Phase 3 hardening).
+	cfg.Enabled = os.Getenv("REFLECT_ENABLE_TELEMETRY") == "1"
 
 	if hdrs := os.Getenv("OTEL_EXPORTER_OTLP_HEADERS"); hdrs != "" {
 		cfg.Headers = parseHeaders(hdrs)
 	}
 
-	if timeout := os.Getenv("DECODER_OTEL_SHUTDOWN_TIMEOUT_MS"); timeout != "" {
+	if timeout := os.Getenv("REFLECT_OTEL_SHUTDOWN_TIMEOUT_MS"); timeout != "" {
 		if ms, err := strconv.Atoi(timeout); err == nil {
 			cfg.ShutdownTimeout = time.Duration(ms) * time.Millisecond
 		}

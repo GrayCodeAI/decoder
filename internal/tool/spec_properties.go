@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/GrayCodeAI/decoder/internal/spec"
+	"github.com/GrayCodeAI/reflect/internal/spec"
 )
 
 type SpecPropertiesTool struct{}

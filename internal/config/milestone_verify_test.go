@@ -8,23 +8,23 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/GrayCodeAI/mux/catalog"
-	muxcfg "github.com/GrayCodeAI/mux/config"
-	"github.com/GrayCodeAI/mux/credentials"
+	"github.com/GrayCodeAI/relay/catalog"
+	relaycfg "github.com/GrayCodeAI/relay/config"
+	"github.com/GrayCodeAI/relay/credentials"
 )
 
-// isolateMilestoneTest uses a temp HOME and DECODER_CONFIG_DIR so verification does not touch the user machine.
+// isolateMilestoneTest uses a temp HOME and REFLECT_CONFIG_DIR so verification does not touch the user machine.
 func isolateMilestoneTest(t *testing.T) string {
 	t.Helper()
 	home := t.TempDir()
-	decoderDir := filepath.Join(home, ".decoder")
-	if err := os.MkdirAll(decoderDir, 0o700); err != nil {
+	reflectDir := filepath.Join(home, ".reflect")
+	if err := os.MkdirAll(reflectDir, 0o700); err != nil {
 		t.Fatal(err)
 	}
 	t.Setenv("HOME", home)
-	t.Setenv("DECODER_CONFIG_DIR", decoderDir)
-	t.Setenv("MUX_CONFIG_DIR", decoderDir)
-	return decoderDir
+	t.Setenv("REFLECT_CONFIG_DIR", reflectDir)
+	t.Setenv("RELAY_CONFIG_DIR", reflectDir)
+	return reflectDir
 }
 
 func TestVerify_ProviderJSONOnDiskHasNoSecrets(t *testing.T) {
@@ -34,19 +34,19 @@ func TestVerify_ProviderJSONOnDiskHasNoSecrets(t *testing.T) {
 		t.Fatal("compiled catalog required")
 	}
 	env := map[string]string{"ANTHROPIC_API_KEY": "sk-ant-verify-test-key-1234567890"}
-	cfg := muxcfg.SyncProviderConfigFromCatalog(compiled, env)
-	path, err := muxcfg.GetProviderConfigPath()
+	cfg := relaycfg.SyncProviderConfigFromCatalog(compiled, env)
+	path, err := relaycfg.GetProviderConfigPath()
 	if err != nil {
 		t.Fatalf("GetProviderConfigPath: %v", err)
 	}
-	if err := muxcfg.SaveProviderConfig(cfg, path); err != nil {
+	if err := relaycfg.SaveProviderConfig(cfg, path); err != nil {
 		t.Fatal(err)
 	}
 	assertProviderJSONFileHasNoSecrets(t, path)
 }
 
 func TestVerify_PersistAPIKeyDoesNotWriteProviderJSON(t *testing.T) {
-	decoderDir := isolateMilestoneTest(t)
+	reflectDir := isolateMilestoneTest(t)
 	credentials.SetDefaultStore(emptyCredentialStore{})
 	t.Cleanup(func() { credentials.SetDefaultStore(nil) })
 
@@ -54,7 +54,7 @@ func TestVerify_PersistAPIKeyDoesNotWriteProviderJSON(t *testing.T) {
 	if err := PersistAPIKey(context.Background(), "ANTHROPIC_API_KEY", secret); err != nil {
 		t.Fatal(err)
 	}
-	path := filepath.Join(decoderDir, "provider.json")
+	path := filepath.Join(reflectDir, "provider.json")
 	if _, err := os.Stat(path); err == nil {
 		data, _ := os.ReadFile(path)
 		if strings.Contains(string(data), secret) {
@@ -99,13 +99,13 @@ func TestVerify_EvaluateSetupFlow(t *testing.T) {
 		t.Fatal("expected setup still needed until model selected")
 	}
 
-	providerPath := filepath.Join(os.Getenv("HOME"), ".decoder", "provider.json")
-	cfg := &muxcfg.ProviderConfig{
+	providerPath := filepath.Join(os.Getenv("HOME"), ".reflect", "provider.json")
+	cfg := &relaycfg.ProviderConfig{
 		ActiveProvider: "anthropic",
 		ActiveModel:    "claude-sonnet-4-20250514",
 		AnthropicModel: "claude-sonnet-4-20250514",
 	}
-	if err := muxcfg.SaveProviderConfig(cfg, providerPath); err != nil {
+	if err := relaycfg.SaveProviderConfig(cfg, providerPath); err != nil {
 		t.Fatal(err)
 	}
 	st = EvaluateSetup(ctx)
@@ -133,7 +133,7 @@ func assertProviderJSONFileHasNoSecrets(t *testing.T, path string) {
 			t.Fatalf("provider.json at %s contains non-empty %s", path, needle)
 		}
 	}
-	var cfg muxcfg.ProviderConfig
+	var cfg relaycfg.ProviderConfig
 	if err := json.Unmarshal(data, &cfg); err != nil {
 		t.Fatal(err)
 	}

@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GrayCodeAI/decoder/internal/engine/safety"
-	chatfeature "github.com/GrayCodeAI/decoder/internal/features/chat"
+	"github.com/GrayCodeAI/reflect/internal/engine/safety"
+	chatfeature "github.com/GrayCodeAI/reflect/internal/features/chat"
 
 	"charm.land/bubbles/v2/spinner"
 	"charm.land/bubbles/v2/textarea"
@@ -16,15 +16,15 @@ import (
 	tea "charm.land/bubbletea/v2"
 	lipgloss "charm.land/lipgloss/v2"
 
-	"github.com/GrayCodeAI/decoder/internal/bridge/sessioncapture"
-	decoderconfig "github.com/GrayCodeAI/decoder/internal/config"
-	"github.com/GrayCodeAI/decoder/internal/engine"
-	"github.com/GrayCodeAI/decoder/internal/features/shellmode"
-	"github.com/GrayCodeAI/decoder/internal/features/taste"
-	"github.com/GrayCodeAI/decoder/internal/plugin"
-	"github.com/GrayCodeAI/decoder/internal/session"
-	"github.com/GrayCodeAI/decoder/internal/system/staleness"
-	"github.com/GrayCodeAI/decoder/internal/tool"
+	"github.com/GrayCodeAI/reflect/internal/bridge/sessioncapture"
+	reflectconfig "github.com/GrayCodeAI/reflect/internal/config"
+	"github.com/GrayCodeAI/reflect/internal/engine"
+	"github.com/GrayCodeAI/reflect/internal/features/shellmode"
+	"github.com/GrayCodeAI/reflect/internal/features/taste"
+	"github.com/GrayCodeAI/reflect/internal/plugin"
+	"github.com/GrayCodeAI/reflect/internal/session"
+	"github.com/GrayCodeAI/reflect/internal/system/staleness"
+	"github.com/GrayCodeAI/reflect/internal/tool"
 )
 
 // sessionWAL is the durability surface the chat model needs from its
@@ -56,10 +56,10 @@ func (m *chatModel) recordWALError(err error) {
 	if err == nil || m.durabilityWarning != "" {
 		return
 	}
-	m.durabilityWarning = "Warning: session persistence is failing — recent messages may be lost if decoder crashes. Check disk space and permissions."
+	m.durabilityWarning = "Warning: session persistence is failing — recent messages may be lost if reflect crashes. Check disk space and permissions."
 }
 
-// All decoder color/icon/glyph constants live in theme.go. This file holds
+// All reflect color/icon/glyph constants live in theme.go. This file holds
 // the pre-built lipgloss styles that combine a color with attributes
 // (bold, italic, border, etc.) for the most common patterns.
 
@@ -75,8 +75,8 @@ var (
 
 	slashCmdStyle     = lipgloss.NewStyle().Foreground(textDisabled)
 	slashDescStyle    = lipgloss.NewStyle().Foreground(textDisabled)
-	slashSelCmdStyle  = lipgloss.NewStyle().Foreground(decoderColor).Bold(true)
-	slashSelDescStyle = lipgloss.NewStyle().Foreground(decoderColor)
+	slashSelCmdStyle  = lipgloss.NewStyle().Foreground(reflectColor).Bold(true)
+	slashSelDescStyle = lipgloss.NewStyle().Foreground(reflectColor)
 	inputBorderStyle  = lipgloss.NewStyle().Border(lipgloss.NormalBorder(), true, false, true, false).BorderForeground(borderDim)
 
 	// Backwards-compatible alias for callers that still use the old name.
@@ -88,13 +88,13 @@ func ghostHintStyle() lipgloss.Style {
 	return lipgloss.NewStyle().Foreground(textDisabled).Italic(true)
 }
 
-// decoderSpinnerFrames feeds the bubbles spinner (matches BrailleSpinner default).
-var decoderSpinnerFrames = decoderSpinnerGlyphs
+// reflectSpinnerFrames feeds the bubbles spinner (matches BrailleSpinner default).
+var reflectSpinnerFrames = reflectSpinnerGlyphs
 
-// decoderSpinnerFrameInterval — compass frame cadence.
-const decoderSpinnerFrameInterval = 80 * time.Millisecond
+// reflectSpinnerFrameInterval — compass frame cadence.
+const reflectSpinnerFrameInterval = 80 * time.Millisecond
 
-// Spinner verbs (from decoder-archive) — picked randomly per session
+// Spinner verbs (from reflect-archive) — picked randomly per session
 var spinnerVerbs = []string{
 	"Abstracting", "Architecting", "Brewing", "Calculating", "Cogitating",
 	"Compiling", "Computing", "Conjuring", "Contemplating", "Cooking",
@@ -154,7 +154,7 @@ type (
 		statusLeftBranch string
 		connStatusVal    string
 		connStatusKey    string
-		welcomeSetup     decoderconfig.SetupState
+		welcomeSetup     reflectconfig.SetupState
 		welcomeAgentsOK  bool
 	}
 	processArrowTickMsg struct {
@@ -219,7 +219,7 @@ type chatModel struct {
 	viewport                   viewport.Model
 	session                    *engine.Session
 	registry                   *tool.Registry
-	settings                   decoderconfig.Settings
+	settings                   reflectconfig.Settings
 	ref                        *progRef
 	cancel                     context.CancelFunc // cancel current stream
 	sessionID                  string
@@ -257,7 +257,7 @@ type chatModel struct {
 	width                      int
 	height                     int
 	quitting                   bool
-	mascotEnabled              bool // inline DECODER mascot is available in the active terminal
+	mascotEnabled              bool // inline REFLECT mascot is available in the active terminal
 	blinkClosed                bool
 	eyeFrame                   int
 	slashSel                   int
@@ -270,7 +270,7 @@ type chatModel struct {
 	configNotice               string
 	configEntry                string              // configEntryNone, configEntryAPIKeyPaste, configEntryOllamaURL
 	configProvider             string              // e.g. configProviderOllama while entry overlay is open
-	configModelOptions         []configModelOption // labels + ids from mux catalog
+	configModelOptions         []configModelOption // labels + ids from relay catalog
 	configModelProvider        string              // filter models after API key paste
 	configModelSearch          string              // active model filter query
 	configModelSearchActive    bool                // typing into model search input
@@ -323,7 +323,7 @@ type chatModel struct {
 	sessionBootstrapDone         bool
 	toolStartTime                time.Time
 	welcomeCache                 string
-	welcomeSetupState            decoderconfig.SetupState
+	welcomeSetupState            reflectconfig.SetupState
 	welcomeAgentsOK              bool
 	viewDirty                    bool
 	layoutKey                    int    // input lines + slash menu height fingerprint

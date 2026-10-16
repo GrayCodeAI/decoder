@@ -1,10 +1,10 @@
 package cmd
 
-import chatfeature "github.com/GrayCodeAI/decoder/internal/features/chat"
+import chatfeature "github.com/GrayCodeAI/reflect/internal/features/chat"
 
 // turnHadThinkingOnly reports whether the latest user turn ended with internal
 // reasoning visible but no assistant reply or tool activity. This is the TUI
-// symptom of mux's ResponseErrorOnlyReasoning health check.
+// symptom of relay's ResponseErrorOnlyReasoning health check.
 func turnHadThinkingOnly(messages []displayMsg) bool {
 	return chatfeature.HadThinkingOnly(toFeatureMessages(messages))
 }

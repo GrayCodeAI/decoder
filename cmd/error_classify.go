@@ -4,41 +4,41 @@ import (
 	"fmt"
 	"strings"
 
-	decoderconfig "github.com/GrayCodeAI/decoder/internal/config"
-	"github.com/GrayCodeAI/decoder/internal/decodererr"
-	"github.com/GrayCodeAI/decoder/internal/errhint"
+	reflectconfig "github.com/GrayCodeAI/reflect/internal/config"
+	"github.com/GrayCodeAI/reflect/internal/errhint"
+	"github.com/GrayCodeAI/reflect/internal/reflecterr"
 )
 
 // friendlyErrorMessage returns the user-friendly message for an error.
-// Delegates to the shared decodererr.ClassifyErrorMessage for the base message,
+// Delegates to the shared reflecterr.ClassifyErrorMessage for the base message,
 // then enriches specific cases with dynamic hints that require the config
-// package (decodererr can't import internal/config without a cycle).
+// package (reflecterr can't import internal/config without a cycle).
 func friendlyErrorMessage(err error) string {
-	msg := decodererr.ClassifyErrorMessage(err)
+	msg := reflecterr.ClassifyErrorMessage(err)
 
 	if err == nil {
 		return msg
 	}
 
-	ec := decodererr.ClassifyError(err)
+	ec := reflecterr.ClassifyError(err)
 	low := strings.ToLower(err.Error())
 
 	switch ec.ExitCode {
-	case decodererr.ExitNotFound:
+	case reflecterr.ExitNotFound:
 		// Enrich model-not-found errors with concrete examples from the catalog.
 		if strings.Contains(low, "model") || strings.Contains(low, "unknown") ||
 			strings.Contains(low, "does not exist") {
-			ex1, ex2 := decoderconfig.ExampleModelHints()
+			ex1, ex2 := reflectconfig.ExampleModelHints()
 			msg = fmt.Sprintf(
-				"Model not found. Check your model name with /model.\n  Examples from the mux catalog: %s, %s\n  Use /models to list all models, or /config to change provider.",
+				"Model not found. Check your model name with /model.\n  Examples from the relay catalog: %s, %s\n  Use /models to list all models, or /config to change provider.",
 				ex1, ex2,
 			)
 		}
-	case decodererr.ExitAuth:
+	case reflecterr.ExitAuth:
 		msg += "\n  Check your API key with /config. Keys can expire or be revoked."
-	case decodererr.ExitNetwork:
+	case reflecterr.ExitNetwork:
 		msg += "\n  Check your internet connection. If you're behind a proxy, configure it with /config."
-	case decodererr.ExitTimeout:
+	case reflecterr.ExitTimeout:
 		msg += "\n  The request took too long. Try again, or use /model to switch to a faster provider."
 	}
 

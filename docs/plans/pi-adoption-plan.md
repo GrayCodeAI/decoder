@@ -4,17 +4,17 @@ Status: Proposed
 
 Source: `https://github.com/earendil-works/pi` (MIT, TypeScript/Bun monorepo)
 
-This plan records the features identified as genuinely missing from decoder while
-auditing the Pi agent harness against Decoder and its independent ecosystem
+This plan records the features identified as genuinely missing from reflect while
+auditing the Pi agent harness against Reflect and its independent ecosystem
 repositories. It is
-an adoption plan, not a code-porting plan: decoder reimplements compatible behavior
+an adoption plan, not a code-porting plan: reflect reimplements compatible behavior
 in Go and preserves its existing provider, session, permission, observability,
-and protocol boundaries. Decoder executes tools directly on the host; it does not
+and protocol boundaries. Reflect executes tools directly on the host; it does not
 ship a product sandbox runtime.
 
 ## Executive Decision
 
-Decoder should adopt the following Pi features:
+Reflect should adopt the following Pi features:
 
 1. A Go telemetry conformance suite that verifies emitted OpenTelemetry spans
    and attributes match the documented schema.
@@ -26,24 +26,24 @@ Decoder should adopt the following Pi features:
 5. Kitty graphics protocol support for terminal images.
 6. Session lease/ownership semantics in the daemon protocol.
 
-Decoder should not copy Pi's TypeScript code, replace its Go runtime, or adopt Pi's
+Reflect should not copy Pi's TypeScript code, replace its Go runtime, or adopt Pi's
 custom CBOR RPC protocol. Its host-native permission and path/trust policy is
 the local safety boundary.
 
-## Existing Decoder Capabilities
+## Existing Reflect Capabilities
 
-The audit found that decoder already provides the foundation for most Pi features:
+The audit found that reflect already provides the foundation for most Pi features:
 
-| Pi package | Decoder implementation | Current decision |
+| Pi package | Reflect implementation | Current decision |
 |---|---|---|
-| `pi-ai` (multi-provider) | sibling `mux` client + engine facade + catalog + router + credentials | Keep decoder (broader) |
-| `pi-agent-core` (agent loop) | `internal/engine` | Keep decoder |
-| `pi-coding-agent` (CLI) | `cmd` TUI + CLI + daemon | Keep decoder |
-| `pi-session-backends` (storage) | `internal/session` JSONL + zstd + WAL + SQLite index, sibling `swift` (Swift) | Keep decoder |
-| `pi-server` (RPC) | `internal/daemon` + `internal/acp` + `internal/mcp` | Keep decoder (broader) |
-| Permissions and trust | `internal/engine/safety`, path guards, `internal/trust`, `internal/env` | Keep decoder's host-native boundary |
+| `pi-ai` (multi-provider) | sibling `relay` client + engine facade + catalog + router + credentials | Keep reflect (broader) |
+| `pi-agent-core` (agent loop) | `internal/engine` | Keep reflect |
+| `pi-coding-agent` (CLI) | `cmd` TUI + CLI + daemon | Keep reflect |
+| `pi-session-backends` (storage) | `internal/session` JSONL + zstd + WAL + SQLite index, sibling `swift` (Swift) | Keep reflect |
+| `pi-server` (RPC) | `internal/daemon` + `internal/acp` + `internal/mcp` | Keep reflect (broader) |
+| Permissions and trust | `internal/engine/safety`, path guards, `internal/trust`, `internal/env` | Keep reflect's host-native boundary |
 | `pi-tui` differential rendering | Bubble Tea v2 full-frame redraw | Adopt line-diff engine |
-| `pi-telemetry` conformance | `docs/OTEL-CONVENTIONS.md`, mux `genai_semconv` pinning | Adopt conformance suite |
+| `pi-telemetry` conformance | `docs/OTEL-CONVENTIONS.md`, relay `genai_semconv` pinning | Adopt conformance suite |
 | `pi-evals` agent-level eval | `internal/features/eval` (model benchmark only) | Adopt agent-runtime eval |
 
 ## Priority Model
@@ -59,16 +59,16 @@ The audit found that decoder already provides the foundation for most Pi feature
 
 Guarantee the emitted OpenTelemetry spans and attributes always match the
 documented `gen_ai.*` / `cost.usd` / `tool.name` / `session.id` / `agent.id`
-contract, so the schema cannot silently drift across Decoder and its independent
+contract, so the schema cannot silently drift across Reflect and its independent
 ecosystem repositories.
 
 ### Scope and ownership
 
 - Primary implementation: `internal/observability` and
-  `mux/internal/observability` (the canonical `genai_semconv`
+  `relay/internal/observability` (the canonical `genai_semconv`
   constants and their pinning test).
 - Shared schema constants: sibling `eagle` if a cross-repo
-  contract is needed, otherwise keep them in mux as today.
+  contract is needed, otherwise keep them in relay as today.
 - No changes to `internal/mcp` or `internal/daemon` for telemetry adoption.
 
 ### Required behavior
@@ -84,24 +84,24 @@ ecosystem repositories.
    - asserts sensitive attributes never carry raw prompt/response text,
    - asserts parent/child span relationships and settlement semantics,
    - is runner-independent (usable from any Go test harness).
-4. Wire the conformance harness into the decoder and mux test suites so CI
+4. Wire the conformance harness into the reflect and relay test suites so CI
    enforces the contract.
 5. Keep the conformance layer passive and non-throwing: malformed or unreadable
    telemetry payloads must not break agent execution.
 
 ### Acceptance criteria
 
-- Every span decoder emits is covered by the schema.
+- Every span reflect emits is covered by the schema.
 - A deliberate schema drift (adding a span or attribute) fails the conformance
   test until the schema is updated.
 - No raw prompt/response text appears in recorded attributes.
-- The conformance harness runs green in decoder and mux CI.
+- The conformance harness runs green in reflect and relay CI.
 
 ## P0: Agent-Runtime Eval Harness
 
 ### Goal
 
-Evaluate the full decoder agent end-to-end (real session, tool loop, planning,
+Evaluate the full reflect agent end-to-end (real session, tool loop, planning,
 host policy) against tasks, and snapshot session data as artifacts — not just a
 model-level benchmark.
 
@@ -276,7 +276,7 @@ Every implementation phase must preserve:
 - Eval runs the real tool loop end-to-end in an isolated dir.
 - Daemon and ACP parity for leased sessions.
 - fxtape recording/replay across the new renderer.
-- Cross-repo telemetry conformance in decoder and mux CI.
+- Cross-repo telemetry conformance in reflect and relay CI.
 
 ### Security tests
 
@@ -294,11 +294,11 @@ make test-race
 make vet
 make lint
 make security
-decoder verify
+reflect verify
 ```
 
 For sibling-repository changes, run that repository's own tests and boundary checks before
-updating the Decoder pointer.
+updating the Reflect pointer.
 
 ## Delivery Sequence
 
@@ -313,7 +313,7 @@ updating the Decoder pointer.
 
 - [x] Define the typed span/attribute schema.
 - [x] Implement the conformance harness.
-- [x] Wire decoder and mux CI.
+- [x] Wire reflect and relay CI.
 - [x] Add schema-drift regression tests.
 
 ### Milestone 2: Agent-runtime eval (P0)
@@ -321,7 +321,7 @@ updating the Decoder pointer.
 - [x] Implement the loop runner over the real Session/tool loop.
 - [x] Add isolated execution and session-JSONL artifacts.
 - [ ] Add comparative and reproducibility reporting.
-- [x] Extend `decoder eval` with a loop mode.
+- [x] Extend `reflect eval` with a loop mode.
 
 ### Milestone 3: Differential renderer (P1)
 
@@ -347,19 +347,19 @@ updating the Decoder pointer.
 ## Deliberately Deferred
 
 - Copying Pi's TypeScript code or adopting its custom CBOR RPC protocol in place
-  of decoder's ACP/MCP/daemon stack.
-- Replacing decoder's native permission/sandbox model with Pi's container-only
+  of reflect's ACP/MCP/daemon stack.
+- Replacing reflect's native permission/sandbox model with Pi's container-only
   approach.
-- Porting Pi's extension system verbatim; decoder's plugin/hook/skills model already
+- Porting Pi's extension system verbatim; reflect's plugin/hook/skills model already
   covers it.
 - Adding a full agent-swarm/graph model beyond current subagent support.
 
 ## Success Criteria
 
-The adoption is successful when decoder closes each confirmed gap while retaining
+The adoption is successful when reflect closes each confirmed gap while retaining
 its stronger architecture:
 
-- Telemetry spans always conform to the documented schema across decoder and its
+- Telemetry spans always conform to the documented schema across reflect and its
   sibling repositories.
 - The agent can be evaluated end-to-end through its real tool loop.
 - The TUI re-renders only changed lines with synchronized output.

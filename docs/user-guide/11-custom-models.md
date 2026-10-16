@@ -1,12 +1,12 @@
 # Custom Models
 
-Decoder connects to custom model endpoints through Mux for alternative providers, self-hosted models, and overriding built-in settings.
+Reflect connects to custom model endpoints through Relay for alternative providers, self-hosted models, and overriding built-in settings.
 
 ---
 
 ## Supported Providers
 
-Decoder works with any LLM provider. Built-in support includes:
+Reflect works with any LLM provider. Built-in support includes:
 
 | Provider | ID | Key |
 |----------|-----|-----|
@@ -24,7 +24,7 @@ Decoder works with any LLM provider. Built-in support includes:
 ### CLI Flag
 
 ```bash
-decoder -m gpt-4o -p "Hello"
+reflect -m gpt-4o -p "Hello"
 ```
 
 ### Slash Command
@@ -39,7 +39,7 @@ In the TUI:
 ### Config Default
 
 ```json
-// ~/.decoder/settings.json
+// ~/.reflect/settings.json
 {
   "default_provider": "openai",
   "default_model": "gpt-4o"
@@ -50,7 +50,7 @@ In the TUI:
 
 ## Configuring Custom Models
 
-Add custom models in `~/.decoder/settings.json`:
+Add custom models in `~/.reflect/settings.json`:
 
 ```json
 {
@@ -73,7 +73,7 @@ Add custom models in `~/.decoder/settings.json`:
 
 ### Credential Resolution
 
-Decoder resolves credentials in this order:
+Reflect resolves credentials in this order:
 
 1. Per-model `api_key` field
 2. Environment variable (`env_key`)
@@ -127,11 +127,11 @@ ollama pull llama-3.1-70b
 
 ## Deployment-Aware Routing
 
-Enable deployment-aware routing to use Mux's model catalog:
+Enable deployment-aware routing to use Relay's model catalog:
 
 ```bash
-export DECODER_DEPLOYMENT_ROUTING=true
-decoder
+export REFLECT_DEPLOYMENT_ROUTING=true
+reflect
 ```
 
 Or in settings:

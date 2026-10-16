@@ -4,7 +4,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/GrayCodeAI/decoder/internal/engine/safety"
+	"github.com/GrayCodeAI/reflect/internal/engine/safety"
 )
 
 var (

@@ -3,17 +3,17 @@ package cmd
 import (
 	"strings"
 
-	"github.com/GrayCodeAI/decoder"
+	reflectmod "github.com/GrayCodeAI/reflect"
 )
 
 // versionLine is the single user-facing version format shared by
-// `decoder --version` and `decoder version`.
+// `reflect --version` and `reflect version`.
 func versionLine() string {
 	ver := DisplayVersion()
 	if ver != "" && !strings.HasPrefix(ver, "v") && !strings.HasPrefix(ver, "V") {
 		ver = "v" + ver
 	}
-	line := auditTint("decoder", textPrimary) + " " + auditTint(ver, decoderColor)
+	line := auditTint("reflect", textPrimary) + " " + auditTint(ver, reflectColor)
 	if d := strings.TrimSpace(buildDate); d != "" && d != "unknown" {
 		line += auditTint(" (built "+d+")", textMuted)
 	}
@@ -26,5 +26,5 @@ func DisplayVersion() string {
 	if v := strings.TrimSpace(version); v != "" && v != "dev" {
 		return v
 	}
-	return decoder.Version
+	return reflectmod.Version
 }

@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GrayCodeAI/decoder/internal/types"
+	"github.com/GrayCodeAI/reflect/internal/types"
 )
 
 func TestSnapshotPersistentConvertsRuntimeMessages(t *testing.T) {
@@ -13,7 +13,7 @@ func TestSnapshotPersistentConvertsRuntimeMessages(t *testing.T) {
 		ID:       "session-1",
 		Model:    "model-1",
 		Provider: "provider-1",
-		Messages: []types.MuxMessage{{Role: "user", Content: "hello"}},
+		Messages: []types.RelayMessage{{Role: "user", Content: "hello"}},
 		Created:  created,
 	}
 

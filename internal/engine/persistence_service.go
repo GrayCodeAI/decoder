@@ -4,13 +4,13 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/GrayCodeAI/decoder/internal/engine/compact"
-	"github.com/GrayCodeAI/decoder/internal/engine/streaming"
+	"github.com/GrayCodeAI/reflect/internal/engine/compact"
+	"github.com/GrayCodeAI/reflect/internal/engine/streaming"
 
-	"github.com/GrayCodeAI/decoder/internal/eventlog"
-	"github.com/GrayCodeAI/decoder/internal/observability/logger"
-	"github.com/GrayCodeAI/decoder/internal/session"
-	"github.com/GrayCodeAI/decoder/internal/types"
+	"github.com/GrayCodeAI/reflect/internal/eventlog"
+	"github.com/GrayCodeAI/reflect/internal/observability/logger"
+	"github.com/GrayCodeAI/reflect/internal/session"
+	"github.com/GrayCodeAI/reflect/internal/types"
 )
 
 // PersistenceService is the Session's view of the conversation store:
@@ -29,7 +29,7 @@ type PersistenceService struct {
 	// stateMu protects compaction, token, and checkpoint metadata.
 	stateMu sync.RWMutex
 	// messages is the full transcript (system + user + assistant + tool_use + tool_result).
-	messages []types.MuxMessage
+	messages []types.RelayMessage
 	// system is the system prompt (mutable, agents append learned guidelines).
 	system string
 	// pinnedMessages is the count of messages protected from compaction (from /pin).
@@ -38,7 +38,7 @@ type PersistenceService struct {
 	autoCompactThresholdPct int
 	// contextWindowCached is the catalog context window; 0 → governor default.
 	contextWindowCached int
-	// graph is Decoder's product-owned conversation graph (for branching).
+	// graph is Reflect's product-owned conversation graph (for branching).
 	graph *session.ConversationGraph
 	// journal is the append-only session event spine. It is attached by the
 	// composition root; nil means journaling is disabled (pure in-memory mode).
@@ -97,7 +97,7 @@ func (s *PersistenceService) SetLogger(l *logger.Logger) {
 }
 
 // Messages returns a snapshot copy of the current transcript.
-func (s *PersistenceService) Messages() []types.MuxMessage {
+func (s *PersistenceService) Messages() []types.RelayMessage {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	// Read s.messages directly; the lock is already held. Calling
@@ -111,7 +111,7 @@ func (s *PersistenceService) Messages() []types.MuxMessage {
 // that previously wrote to s.messages directly. The input is deep-copied so
 // callers cannot mutate the live transcript after handing it to persistence.
 // Safe on a nil receiver.
-func (s *PersistenceService) SetRawMessages(msgs []types.MuxMessage) {
+func (s *PersistenceService) SetRawMessages(msgs []types.RelayMessage) {
 	if s == nil {
 		return
 	}
@@ -124,7 +124,7 @@ func (s *PersistenceService) SetRawMessages(msgs []types.MuxMessage) {
 // arguments and multimodal slices are cloned as well, so callers cannot
 // mutate live session state by retaining or editing the returned value.
 // Safe to call on a nil receiver (returns nil).
-func (s *PersistenceService) RawMessages() []types.MuxMessage {
+func (s *PersistenceService) RawMessages() []types.RelayMessage {
 	if s == nil {
 		return nil
 	}
@@ -140,7 +140,7 @@ func (s *PersistenceService) RawMessages() []types.MuxMessage {
 // as ephemeral: appends may reallocate the backing array, and nested tool
 // arguments are shared with live session state. Use RawMessages when a
 // stable snapshot is required. Safe on a nil receiver (returns nil).
-func (s *PersistenceService) RawMessagesView() []types.MuxMessage {
+func (s *PersistenceService) RawMessagesView() []types.RelayMessage {
 	if s == nil {
 		return nil
 	}
@@ -149,7 +149,7 @@ func (s *PersistenceService) RawMessagesView() []types.MuxMessage {
 	return s.messages
 }
 
-// Graph returns Decoder's product-owned conversation graph.
+// Graph returns Reflect's product-owned conversation graph.
 func (s *PersistenceService) Graph() *session.ConversationGraph { return s.graph }
 
 // SetGraph attaches the conversation graph.
@@ -164,7 +164,7 @@ func (s *PersistenceService) SetSteering(sq *streaming.SteeringQueue) { s.steeri
 
 // AddAssistant appends an assistant message.
 func (s *PersistenceService) AddAssistant(content string) {
-	s.AppendAssistantJournaled(types.MuxMessage{Role: "assistant", Content: content})
+	s.AppendAssistantJournaled(types.RelayMessage{Role: "assistant", Content: content})
 }
 
 // TrimIncompleteTurn removes a trailing partial turn so the transcript stays
@@ -222,7 +222,7 @@ func (s *PersistenceService) TrimIncompleteTurn() {
 
 // lastAssistantToolUseIDs returns the tool-use IDs from the most recent
 // assistant message carrying ToolUse blocks, or nil if none exists in msgs.
-func lastAssistantToolUseIDs(msgs []types.MuxMessage) map[string]bool {
+func lastAssistantToolUseIDs(msgs []types.RelayMessage) map[string]bool {
 	for i := len(msgs) - 1; i >= 0; i-- {
 		if msgs[i].Role == "assistant" && len(msgs[i].ToolUse) > 0 {
 			ids := make(map[string]bool, len(msgs[i].ToolUse))
@@ -235,7 +235,7 @@ func lastAssistantToolUseIDs(msgs []types.MuxMessage) map[string]bool {
 	return nil
 }
 
-func hasOwnersForToolResults(msgs []types.MuxMessage, results []types.ToolResult) bool {
+func hasOwnersForToolResults(msgs []types.RelayMessage, results []types.ToolResult) bool {
 	owners := lastAssistantToolUseIDs(msgs)
 	if len(owners) == 0 {
 		return false
@@ -250,7 +250,7 @@ func hasOwnersForToolResults(msgs []types.MuxMessage, results []types.ToolResult
 
 // hasResultsForAllToolUses reports whether every tool-use ID has at least one
 // matching tool_result anywhere in msgs.
-func hasResultsForAllToolUses(msgs []types.MuxMessage, uses []types.ToolCall) bool {
+func hasResultsForAllToolUses(msgs []types.RelayMessage, uses []types.ToolCall) bool {
 	if len(uses) == 0 {
 		return true
 	}
@@ -269,7 +269,7 @@ func hasResultsForAllToolUses(msgs []types.MuxMessage, uses []types.ToolCall) bo
 }
 
 // SetMessages replaces the transcript.
-func (s *PersistenceService) SetMessages(msgs []types.MuxMessage) {
+func (s *PersistenceService) SetMessages(msgs []types.RelayMessage) {
 	s.mu.Lock()
 	s.messages = cloneMessages(msgs)
 	s.mu.Unlock()
@@ -280,14 +280,14 @@ func (s *PersistenceService) SetMessages(msgs []types.MuxMessage) {
 // snapshotLen is the length of the snapshot keep was derived from; messages
 // past that index are re-appended to the tail so a compaction racing an
 // AddUser can never drop the new message. Safe on a nil receiver.
-func (s *PersistenceService) ApplyCompaction(keep []types.MuxMessage, snapshotLen int) {
+func (s *PersistenceService) ApplyCompaction(keep []types.RelayMessage, snapshotLen int) {
 	if s == nil {
 		return
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if snapshotLen >= 0 && snapshotLen < len(s.messages) {
-		kept := make([]types.MuxMessage, 0, len(keep)+(len(s.messages)-snapshotLen))
+		kept := make([]types.RelayMessage, 0, len(keep)+(len(s.messages)-snapshotLen))
 		kept = append(kept, keep...)
 		kept = append(kept, s.messages[snapshotLen:]...)
 		s.messages = cloneMessages(kept)
@@ -298,7 +298,7 @@ func (s *PersistenceService) ApplyCompaction(keep []types.MuxMessage, snapshotLe
 
 // AddUser appends a user message. Safe on a nil receiver.
 func (s *PersistenceService) AddUser(content string) {
-	s.AppendUserJournaled(types.MuxMessage{Role: "user", Content: content})
+	s.AppendUserJournaled(types.RelayMessage{Role: "user", Content: content})
 }
 
 // AddMessage appends a message with the specified role and content.
@@ -313,14 +313,14 @@ func (s *PersistenceService) AddMessage(role, content string) {
 		s.AddUser(content)
 	default:
 		s.mu.Lock()
-		s.messages = append(s.messages, types.MuxMessage{Role: role, Content: content})
+		s.messages = append(s.messages, types.RelayMessage{Role: role, Content: content})
 		s.mu.Unlock()
 	}
 }
 
 // AddUserWithImage appends a user message with an inline image.
 // The image is stored as a data URL ("data:<imageType>;base64,<base64>")
-// so the LLM-side mux client can decode it from the message body
+// so the LLM-side relay client can decode it from the message body
 // without any extra metadata channel. imageType is "image/png",
 // "image/jpeg", etc.
 func (s *PersistenceService) AddUserWithImage(content, imageBase64, imageType string) {
@@ -328,7 +328,7 @@ func (s *PersistenceService) AddUserWithImage(content, imageBase64, imageType st
 		return
 	}
 	dataURL := "data:" + imageType + ";base64," + imageBase64
-	s.AppendUserJournaled(types.MuxMessage{
+	s.AppendUserJournaled(types.RelayMessage{
 		Role:    "user",
 		Content: content,
 		Images:  []string{dataURL},
@@ -431,7 +431,7 @@ func (s *PersistenceService) RemoveLastExchange() {
 }
 
 // LoadMessages replaces the transcript with a fresh slice.
-func (s *PersistenceService) LoadMessages(msgs []types.MuxMessage) {
+func (s *PersistenceService) LoadMessages(msgs []types.RelayMessage) {
 	s.mu.Lock()
 	// Clone while holding the lock; callers retain no mutable alias to the
 	// live transcript.
@@ -442,11 +442,11 @@ func (s *PersistenceService) LoadMessages(msgs []types.MuxMessage) {
 // cloneMessages performs a deep copy of the provider-neutral transcript.
 // Tool arguments are arbitrary JSON-shaped values, so cloneJSONValue walks
 // maps and slices recursively instead of relying on a shallow slice copy.
-func cloneMessages(in []types.MuxMessage) []types.MuxMessage {
+func cloneMessages(in []types.RelayMessage) []types.RelayMessage {
 	if in == nil {
 		return nil
 	}
-	out := make([]types.MuxMessage, len(in))
+	out := make([]types.RelayMessage, len(in))
 	for i, msg := range in {
 		out[i] = msg
 		out[i].Images = append([]string(nil), msg.Images...)

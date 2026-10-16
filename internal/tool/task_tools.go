@@ -11,8 +11,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GrayCodeAI/decoder/internal/env"
-	"github.com/GrayCodeAI/decoder/internal/taskruntime"
+	"github.com/GrayCodeAI/reflect/internal/env"
+	"github.com/GrayCodeAI/reflect/internal/taskruntime"
 )
 
 const (

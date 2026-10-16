@@ -3,9 +3,9 @@
 Status: Draft / historical spec (aspirational; not implemented)
 Applies to: the wider graycode-eco ecosystem
 
-> Note: Decoder now depends only on mux and embeds its own token engine.
+> Note: Reflect now depends only on relay and embeds its own token engine.
 > References below to harrier, shrike, and swift describe a proposed
-> ecosystem-wide schema, not Decoder's current runtime.
+> ecosystem-wide schema, not Reflect's current runtime.
 
 This document specifies a **single, unified configuration schema** for the
 graycode-eco ecosystem: one declarative file (`graycode-eco.yaml`, with an equivalent
@@ -15,7 +15,7 @@ file is the source of truth, version-controlled alongside a project, and each
 repo reads the slice of the schema it owns.
 
 Today each repo configures itself independently through its own env vars,
-flags, and config files (decoder: `config.json` + `DECODER_*`/`DECODER_*` env; mux:
+flags, and config files (reflect: `config.json` + `REFLECT_*`/`REFLECT_*` env; relay:
 provider env vars; harrier: `~/.harrier/config.toml`; shrike: `TOK_*` env; swift:
 `SWIFT_*` env). This spec does **not** replace those mechanisms — it defines a
 superset schema and maps every setting back to the repo + existing env
@@ -31,7 +31,7 @@ any runtime behavior.
    `graycode-eco.yaml` value > repo default. This preserves current behavior where
    env/flags are authoritative.
 3. **Repo-owned sections.** Each top-level section is owned by one repo (with
-   `model`/`providers` shared by decoder + mux). A repo only reads its sections.
+   `model`/`providers` shared by reflect + relay). A repo only reads its sections.
 4. **Two encodings, one schema.** YAML is canonical for humans; the identical
    structure is valid JSON for machine generation. (harrier's on-disk format is
    TOML; its section maps 1:1 to `~/.harrier/config.toml`.)
@@ -44,7 +44,7 @@ Search order (first found wins for the file itself; values still follow the
 runtime precedence above):
 
 1. `--config <path>` flag (where a repo's CLI supports it)
-2. `$DECODER_ECO_CONFIG`
+2. `$REFLECT_ECO_CONFIG`
 3. `./graycode-eco.yaml` (project root)
 4. `~/.config/graycode-eco/config.yaml`
 
@@ -53,7 +53,7 @@ runtime precedence above):
 ```yaml
 version: 1
 
-# ─── Shared: model + providers (decoder + mux) ───────────────────────────────
+# ─── Shared: model + providers (reflect + relay) ───────────────────────────────
 model:
   default: anthropic/claude-sonnet-4-5   # provider/model the agent uses
   small_fast: anthropic/claude-haiku     # cheap model for trivial steps
@@ -70,16 +70,16 @@ providers:
     api_key_env: GEMINI_API_KEY
     model: gemini-2.0-flash
 
-# ─── mux: gateway / runtime ───────────────────────────────────────────────
+# ─── relay: gateway / runtime ───────────────────────────────────────────────
 gateway:
-  base_url: http://localhost:8080        # mux endpoint decoder talks to
-  api_key_env: MUX_API_KEY
+  base_url: http://localhost:8080        # relay endpoint reflect talks to
+  api_key_env: RELAY_API_KEY
   allow_insecure_public_api: false
-  deployment_routing: ""                 # MUX_DEPLOYMENT_ROUTING
+  deployment_routing: ""                 # RELAY_DEPLOYMENT_ROUTING
   model_catalog:
-    path_env: MUX_MODEL_CATALOG_PATH
-    url_env: MUX_MODEL_CATALOG_URL
-    refresh: MUX_MODEL_CATALOG_REFRESH
+    path_env: RELAY_MODEL_CATALOG_PATH
+    url_env: RELAY_MODEL_CATALOG_URL
+    refresh: RELAY_MODEL_CATALOG_REFRESH
 
 # ─── harrier: memory ───────────────────────────────────────────────────────────
 memory:
@@ -123,9 +123,9 @@ swift:
 telemetry:
   # OTel exporter settings shared by all repos. Span attribute keys follow
   # docs/OTEL-CONVENTIONS.md.
-  enabled: false                         # decoder: DECODER_ENABLE_TELEMETRY
+  enabled: false                         # reflect: REFLECT_ENABLE_TELEMETRY
   otlp_endpoint: ""                      # OTEL_EXPORTER_OTLP_ENDPOINT
-  shutdown_timeout_ms: 0                 # DECODER_OTEL_SHUTDOWN_TIMEOUT_MS
+  shutdown_timeout_ms: 0                 # REFLECT_OTEL_SHUTDOWN_TIMEOUT_MS
 ```
 
 ## Setting → repo → existing mechanism
@@ -133,30 +133,30 @@ telemetry:
 The authoritative mapping. "Mechanism today" is what already implements the
 setting; the unified key is rendered down to it.
 
-### Shared: model / providers (decoder + mux)
+### Shared: model / providers (reflect + relay)
 
 | Unified key                     | Repo        | Mechanism today                                  |
 |---------------------------------|-------------|--------------------------------------------------|
-| `model.default`                 | decoder        | `DECODER_MODEL` env / `config.json`                 |
-| `model.small_fast`              | decoder        | `DECODER_SMALL_FAST_MODEL` env                  |
-| `providers[].api_key_env`       | mux/decoder  | `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY`, `OPENROUTER_API_KEY`, `XAI_API_KEY`, `ZAI_API_KEY`, `CANOPYWAVE_API_KEY`, `FIREWORKS_API_KEY` |
-| `providers[].base_url_env`      | mux       | `ANTHROPIC_BASE_URL`, `OPENAI_BASE_URL` / `OPENAI_API_BASE`, `OLLAMA_BASE_URL`, `FIREWORKS_BASE_URL` |
-| `providers[].model` (openai)    | mux       | `OPENAI_MODEL` env                               |
-| `providers[].model` (gemini)    | mux       | `GEMINI_MODEL` env                               |
-| `providers[].model` (anthropic) | mux       | `ANTHROPIC_MODEL` env                            |
+| `model.default`                 | reflect        | `REFLECT_MODEL` env / `config.json`                 |
+| `model.small_fast`              | reflect        | `REFLECT_SMALL_FAST_MODEL` env                  |
+| `providers[].api_key_env`       | relay/reflect  | `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY`, `OPENROUTER_API_KEY`, `XAI_API_KEY`, `ZAI_API_KEY`, `CANOPYWAVE_API_KEY`, `FIREWORKS_API_KEY` |
+| `providers[].base_url_env`      | relay       | `ANTHROPIC_BASE_URL`, `OPENAI_BASE_URL` / `OPENAI_API_BASE`, `OLLAMA_BASE_URL`, `FIREWORKS_BASE_URL` |
+| `providers[].model` (openai)    | relay       | `OPENAI_MODEL` env                               |
+| `providers[].model` (gemini)    | relay       | `GEMINI_MODEL` env                               |
+| `providers[].model` (anthropic) | relay       | `ANTHROPIC_MODEL` env                            |
 
-### mux: gateway / runtime
+### relay: gateway / runtime
 
-| Unified key                          | Mechanism today (mux)              |
+| Unified key                          | Mechanism today (relay)              |
 |--------------------------------------|--------------------------------------|
-| `gateway.base_url`                   | `MUX_BASE_URL` (decoder→mux link)   |
-| `gateway.api_key_env`                | `MUX_API_KEY`                      |
-| `gateway.allow_insecure_public_api`  | `MUX_ALLOW_INSECURE_PUBLIC_API`    |
-| `gateway.deployment_routing`         | `MUX_DEPLOYMENT_ROUTING` (also `DECODER_DEPLOYMENT_ROUTING`) |
-| `gateway.model_catalog.path_env`     | `MUX_MODEL_CATALOG_PATH`           |
-| `gateway.model_catalog.url_env`      | `MUX_MODEL_CATALOG_URL`            |
-| `gateway.model_catalog.refresh`      | `MUX_MODEL_CATALOG_REFRESH` / `DECODER_AUTO_REFRESH_CATALOG` / `DECODER_CATALOG_REFRESH_ALWAYS` |
-| `gateway` config dir                 | `MUX_CONFIG_DIR` (default `<user config dir>/mux`) |
+| `gateway.base_url`                   | `RELAY_BASE_URL` (reflect→relay link)   |
+| `gateway.api_key_env`                | `RELAY_API_KEY`                      |
+| `gateway.allow_insecure_public_api`  | `RELAY_ALLOW_INSECURE_PUBLIC_API`    |
+| `gateway.deployment_routing`         | `RELAY_DEPLOYMENT_ROUTING` (also `REFLECT_DEPLOYMENT_ROUTING`) |
+| `gateway.model_catalog.path_env`     | `RELAY_MODEL_CATALOG_PATH`           |
+| `gateway.model_catalog.url_env`      | `RELAY_MODEL_CATALOG_URL`            |
+| `gateway.model_catalog.refresh`      | `RELAY_MODEL_CATALOG_REFRESH` / `REFLECT_AUTO_REFRESH_CATALOG` / `REFLECT_CATALOG_REFRESH_ALWAYS` |
+| `gateway` config dir                 | `RELAY_CONFIG_DIR` (default `<user config dir>/relay`) |
 
 ### harrier: memory
 
@@ -197,22 +197,22 @@ few env vars.
 
 ### swift + telemetry
 
-| Unified key                       | Mechanism today (swift / decoder)                  |
+| Unified key                       | Mechanism today (swift / reflect)                  |
 |-----------------------------------|-------------------------------------------------|
 | `swift.search_url`                | `SWIFT_SEARCH_URL` env                          |
 | `swift.log_level`                 | `SWIFT_LOG_LEVEL` env                           |
 | `swift.telemetry_optout`          | `SWIFT_TELEMETRY_OPTOUT` / `SWIFT_NO_TELEMETRY` env |
 | `swift.posthog.api_key_env`       | `POSTHOG_API_KEY` env                           |
 | `swift.posthog.endpoint`          | `POSTHOG_ENDPOINT` env                          |
-| `telemetry.enabled`               | `DECODER_ENABLE_TELEMETRY` env (decoder)         |
-| `telemetry.shutdown_timeout_ms`   | `DECODER_OTEL_SHUTDOWN_TIMEOUT_MS` env (decoder) |
+| `telemetry.enabled`               | `REFLECT_ENABLE_TELEMETRY` env (reflect)         |
+| `telemetry.shutdown_timeout_ms`   | `REFLECT_OTEL_SHUTDOWN_TIMEOUT_MS` env (reflect) |
 | `telemetry.otlp_endpoint`         | `OTEL_EXPORTER_OTLP_ENDPOINT` (standard OTel)   |
 
 ## Rendering down to per-repo config
 
 The unified file is designed to be **resolved** into the existing mechanisms:
 
-- **env-based repos** (decoder, mux, shrike, swift): export the mapped env var for
+- **env-based repos** (reflect, relay, shrike, swift): export the mapped env var for
   any key set in `graycode-eco.yaml` that is not already present in the process
   environment (preserving "env wins" precedence).
 - **file-based repos** (harrier): write/merge the `memory.*` section into
@@ -234,7 +234,7 @@ The schema is encoding-agnostic. The YAML above is identical in structure to:
   "providers": [
     { "name": "anthropic", "api_key_env": "ANTHROPIC_API_KEY" }
   ],
-  "gateway": { "base_url": "http://localhost:8080", "api_key_env": "MUX_API_KEY" },
+  "gateway": { "base_url": "http://localhost:8080", "api_key_env": "RELAY_API_KEY" },
   "memory": { "addr": "127.0.0.1:3456", "data_dir": "~/.harrier" },
   "compression": { "enabled": true, "db_path": "~/.shrike/usage.db" },
   "swift": { "telemetry_optout": false },
@@ -246,5 +246,5 @@ The schema is encoding-agnostic. The YAML above is identical in structure to:
 
 The `telemetry` and `swift` sections only configure *transport/opt-out*. The
 *attribute vocabulary* emitted on spans is defined separately in
-[`OTEL-CONVENTIONS.md`](./OTEL-CONVENTIONS.md), with mux's
+[`OTEL-CONVENTIONS.md`](./OTEL-CONVENTIONS.md), with relay's
 `internal/observability` package as the reference implementation.

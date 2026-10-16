@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
-	decoderconfig "github.com/GrayCodeAI/decoder/internal/config"
+	reflectconfig "github.com/GrayCodeAI/reflect/internal/config"
 	"github.com/spf13/cobra"
 )
 
@@ -12,8 +12,8 @@ var ecosystemJSON bool
 
 var ecosystemCmd = &cobra.Command{
 	Use:   "ecosystem",
-	Short: "Show mux and token-pipeline integration status",
-	Long:  "Print the ecosystem panel summarizing the LLM provider runtime (mux) and the local token/compression pipeline. Same block as the top of decoder doctor.",
+	Short: "Show relay and token-pipeline integration status",
+	Long:  "Print the ecosystem panel summarizing the LLM provider runtime (relay) and the local token/compression pipeline. Same block as the top of reflect doctor.",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		settings, err := loadEffectiveSettings()
 		if err != nil {
@@ -24,12 +24,12 @@ var ecosystemCmd = &cobra.Command{
 			providerName = "auto"
 		}
 		if ecosystemJSON {
-			report := decoderconfig.BuildEcosystemReport(context.Background(), providerName, modelName)
+			report := reflectconfig.BuildEcosystemReport(context.Background(), providerName, modelName)
 			enc := json.NewEncoder(cmd.OutOrStdout())
 			enc.SetIndent("", "  ")
 			return enc.Encode(report)
 		}
-		cmd.Println(decoderconfig.FormatEcosystemPanel(context.Background(), providerName, modelName))
+		cmd.Println(reflectconfig.FormatEcosystemPanel(context.Background(), providerName, modelName))
 		return nil
 	},
 }

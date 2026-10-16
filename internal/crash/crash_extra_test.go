@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-const testEnvStateDir = "DECODER_STATE_DIR"
+const testEnvStateDir = "REFLECT_STATE_DIR"
 
 // --- WriteReport tests ---
 
@@ -112,7 +112,7 @@ func TestFormatReport_FullFields(t *testing.T) {
 	}
 
 	result := formatReport(r)
-	if !strings.Contains(result, "decoder crash report") {
+	if !strings.Contains(result, "reflect crash report") {
 		t.Error("report should have header")
 	}
 	if !strings.Contains(result, "1.2.3") {

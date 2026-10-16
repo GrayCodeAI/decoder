@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GrayCodeAI/decoder/internal/engine/safety"
+	"github.com/GrayCodeAI/reflect/internal/engine/safety"
 
 	lipgloss "charm.land/lipgloss/v2"
-	"github.com/GrayCodeAI/decoder/internal/engine"
+	"github.com/GrayCodeAI/reflect/internal/engine"
 )
 
 func TestRenderStatusBar_SignatureExists(t *testing.T) {
@@ -120,8 +120,8 @@ func TestRenderStatusBarPrimaryLeft_UsesCachedState(t *testing.T) {
 func TestShortenHomePath(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
-	got := shortenHomePath(home + "/project/decoder")
-	if got != "~/project/decoder" {
+	got := shortenHomePath(home + "/project/reflect")
+	if got != "~/project/reflect" {
 		t.Fatalf("got %q", got)
 	}
 }

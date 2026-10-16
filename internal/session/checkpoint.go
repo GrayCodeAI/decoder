@@ -11,8 +11,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GrayCodeAI/decoder/internal/safewrite"
-	"github.com/GrayCodeAI/decoder/internal/token"
+	"github.com/GrayCodeAI/reflect/internal/safewrite"
+	"github.com/GrayCodeAI/reflect/internal/token"
 )
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -8,29 +8,29 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GrayCodeAI/decoder/internal/engine/safety"
+	"github.com/GrayCodeAI/reflect/internal/engine/safety"
 
-	"github.com/GrayCodeAI/decoder/internal/engine/compression"
-	"github.com/GrayCodeAI/decoder/internal/engine/control"
-	"github.com/GrayCodeAI/decoder/internal/engine/errs"
-	"github.com/GrayCodeAI/decoder/internal/engine/history"
-	"github.com/GrayCodeAI/decoder/internal/engine/intelligence"
-	"github.com/GrayCodeAI/decoder/internal/engine/memory"
-	"github.com/GrayCodeAI/decoder/internal/engine/observability"
-	"github.com/GrayCodeAI/decoder/internal/engine/review"
-	"github.com/GrayCodeAI/decoder/internal/engine/streaming"
-	"github.com/GrayCodeAI/decoder/internal/engine/validation"
-	"github.com/GrayCodeAI/decoder/internal/engine/workflow"
+	"github.com/GrayCodeAI/reflect/internal/engine/compression"
+	"github.com/GrayCodeAI/reflect/internal/engine/control"
+	"github.com/GrayCodeAI/reflect/internal/engine/errs"
+	"github.com/GrayCodeAI/reflect/internal/engine/history"
+	"github.com/GrayCodeAI/reflect/internal/engine/intelligence"
+	"github.com/GrayCodeAI/reflect/internal/engine/memory"
+	"github.com/GrayCodeAI/reflect/internal/engine/observability"
+	"github.com/GrayCodeAI/reflect/internal/engine/review"
+	"github.com/GrayCodeAI/reflect/internal/engine/streaming"
+	"github.com/GrayCodeAI/reflect/internal/engine/validation"
+	"github.com/GrayCodeAI/reflect/internal/engine/workflow"
 
-	"github.com/GrayCodeAI/decoder/internal/engine/ctxmgr"
-	"github.com/GrayCodeAI/decoder/internal/engine/token"
-	"github.com/GrayCodeAI/decoder/internal/eventlog"
-	"github.com/GrayCodeAI/decoder/internal/storage"
-	"github.com/GrayCodeAI/decoder/internal/types"
+	"github.com/GrayCodeAI/reflect/internal/engine/ctxmgr"
+	"github.com/GrayCodeAI/reflect/internal/engine/token"
+	"github.com/GrayCodeAI/reflect/internal/eventlog"
+	"github.com/GrayCodeAI/reflect/internal/storage"
+	"github.com/GrayCodeAI/reflect/internal/types"
 )
 
 // ---------------------------------------------------------------------------
-// Integration Pipeline — connects decoder's subsystems into working pipelines.
+// Integration Pipeline — connects reflect's subsystems into working pipelines.
 //
 // The pipeline orchestrates pre-query, post-response, post-tool, and session
 // end phases. Each phase delegates to the relevant subsystems, gathers their
@@ -213,7 +213,7 @@ type SessionSummary struct {
 // pipeline orchestrator.
 func NewIntegrationPipeline() *IntegrationPipeline {
 	// Resolve the user's home dir once so the learning-pipeline stores do not
-	// leak into <cwd>/.decoder/ when decoder is run from inside its own source tree.
+	// leak into <cwd>/.reflect/ when reflect is run from inside its own source tree.
 	// See L2 in docs/plans/fix-critical-and-high-review.md.
 	stateRoot := storage.StateDir()
 
@@ -302,7 +302,7 @@ func (p *IntegrationPipeline) SetJournal(j *eventlog.Log) {
 // PreQuery runs the full pre-query pipeline: classify intent, select tools, apply
 // context decay, allocate budget, predict cost, build system prompt, scan for
 // injection, and check the response cache.
-func (p *IntegrationPipeline) PreQuery(messages []types.MuxMessage, userInput string) *PreQueryResult {
+func (p *IntegrationPipeline) PreQuery(messages []types.RelayMessage, userInput string) *PreQueryResult {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
@@ -366,7 +366,7 @@ func (p *IntegrationPipeline) PreQuery(messages []types.MuxMessage, userInput st
 // PostResponse runs the full post-response pipeline: format, score quality,
 // detect file mentions, redact secrets, update timeline, record tokens, cache,
 // and update the experience store.
-func (p *IntegrationPipeline) PostResponse(response string, messages []types.MuxMessage) *PostResponseResult {
+func (p *IntegrationPipeline) PostResponse(response string, messages []types.RelayMessage) *PostResponseResult {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
@@ -389,7 +389,7 @@ func (p *IntegrationPipeline) PostResponse(response string, messages []types.Mux
 	// 3. Detect file mentions
 	result.MentionedFiles = p.FileMentionDetector.DetectMentions(result.FormattedResponse)
 
-	// 4. Redact secrets from output (decoder's patterns + the token engine's patterns)
+	// 4. Redact secrets from output (reflect's patterns + the token engine's patterns)
 	result.FormattedResponse = p.OutputRedactor.Redact(result.FormattedResponse)
 	secretDetector := token.DefaultSecretDetector()
 	secretMatches := secretDetector.DetectSecrets(result.FormattedResponse)
@@ -667,7 +667,7 @@ func intentCategory(intent *intelligence.Intent) string {
 }
 
 // lastUserMessage extracts the last user message from the conversation.
-func lastUserMessage(messages []types.MuxMessage) string {
+func lastUserMessage(messages []types.RelayMessage) string {
 	for i := len(messages) - 1; i >= 0; i-- {
 		if messages[i].Role == "user" && len(messages[i].ToolResults) == 0 {
 			return messages[i].Content
@@ -677,7 +677,7 @@ func lastUserMessage(messages []types.MuxMessage) string {
 }
 
 // integrationEstimateTokens gives a rough token count for a message slice.
-func integrationEstimateTokens(messages []types.MuxMessage) int {
+func integrationEstimateTokens(messages []types.RelayMessage) int {
 	total := 0
 	for _, m := range messages {
 		total += EstimateStringTokens(m.Content)

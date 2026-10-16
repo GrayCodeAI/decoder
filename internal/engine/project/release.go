@@ -15,7 +15,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GrayCodeAI/decoder/internal/fsutil"
+	"github.com/GrayCodeAI/reflect/internal/fsutil"
 )
 
 // ReleaseManager handles release automation including changelog generation,

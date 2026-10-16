@@ -1,41 +1,41 @@
 #!/bin/sh
-# Install decoder (the GrayCode terminal AI coding agent) from a GitHub release.
+# Install reflect (the GrayCode terminal AI coding agent) from a GitHub release.
 #
-#   curl -fsSL https://raw.githubusercontent.com/GrayCodeAI/decoder/main/install.sh | sh
-#   curl -fsSL https://raw.githubusercontent.com/GrayCodeAI/decoder/main/install.sh | sh -s -- --version "$(cat VERSION)" --prefix "$HOME/.decoder"
+#   curl -fsSL https://raw.githubusercontent.com/GrayCodeAI/reflect/main/install.sh | sh
+#   curl -fsSL https://raw.githubusercontent.com/GrayCodeAI/reflect/main/install.sh | sh -s -- --version "$(cat VERSION)" --prefix "$HOME/.reflect"
 #
 # Steps:
-#   1. Resolve the version: --version / DECODER_VERSION, otherwise the latest
-#      GitHub release. Historical hawk-era releases predate the rename to decoder (they
+#   1. Resolve the version: --version / REFLECT_VERSION, otherwise the latest
+#      GitHub release. Historical hawk-era releases predate the rename to reflect (they
 #      ship hawk_* archives) and are refused.
-#   2. Download decoder_<version>_<os>_<arch>.tar.gz (.zip on Windows) and
+#   2. Download reflect_<version>_<os>_<arch>.tar.gz (.zip on Windows) and
 #      checksums.txt from the release.
 #   3. When cosign is installed, verify checksums.txt against the release's
 #      Sigstore bundle (checksums.txt.sigstore.json) with the exact identity of
 #      this repository's release workflow for that tag. A missing or invalid
 #      signature aborts the install. Without cosign the signature is NOT
-#      verified and the script says so; DECODER_REQUIRE_COSIGN=1 makes cosign
+#      verified and the script says so; REFLECT_REQUIRE_COSIGN=1 makes cosign
 #      mandatory.
 #   4. Always verify the archive's SHA-256 against checksums.txt.
-#   5. Install <prefix>/bin/decoder-<version> and atomically point <prefix>/bin/decoder
-#      at it (a copy named decoder.exe on Windows).
+#   5. Install <prefix>/bin/reflect-<version> and atomically point <prefix>/bin/reflect
+#      at it (a copy named reflect.exe on Windows).
 #
 # Options:
 #   --version <ver>   install this version (e.g. X.Y.Z or vX.Y.Z)
-#   --prefix <dir>    install under <dir>/bin (default: $DECODER_HOME or ~/.decoder)
+#   --prefix <dir>    install under <dir>/bin (default: $REFLECT_HOME or ~/.reflect)
 #   -h, --help        show this help
 #
 # Environment:
-#   DECODER_VERSION=<ver>        same as --version (the flag wins)
-#   DECODER_HOME=<dir>           same as --prefix (the flag wins)
-#   DECODER_REQUIRE_COSIGN=1     fail unless the cosign signature can be verified
-#   DECODER_INSTALL_REPO=<o/r>   install from a fork's releases (default GrayCodeAI/decoder);
+#   REFLECT_VERSION=<ver>        same as --version (the flag wins)
+#   REFLECT_HOME=<dir>           same as --prefix (the flag wins)
+#   REFLECT_REQUIRE_COSIGN=1     fail unless the cosign signature can be verified
+#   REFLECT_INSTALL_REPO=<o/r>   install from a fork's releases (default GrayCodeAI/reflect);
 #                            the cosign identity follows the chosen repository
 set -eu
 
-BINARY="decoder"
+BINARY="reflect"
 OIDC_ISSUER="https://token.actions.githubusercontent.com"
-REPO="${DECODER_INSTALL_REPO:-GrayCodeAI/decoder}"
+REPO="${REFLECT_INSTALL_REPO:-GrayCodeAI/reflect}"
 
 say() { printf '%s\n' "$*"; }
 warn() { printf 'WARNING: %s\n' "$*" >&2; }
@@ -46,15 +46,15 @@ die() {
 
 usage() {
   cat <<'EOF'
-Install decoder from a GitHub release.
+Install reflect from a GitHub release.
 
 Usage: install.sh [--version <ver>] [--prefix <dir>]
 
   --version <ver>   install this version (e.g. 1.2.3); default: latest release
-  --prefix <dir>    install under <dir>/bin; default: $DECODER_HOME or ~/.decoder
+  --prefix <dir>    install under <dir>/bin; default: $REFLECT_HOME or ~/.reflect
   -h, --help        show this help
 
-Environment: DECODER_VERSION, DECODER_HOME, DECODER_REQUIRE_COSIGN=1, DECODER_INSTALL_REPO.
+Environment: REFLECT_VERSION, REFLECT_HOME, REFLECT_REQUIRE_COSIGN=1, REFLECT_INSTALL_REPO.
 EOF
 }
 
@@ -84,8 +84,8 @@ sha256_of() {
 
 
 # --- Arguments -----------------------------------------------------------------
-VERSION_PIN="${DECODER_VERSION:-}"
-PREFIX="${DECODER_HOME:-}"
+VERSION_PIN="${REFLECT_VERSION:-}"
+PREFIX="${REFLECT_HOME:-}"
 while [ $# -gt 0 ]; do
   case "$1" in
     --version)
@@ -120,11 +120,11 @@ done
 
 if [ -z "$PREFIX" ]; then
   [ -n "${HOME:-}" ] || die "HOME is not set; pass --prefix <dir>"
-  PREFIX="$HOME/.decoder"
+  PREFIX="$HOME/.reflect"
 fi
 
 if ! printf '%s' "$REPO" | grep -Eq '^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$'; then
-  die "DECODER_INSTALL_REPO must look like owner/repo (got: $REPO)"
+  die "REFLECT_INSTALL_REPO must look like owner/repo (got: $REPO)"
 fi
 
 command -v curl >/dev/null 2>&1 || die "curl is required"
@@ -169,7 +169,7 @@ if ! printf '%s' "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)
 fi
 case "$VERSION" in
   0.1.0 | 0.1.1 | 0.2.0)
-    die "v${VERSION} predates the rename to decoder: this historical tag ships hawk_* archives. Choose a decoder release or build from source (https://github.com/${REPO}#readme)."
+    die "v${VERSION} predates the rename to reflect: this historical tag ships hawk_* archives. Choose a reflect release or build from source (https://github.com/${REPO}#readme)."
     ;;
 esac
 
@@ -177,13 +177,13 @@ TAG="v${VERSION}"
 BASE_URL="https://github.com/${REPO}/releases/download/${TAG}"
 ARCHIVE_NAME="${BINARY}_${VERSION}_${OS}_${ARCH}.${ARCHIVE_EXT}"
 
-TMP=$(mktemp -d 2>/dev/null || mktemp -d -t decoder-install)
+TMP=$(mktemp -d 2>/dev/null || mktemp -d -t reflect-install)
 trap 'rm -rf "$TMP"' EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 trap 'exit 129' HUP
 
-say "Downloading decoder ${TAG} for ${OS}/${ARCH}..."
+say "Downloading reflect ${TAG} for ${OS}/${ARCH}..."
 fetch "${BASE_URL}/${ARCHIVE_NAME}" "$TMP/$ARCHIVE_NAME" ||
   die "could not download ${BASE_URL}/${ARCHIVE_NAME} (does release ${TAG} exist for ${OS}/${ARCH}?)"
 fetch "${BASE_URL}/checksums.txt" "$TMP/checksums.txt" ||
@@ -205,12 +205,12 @@ if command -v cosign >/dev/null 2>&1; then
     die "cosign could not verify checksums.txt for ${TAG} against ${IDENTITY}; the release may have been tampered with (cosign v2.4 or later is required, v3 recommended)"
   fi
   SIGNATURE_STATUS="verified with cosign (${IDENTITY})"
-elif [ "${DECODER_REQUIRE_COSIGN:-0}" = 1 ]; then
-  die "DECODER_REQUIRE_COSIGN=1 but cosign is not installed (see https://docs.sigstore.dev/cosign/system_config/installation/)"
+elif [ "${REFLECT_REQUIRE_COSIGN:-0}" = 1 ]; then
+  die "REFLECT_REQUIRE_COSIGN=1 but cosign is not installed (see https://docs.sigstore.dev/cosign/system_config/installation/)"
 else
   warn "cosign is not installed, so the release signature was NOT verified."
   warn "The SHA-256 check only detects corrupted downloads, not a tampered release."
-  warn "Install cosign (https://docs.sigstore.dev) or set DECODER_REQUIRE_COSIGN=1 to require it."
+  warn "Install cosign (https://docs.sigstore.dev) or set REFLECT_REQUIRE_COSIGN=1 to require it."
   SIGNATURE_STATUS="NOT verified (cosign not installed)"
 fi
 
@@ -241,27 +241,27 @@ fi
 # A binary is never overwritten in place. On macOS (and any codesigned
 # platform) replacing a file that a running process has mmap'd invalidates the
 # kernel's code-signature cache and the kernel then SIGKILLs that process.
-# Installing into a per-version file and swapping a symlink keeps running decoder
+# Installing into a per-version file and swapping a symlink keeps running reflect
 # processes on the old inode. The symlink is created under a temporary name and
 # renamed into place so the swap is atomic. Windows lacks reliable non-admin
 # symlinks, so the launcher there is a plain copy.
 BINDIR="$PREFIX/bin"
 mkdir -p "$BINDIR"
 if [ "$OS" = windows ]; then
-  mv -f "$TMP/extract/$BIN_NAME" "$BINDIR/decoder-${VERSION}.exe"
-  cp -f "$BINDIR/decoder-${VERSION}.exe" "$BINDIR/decoder.exe"
-  INSTALLED="$BINDIR/decoder-${VERSION}.exe (launcher: $BINDIR/decoder.exe)"
+  mv -f "$TMP/extract/$BIN_NAME" "$BINDIR/reflect-${VERSION}.exe"
+  cp -f "$BINDIR/reflect-${VERSION}.exe" "$BINDIR/reflect.exe"
+  INSTALLED="$BINDIR/reflect-${VERSION}.exe (launcher: $BINDIR/reflect.exe)"
 else
-  mv -f "$TMP/extract/$BIN_NAME" "$BINDIR/decoder-${VERSION}"
-  chmod 0755 "$BINDIR/decoder-${VERSION}"
-  rm -f "$BINDIR/decoder.tmp"
-  ln -s "decoder-${VERSION}" "$BINDIR/decoder.tmp"
-  mv -f "$BINDIR/decoder.tmp" "$BINDIR/decoder"
-  INSTALLED="$BINDIR/decoder-${VERSION} (linked: $BINDIR/decoder)"
+  mv -f "$TMP/extract/$BIN_NAME" "$BINDIR/reflect-${VERSION}"
+  chmod 0755 "$BINDIR/reflect-${VERSION}"
+  rm -f "$BINDIR/reflect.tmp"
+  ln -s "reflect-${VERSION}" "$BINDIR/reflect.tmp"
+  mv -f "$BINDIR/reflect.tmp" "$BINDIR/reflect"
+  INSTALLED="$BINDIR/reflect-${VERSION} (linked: $BINDIR/reflect)"
 fi
 
 say ""
-say "Installed decoder ${TAG} to ${INSTALLED}"
+say "Installed reflect ${TAG} to ${INSTALLED}"
 say "  checksum:  verified (SHA-256 from checksums.txt)"
 say "  signature: ${SIGNATURE_STATUS}"
 say ""
@@ -273,5 +273,5 @@ case ":${PATH:-}:" in
     say ""
     ;;
 esac
-say "Restart running decoder sessions to pick up the new binary; they keep running"
+say "Restart running reflect sessions to pick up the new binary; they keep running"
 say "the previous version until restarted."

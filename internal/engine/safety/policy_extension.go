@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/GrayCodeAI/decoder/internal/ext"
+	"github.com/GrayCodeAI/reflect/internal/ext"
 )
 
 // PolicyExtension adapts a PermissionEngine to the unified ext.Extension

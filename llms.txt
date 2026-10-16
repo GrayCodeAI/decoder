@@ -1,7 +1,7 @@
-# Decoder — coding agent CLI (Go)
+# Reflect — coding agent CLI (Go)
 
-Decoder owns UX, orchestration, tools, permissions, sessions, product semantics.
-It uses Mux only through the engine facade and go.local.mod overlays for local development.
+Reflect owns UX, orchestration, tools, permissions, sessions, product semantics.
+It uses Relay only through the engine facade and go.local.mod overlays for local development.
 
 ## Navigation
 - README.md / AGENTS.md — workflow, conventions, common pitfalls, workspace overlay
@@ -27,5 +27,5 @@ It uses Mux only through the engine facade and go.local.mod overlays for local d
 
 ## Conventions
 - Go 1.27.2+, Conventional Commits
-- Host-neutral: never import Mux internals directly, use engine facade
+- Host-neutral: never import Relay internals directly, use engine facade
 - VERSION is single source of truth (VERSION file + sync-version.py)

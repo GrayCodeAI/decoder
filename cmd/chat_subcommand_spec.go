@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/GrayCodeAI/decoder/internal/engine/safety"
+	"github.com/GrayCodeAI/reflect/internal/engine/safety"
 
 	tea "charm.land/bubbletea/v2"
 
-	"github.com/GrayCodeAI/decoder/internal/spec"
+	"github.com/GrayCodeAI/reflect/internal/spec"
 )
 
 // specSubcommand implements the /spec slash command: starts (or reports

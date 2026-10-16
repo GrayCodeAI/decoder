@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	feature "github.com/GrayCodeAI/decoder/internal/features"
-	"github.com/GrayCodeAI/decoder/internal/testutil"
+	feature "github.com/GrayCodeAI/reflect/internal/features"
+	"github.com/GrayCodeAI/reflect/internal/testutil"
 )
 
 // TestE2E_HealthEndpoint verifies the health endpoint returns the expected
@@ -83,11 +83,11 @@ func TestE2E_MetricsEndpoint(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(body), "decoder_daemon_active_sessions") {
-		t.Error("expected decoder_daemon_active_sessions metric in output")
+	if !strings.Contains(string(body), "reflect_daemon_active_sessions") {
+		t.Error("expected reflect_daemon_active_sessions metric in output")
 	}
-	if !strings.Contains(string(body), "decoder_daemon_uptime_seconds") {
-		t.Error("expected decoder_daemon_uptime_seconds metric in output")
+	if !strings.Contains(string(body), "reflect_daemon_uptime_seconds") {
+		t.Error("expected reflect_daemon_uptime_seconds metric in output")
 	}
 
 	// Test JSON format too.

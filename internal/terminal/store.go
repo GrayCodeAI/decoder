@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GrayCodeAI/decoder/internal/env"
+	"github.com/GrayCodeAI/reflect/internal/env"
 )
 
 var (

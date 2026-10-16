@@ -8,7 +8,7 @@ import (
 )
 
 func TestWelcomeToBanner_TOAligned(t *testing.T) {
-	to := composeDecoderBlockLines("TO")
+	to := composeReflectBlockLines("TO")
 	if len(to) != 5 {
 		t.Fatalf("expected 5 rows, got %d", len(to))
 	}
@@ -48,10 +48,10 @@ func TestWelcomeToPhraseLinesContainSingleRowPhrase(t *testing.T) {
 	}
 }
 
-func TestWelcomeWordLines_SameWGlyphAsDECODER(t *testing.T) {
-	w := strings.TrimRight(decoderBlockGlyphs['W'][0], " ")
+func TestWelcomeWordLines_SameWGlyphAsREFLECT(t *testing.T) {
+	w := strings.TrimRight(reflectBlockGlyphs['W'][0], " ")
 	if !strings.HasPrefix(welcomeWordLines[0], w) {
-		t.Fatalf("W row should start with decoder logo glyph:\nwelcome: %q\ndecoder W:  %q",
+		t.Fatalf("W row should start with reflect logo glyph:\nwelcome: %q\nreflect W:  %q",
 			welcomeWordLines[0], w)
 	}
 }

@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	tea "charm.land/bubbletea/v2"
-	"github.com/GrayCodeAI/decoder/internal/session"
+	"github.com/GrayCodeAI/reflect/internal/session"
 )
 
 func TestHistorySearchOverlaySelectsResultAndCloses(t *testing.T) {
@@ -30,7 +30,7 @@ func TestHistorySearchOverlaySelectsResultAndCloses(t *testing.T) {
 func TestSessionPickerOverlayDismissesAndClearsState(t *testing.T) {
 	m := newTestChatModel()
 	m.sessionPickerOpen = true
-	m.sessionPickerInput = "decoder"
+	m.sessionPickerInput = "reflect"
 	m.sessionPickerSel = 2
 	m.sessionPickerEntries = make([]session.Entry, 1)
 	m.sessionPickerFiltered = m.sessionPickerEntries

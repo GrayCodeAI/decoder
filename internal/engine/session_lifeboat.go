@@ -4,8 +4,8 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/GrayCodeAI/decoder/internal/session"
-	"github.com/GrayCodeAI/decoder/internal/types"
+	"github.com/GrayCodeAI/reflect/internal/session"
+	"github.com/GrayCodeAI/reflect/internal/types"
 )
 
 var errSessionNoPersistedID = errors.New("session has no persisted id yet")
@@ -24,7 +24,7 @@ func (s *Session) SaveLifeboat() (string, error) {
 	}
 
 	raw := s.Persistence().RawMessages()
-	msgs := make([]types.MuxMessage, 0, len(raw))
+	msgs := make([]types.RelayMessage, 0, len(raw))
 	msgs = append(msgs, raw...)
 	state := session.BuildLifeboat(id, msgs)
 	return session.SaveLifeboat(id, state)

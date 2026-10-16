@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GrayCodeAI/decoder/internal/engine"
-	"github.com/GrayCodeAI/decoder/internal/session"
-	"github.com/GrayCodeAI/decoder/internal/tool"
+	"github.com/GrayCodeAI/reflect/internal/engine"
+	"github.com/GrayCodeAI/reflect/internal/session"
+	"github.com/GrayCodeAI/reflect/internal/tool"
 )
 
 // testFactory builds a session backed by the engine's canned mock chat client,
@@ -79,16 +79,16 @@ func TestACP_InitializeAndPrompt(t *testing.T) {
 			gotInit = true
 			var r struct {
 				ProtocolVersion     int `json:"protocolVersion"`
-				DecoderCapabilities struct {
+				ReflectCapabilities struct {
 					Isolation []string `json:"isolation"`
-				} `json:"decoderCapabilities"`
+				} `json:"reflectCapabilities"`
 			}
 			_ = json.Unmarshal(m.Result, &r)
 			if r.ProtocolVersion != ProtocolVersion {
 				t.Errorf("initialize protocolVersion = %d, want %d", r.ProtocolVersion, ProtocolVersion)
 			}
-			if strings.Join(r.DecoderCapabilities.Isolation, ",") != "none,worktree" {
-				t.Errorf("initialize isolation = %v, want [none worktree]", r.DecoderCapabilities.Isolation)
+			if strings.Join(r.ReflectCapabilities.Isolation, ",") != "none,worktree" {
+				t.Errorf("initialize isolation = %v, want [none worktree]", r.ReflectCapabilities.Isolation)
 			}
 		case hasID(m, 2):
 			gotNew = true
@@ -144,7 +144,7 @@ func TestACP_ParseError(t *testing.T) {
 
 func TestACP_SessionLoad(t *testing.T) {
 	tempDir := t.TempDir()
-	t.Setenv("DECODER_SESSIONS_DIR", tempDir)
+	t.Setenv("REFLECT_SESSIONS_DIR", tempDir)
 
 	// Create and persist a session
 	sessID := "acp-load-test-1"
@@ -195,7 +195,7 @@ func TestACP_SessionLoad(t *testing.T) {
 
 func TestACP_SessionList(t *testing.T) {
 	tempDir := t.TempDir()
-	t.Setenv("DECODER_SESSIONS_DIR", tempDir)
+	t.Setenv("REFLECT_SESSIONS_DIR", tempDir)
 
 	prior := &session.Session{
 		ID:    "acp-list-test-1",

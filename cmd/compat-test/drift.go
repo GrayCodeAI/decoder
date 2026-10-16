@@ -9,22 +9,22 @@ import (
 )
 
 // trackedPins are the shared leaf dependencies most likely to drift silently:
-// a sibling repo can pin an older version than what decoder's own go.mod requires,
-// and Go's minimal version selection will silently pull in decoder's newer version
-// at build time without the consumer's own CI ever having tested it. Decoder's
-// only external GrayCodeAI dependency is mux. See docs/compatibility.md.
+// a sibling repo can pin an older version than what reflect's own go.mod requires,
+// and Go's minimal version selection will silently pull in reflect's newer version
+// at build time without the consumer's own CI ever having tested it. Reflect's
+// only external GrayCodeAI dependency is relay. See docs/compatibility.md.
 var trackedPins = []string{
-	"github.com/GrayCodeAI/mux",
+	"github.com/GrayCodeAI/relay",
 }
 
-// checkDrift compares decoder's own go.mod requirements for trackedPins against
-// what each sibling repo (a peer checkout of a decoder dependency in the shared
+// checkDrift compares reflect's own go.mod requirements for trackedPins against
+// what each sibling repo (a peer checkout of a reflect dependency in the shared
 // workspace) declares for the same modules in its own go.mod. It never fails —
 // this is advisory, printed for humans/CI logs to notice, not a build gate.
 func checkDrift(repoRoot string) error {
-	decoderRequires, err := readRequires(filepath.Join(repoRoot, "go.mod"))
+	reflectRequires, err := readRequires(filepath.Join(repoRoot, "go.mod"))
 	if err != nil {
-		return fmt.Errorf("read decoder go.mod: %w", err)
+		return fmt.Errorf("read reflect go.mod: %w", err)
 	}
 
 	workspaceDir := filepath.Join(repoRoot, "..")
@@ -45,18 +45,18 @@ func checkDrift(repoRoot string) error {
 			continue // sibling not a Go module / no go.mod — skip silently
 		}
 		for _, pin := range trackedPins {
-			decoderVer, decoderHas := decoderRequires[pin]
+			reflectVer, reflectHas := reflectRequires[pin]
 			consumerVer, consumerHas := consumerRequires[pin]
-			if !decoderHas || !consumerHas || decoderVer == consumerVer {
+			if !reflectHas || !consumerHas || reflectVer == consumerVer {
 				continue
 			}
 			drifted++
-			fmt.Printf("  %-22s requires %s@%s, decoder requires %s@%s\n",
-				e.Name(), pin, consumerVer, pin, decoderVer)
+			fmt.Printf("  %-22s requires %s@%s, reflect requires %s@%s\n",
+				e.Name(), pin, consumerVer, pin, reflectVer)
 		}
 	}
 	if drifted == 0 {
-		fmt.Println("  OK — no drift between decoder's pins and sibling consumers")
+		fmt.Println("  OK — no drift between reflect's pins and sibling consumers")
 	}
 	return nil
 }

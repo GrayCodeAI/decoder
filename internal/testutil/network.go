@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GrayCodeAI/decoder/internal/netutil"
+	"github.com/GrayCodeAI/reflect/internal/netutil"
 )
 
 const (

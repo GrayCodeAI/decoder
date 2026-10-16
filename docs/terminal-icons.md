@@ -1,6 +1,6 @@
 # Terminal icons
 
-Decoder uses current Nerd Font Codicon glyphs for interactive terminal output.
+Reflect uses current Nerd Font Codicon glyphs for interactive terminal output.
 The application does not try to infer the installed font from `TERM`: terminal
 names do not report the active font, and guessing can produce tiny fallback
 boxes or missing glyphs.
@@ -10,14 +10,14 @@ Interactive TTYs use Nerd Font icons by default. Captured output, CI, and
 
 ```bash
 # Real icons (requires a Nerd Font configured in the terminal profile)
-DECODER_ICONS=nerd ./bin/decoder
+REFLECT_ICONS=nerd ./bin/reflect
 
 # Portable text-only output
-DECODER_ICONS=ascii ./bin/decoder
+REFLECT_ICONS=ascii ./bin/reflect
 ```
 
-For the real icons, configure the terminal profile—not Decoder's Go code—with a
+For the real icons, configure the terminal profile—not Reflect's Go code—with a
 patched font such as `JetBrainsMono Nerd Font` or `Symbols Nerd Font Mono`.
-Font size and glyph scale are controlled by that profile. Decoder applies bold
+Font size and glyph scale are controlled by that profile. Reflect applies bold
 weight to status icons for contrast, but there is no portable ANSI escape that
 can resize one glyph independently of the surrounding text.

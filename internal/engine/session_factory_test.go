@@ -4,19 +4,19 @@ import (
 	"context"
 	"testing"
 
-	"github.com/GrayCodeAI/decoder/internal/provider/gateway"
+	"github.com/GrayCodeAI/reflect/internal/provider/gateway"
 
-	decoderconfig "github.com/GrayCodeAI/decoder/internal/config"
+	reflectconfig "github.com/GrayCodeAI/reflect/internal/config"
 )
 
-func TestNewDecoderSession_UsesResolvedSelectionModel(t *testing.T) {
+func TestNewReflectSession_UsesResolvedSelectionModel(t *testing.T) {
 	selection := gateway.Selection{
 		Provider:          "openrouter",
 		Model:             "openrouter/auto",
 		DeploymentRouting: false,
 	}
 
-	sess := NewDecoderSession(context.Background(), selection, "openrouter", "", "system", nil)
+	sess := NewReflectSession(context.Background(), selection, "openrouter", "", "system", nil)
 	if got := sess.Provider(); got != "openrouter" {
 		t.Fatalf("provider = %q, want openrouter", got)
 	}
@@ -26,7 +26,7 @@ func TestNewDecoderSession_UsesResolvedSelectionModel(t *testing.T) {
 }
 
 func TestBuildChatClientForSettingsComposesCustomGateway(t *testing.T) {
-	settings := decoderconfig.Settings{CustomProviders: []decoderconfig.CustomProviderConfig{{
+	settings := reflectconfig.Settings{CustomProviders: []reflectconfig.CustomProviderConfig{{
 		Name: "private-gateway", BaseURL: "https://private.example.test/v1",
 		APIKeyEnv: "PRIVATE_GATEWAY_API_KEY", Model: "private/model-v1",
 	}}}
@@ -40,13 +40,13 @@ func TestBuildChatClientForSettingsComposesCustomGateway(t *testing.T) {
 	}
 }
 
-func TestNewDecoderSession_FallsBackToCallerModelWhenSelectionEmpty(t *testing.T) {
+func TestNewReflectSession_FallsBackToCallerModelWhenSelectionEmpty(t *testing.T) {
 	selection := gateway.Selection{
 		Provider:          "openrouter",
 		DeploymentRouting: false,
 	}
 
-	sess := NewDecoderSession(context.Background(), selection, "openrouter", "openrouter/fallback", "system", nil)
+	sess := NewReflectSession(context.Background(), selection, "openrouter", "openrouter/fallback", "system", nil)
 	if got := sess.Model(); got != "openrouter/fallback" {
 		t.Fatalf("model = %q, want openrouter/fallback", got)
 	}

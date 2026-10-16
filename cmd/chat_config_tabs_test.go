@@ -4,9 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	decoderconfig "github.com/GrayCodeAI/decoder/internal/config"
-	"github.com/GrayCodeAI/decoder/internal/provider/gateway"
-	"github.com/GrayCodeAI/decoder/internal/ui/icons"
+	reflectconfig "github.com/GrayCodeAI/reflect/internal/config"
+	"github.com/GrayCodeAI/reflect/internal/provider/gateway"
+	"github.com/GrayCodeAI/reflect/internal/ui/icons"
 )
 
 func TestRenderConfigTabBar_DotIndicators(t *testing.T) {
@@ -28,12 +28,12 @@ func TestRenderConfigTabBar_DotIndicators(t *testing.T) {
 }
 
 func TestOpenConfigPanel_FirstRunOpensGateways(t *testing.T) {
-	decoderconfig.InvalidateConfigUICache()
+	reflectconfig.InvalidateConfigUICache()
 	store := &gateway.MapStore{}
 	gateway.SetDefaultStore(store)
 	t.Cleanup(func() {
 		gateway.SetDefaultStore(nil)
-		decoderconfig.InvalidateConfigUICache()
+		reflectconfig.InvalidateConfigUICache()
 	})
 
 	m := chatModel{}
@@ -47,12 +47,12 @@ func TestOpenConfigPanel_FirstRunOpensGateways(t *testing.T) {
 }
 
 func TestOpenConfigAtTab_ModelsWithoutCredentialsFallsBackToGateways(t *testing.T) {
-	decoderconfig.InvalidateConfigUICache()
+	reflectconfig.InvalidateConfigUICache()
 	store := &gateway.MapStore{}
 	gateway.SetDefaultStore(store)
 	t.Cleanup(func() {
 		gateway.SetDefaultStore(nil)
-		decoderconfig.InvalidateConfigUICache()
+		reflectconfig.InvalidateConfigUICache()
 	})
 
 	m := chatModel{}

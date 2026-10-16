@@ -19,11 +19,11 @@ func TestFrontendContract(t *testing.T) {
 
 	// Agent-loop internals a frontend must never import.
 	denied := []string{
-		"github.com/GrayCodeAI/decoder/internal/engine/agent",
-		"github.com/GrayCodeAI/decoder/internal/engine/code",
-		"github.com/GrayCodeAI/decoder/internal/engine/prompt",
-		"github.com/GrayCodeAI/decoder/internal/engine/async",
-		"github.com/GrayCodeAI/decoder/internal/engine/trajectory",
+		"github.com/GrayCodeAI/reflect/internal/engine/agent",
+		"github.com/GrayCodeAI/reflect/internal/engine/code",
+		"github.com/GrayCodeAI/reflect/internal/engine/prompt",
+		"github.com/GrayCodeAI/reflect/internal/engine/async",
+		"github.com/GrayCodeAI/reflect/internal/engine/trajectory",
 	}
 
 	var violations []string

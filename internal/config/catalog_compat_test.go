@@ -4,12 +4,12 @@ import (
 	"context"
 	"strings"
 
-	"github.com/GrayCodeAI/mux/catalog"
-	muxconfig "github.com/GrayCodeAI/mux/config"
+	"github.com/GrayCodeAI/relay/catalog"
+	relayconfig "github.com/GrayCodeAI/relay/config"
 )
 
 // CompiledCatalogV1 is retained only for lower-level migration/security tests.
-// Production Decoder code consumes engine DTOs exclusively.
+// Production Reflect code consumes engine DTOs exclusively.
 func CompiledCatalogV1() *catalog.CompiledCatalog {
 	compiled, err := catalog.LoadCatalog(context.Background(), catalog.LoadCatalogOptions{CachePath: catalog.DefaultCachePath()})
 	if err == nil && compiled != nil {
@@ -20,7 +20,7 @@ func CompiledCatalogV1() *catalog.CompiledCatalog {
 	return compiled
 }
 
-func deploymentHasSecrets(deployment muxconfig.DeploymentConfig) bool {
+func deploymentHasSecrets(deployment relayconfig.DeploymentConfig) bool {
 	return strings.TrimSpace(deployment.APIKey) != "" || strings.TrimSpace(deployment.Token) != "" ||
 		strings.TrimSpace(deployment.SecretAccessKey) != "" || strings.TrimSpace(deployment.AccessKeyID) != "" ||
 		strings.TrimSpace(deployment.SessionToken) != ""

@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GrayCodeAI/decoder/internal/engine"
-	"github.com/GrayCodeAI/decoder/internal/ui/icons"
+	"github.com/GrayCodeAI/reflect/internal/engine"
+	"github.com/GrayCodeAI/reflect/internal/ui/icons"
 	"github.com/spf13/cobra"
 )
 
@@ -25,13 +25,13 @@ var (
 var learnCmd = &cobra.Command{
 	Use:   "learn",
 	Short: "Manage lessons learned across sessions",
-	Long: `Decoder persists lessons from failures (and manual entries) so future
+	Long: `Reflect persists lessons from failures (and manual entries) so future
 sessions avoid repeating them. Lessons are injected into the system prompt.
 
-  decoder learn                      List recent lessons
-  decoder learn add                  Add a lesson manually
-  decoder learn prompt <context>     Print the lesson-extraction prompt for a context
-  decoder learn clear                Remove all lessons`,
+  reflect learn                      List recent lessons
+  reflect learn add                  Add a lesson manually
+  reflect learn prompt <context>     Print the lesson-extraction prompt for a context
+  reflect learn clear                Remove all lessons`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runLearnList(cmd)
 	},
@@ -110,7 +110,7 @@ func runLearnList(cmd *cobra.Command) error {
 	si := engine.NewSelfImprover()
 	lessons := si.Lessons("")
 	if len(lessons) == 0 {
-		cmd.Println(auditTint("No lessons yet. Add one with: decoder learn add --what ... --lesson ...", textMuted))
+		cmd.Println(auditTint("No lessons yet. Add one with: reflect learn add --what ... --lesson ...", textMuted))
 		return nil
 	}
 

@@ -1,11 +1,11 @@
-# Message flow (mux + embedded token engine)
+# Message flow (relay + embedded token engine)
 
-How one user message travels through decoder.
+How one user message travels through reflect.
 
 ## Overview
 
 ```
-User prompt (TUI or decoder exec)
+User prompt (TUI or reflect exec)
         │
         ▼
 ┌───────────────────┐
@@ -14,7 +14,7 @@ User prompt (TUI or decoder exec)
           │
           ▼
 ┌───────────────────┐     ┌─────────────┐
-│  local memory      │◄────│ ~/.decoder/    │  conventions, decisions, lessons
+│  local memory      │◄────│ ~/.reflect/    │  conventions, decisions, lessons
 │  recall            │     │ memories    │
 └─────────┬─────────┘     └─────────────┘
           │
@@ -26,7 +26,7 @@ User prompt (TUI or decoder exec)
           │
           ▼
 ┌───────────────────┐     ┌─────────────┐
-│  Decoder ChatClient   │────►│ mux/engine│  catalog, credentials, routing
+│  Reflect ChatClient   │────►│ relay/engine│  catalog, credentials, routing
 │  port + adapter    │     │ generate/   │────► provider API
 └─────────┬─────────┘     │ stream      │
                           └─────────────┘
@@ -40,27 +40,27 @@ User prompt (TUI or decoder exec)
           ▼ (when context grows)
 ┌───────────────────┐
 │  token Compress    │  fast path before LLM summarization
-│  + mux compact   │
+│  + relay compact   │
 └───────────────────┘
 ```
 
 ## Step by step
 
-### 1. Session start (`decoder` or `decoder exec`)
+### 1. Session start (`reflect` or `reflect exec`)
 
-- **mux**: The Decoder composition root creates an `mux/engine.Engine` with
-  Mux-owned state paths, an injected secret store, and per-engine custom
+- **relay**: The Reflect composition root creates an `relay/engine.Engine` with
+  Relay-owned state paths, an injected secret store, and per-engine custom
   gateway metadata. The engine loads provider state and the model catalog, then
-  builds transport behind Decoder's `ChatClient` port.
+  builds transport behind Reflect's `ChatClient` port.
 - **memory**: `configureSession` initializes the local memory manager
   (core, auto, evolving, zen, retrieval metrics, continuity). If the state
-  directory is unavailable, decoder runs without persistent memory.
+  directory is unavailable, reflect runs without persistent memory.
 - **token**: No startup step — embedded at compile time.
 
 ### 2. System prompt assembly
 
-- Decoder templates (`internal/prompts/templates/*.md`) define behavior, tools, and practices.
-- Project `AGENTS.md` is appended via `decoderconfig.BuildContextWithDirs`.
+- Reflect templates (`internal/prompts/templates/*.md`) define behavior, tools, and practices.
+- Project `AGENTS.md` is appended via `reflectconfig.BuildContextWithDirs`.
 - **memory**: `Memory.Recall` injects relevant stored memories into the system prompt.
 
 ### 3. User message → agent loop (`internal/engine/stream.go`)
@@ -68,8 +68,8 @@ User prompt (TUI or decoder exec)
 Each turn:
 
 1. **memory** — recall memories matching the latest user message (token budget ~2000).
-2. **mux** — Decoder's adapter calls engine generate/stream with Decoder-owned tool
-   definitions; Mux normalizes provider events and tool requests.
+2. **relay** — Reflect's adapter calls engine generate/stream with Reflect-owned tool
+   definitions; Relay normalizes provider events and tool requests.
 3. Tools run with the session's memory service in context.
 4. **memory** — post-session bookkeeping records the session goal and outcome.
 
@@ -78,7 +78,7 @@ Each turn:
 When messages exceed limits (`internal/engine/compact.go`):
 
 1. **token** — `token.Compress()` tries a fast compression path for summaries.
-2. **mux** — if token reduction is insufficient, decoder calls the LLM to summarize, then keeps recent messages.
+2. **relay** — if token reduction is insufficient, reflect calls the LLM to summarize, then keeps recent messages.
 
 ### 5. Token accounting
 
@@ -88,21 +88,21 @@ When messages exceed limits (`internal/engine/compact.go`):
 ## Verify locally
 
 ```bash
-decoder doctor              # ecosystem panel + mux preflight
-./scripts/smoke-decoder.sh  # build + quick tests
+reflect doctor              # ecosystem panel + relay preflight
+./scripts/smoke-reflect.sh  # build + quick tests
 ```
 
 ## Module layout
 
-| Module | Role in decoder | Required? |
+| Module | Role in reflect | Required? |
 |--------|----------------|-----------|
-| **mux** | LLM APIs, catalog, credentials, routing | Yes |
+| **relay** | LLM APIs, catalog, credentials, routing | Yes |
 | **internal/token** | Token estimate + context compression + secrets + usage | Yes (embedded, no config) |
 
-`mux` is an independent sibling checkout; the parent `go.work` wires the
+`relay` is an independent sibling checkout; the parent `go.work` wires the
 local Go workspace.
 
-Production Decoder code imports Mux only through `mux/engine`. Conversation
-history, WAL/resume, permissions, tool execution, and memory remain in Decoder;
+Production Reflect code imports Relay only through `relay/engine`. Conversation
+history, WAL/resume, permissions, tool execution, and memory remain in Reflect;
 provider credentials, discovery, selection, transport, resilience, and
-normalized streaming remain in Mux.
+normalized streaming remain in Relay.

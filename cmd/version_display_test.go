@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/GrayCodeAI/decoder"
-	decoderconfig "github.com/GrayCodeAI/decoder/internal/config"
-	"github.com/GrayCodeAI/decoder/internal/provider/gateway"
+	"github.com/GrayCodeAI/reflect"
+	reflectconfig "github.com/GrayCodeAI/reflect/internal/config"
+	"github.com/GrayCodeAI/reflect/internal/provider/gateway"
 )
 
 func TestDisplayVersion_EmbeddedVersionIgnoresWorkingDirectory(t *testing.T) {
@@ -19,8 +19,8 @@ func TestDisplayVersion_EmbeddedVersionIgnoresWorkingDirectory(t *testing.T) {
 	t.Chdir(dir)
 	for _, value := range []string{"", "dev"} {
 		SetVersion(value)
-		if got := DisplayVersion(); got != decoder.Version {
-			t.Fatalf("got %q, want embedded %q", got, decoder.Version)
+		if got := DisplayVersion(); got != reflect.Version {
+			t.Fatalf("got %q, want embedded %q", got, reflect.Version)
 		}
 	}
 }
@@ -34,12 +34,12 @@ func TestDisplayVersion_ReleaseBuild(t *testing.T) {
 }
 
 func TestChatConnectionStatus_NoCredentials(t *testing.T) {
-	decoderconfig.InvalidateConfigUICache()
+	reflectconfig.InvalidateConfigUICache()
 	store := &gateway.MapStore{}
 	gateway.SetDefaultStore(store)
 	t.Cleanup(func() {
 		gateway.SetDefaultStore(nil)
-		decoderconfig.InvalidateConfigUICache()
+		reflectconfig.InvalidateConfigUICache()
 	})
 
 	m := chatModel{session: nil}
@@ -50,12 +50,12 @@ func TestChatConnectionStatus_NoCredentials(t *testing.T) {
 }
 
 func TestChatBottomRightStatus_NoCredentials(t *testing.T) {
-	decoderconfig.InvalidateConfigUICache()
+	reflectconfig.InvalidateConfigUICache()
 	store := &gateway.MapStore{}
 	gateway.SetDefaultStore(store)
 	t.Cleanup(func() {
 		gateway.SetDefaultStore(nil)
-		decoderconfig.InvalidateConfigUICache()
+		reflectconfig.InvalidateConfigUICache()
 	})
 
 	m := chatModel{inputIndicator: &InputIndicator{}}

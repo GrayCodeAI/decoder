@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/GrayCodeAI/decoder/internal/storage"
+	"github.com/GrayCodeAI/reflect/internal/storage"
 	_ "modernc.org/sqlite"
 )
 

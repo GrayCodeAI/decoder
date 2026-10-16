@@ -6,8 +6,8 @@ import (
 	"github.com/mattn/go-runewidth"
 )
 
-// decoderBlockGlyphs — fixed 8-column ██ font used by the welcome gate banners.
-var decoderBlockGlyphs = map[rune][5]string{
+// reflectBlockGlyphs — fixed 8-column ██ font used by the welcome gate banners.
+var reflectBlockGlyphs = map[rune][5]string{
 	'H': {"██   ██ ", "██   ██ ", "███████ ", "██   ██ ", "██   ██ "},
 	'A': {"  ███   ", " █████  ", "███████ ", "██   ██ ", "██   ██ "},
 	'W': {"██   ██ ", "██   ██ ", "██ █ ██ ", "███ ███ ", "██   ██ "},
@@ -21,19 +21,19 @@ var decoderBlockGlyphs = map[rune][5]string{
 }
 
 const (
-	decoderBlockCellW     = 8
-	decoderBlockLetterGap = 1
-	decoderBlockWordGap   = 4
+	reflectBlockCellW     = 8
+	reflectBlockLetterGap = 1
+	reflectBlockWordGap   = 4
 )
 
 // welcomeWordLines — "WELCOME" block (row-aligned, fixed grid).
-var welcomeWordLines = composeDecoderBlockLines("WELCOME")
+var welcomeWordLines = composeReflectBlockLines("WELCOME")
 
 // welcomeToWordLines — "TO" block, centered under WELCOME on the gate.
-var welcomeToWordLines = composeDecoderBlockLines("TO")
+var welcomeToWordLines = composeReflectBlockLines("TO")
 
 // welcomeToPhraseLines — "WELCOME TO" block for wide welcome gates.
-var welcomeToPhraseLines = composeDecoderBlockLines("WELCOME TO")
+var welcomeToPhraseLines = composeReflectBlockLines("WELCOME TO")
 
 // welcomeToBannerMinWidth is the visible width for the WELCOME block.
 const welcomeToBannerMinWidth = 61
@@ -41,24 +41,24 @@ const welcomeToBannerMinWidth = 61
 // welcomeToPhraseMinWidth is the visible width for the combined "WELCOME TO" block.
 var welcomeToPhraseMinWidth = blockLinesWidth(welcomeToPhraseLines)
 
-func composeDecoderBlockLines(text string) []string {
+func composeReflectBlockLines(text string) []string {
 	rows := make([]string, 5)
 	words := strings.Fields(text)
 	for wi, word := range words {
 		for ci, ch := range word {
-			glyph, ok := decoderBlockGlyphs[ch]
+			glyph, ok := reflectBlockGlyphs[ch]
 			if !ok {
 				continue
 			}
 			for i := range rows {
 				if rows[i] != "" {
 					if ci == 0 && wi > 0 {
-						rows[i] += strings.Repeat(" ", decoderBlockWordGap)
+						rows[i] += strings.Repeat(" ", reflectBlockWordGap)
 					} else {
-						rows[i] += strings.Repeat(" ", decoderBlockLetterGap)
+						rows[i] += strings.Repeat(" ", reflectBlockLetterGap)
 					}
 				}
-				cell := padBlockCell(glyph[i], decoderBlockCellW)
+				cell := padBlockCell(glyph[i], reflectBlockCellW)
 				rows[i] += cell
 			}
 		}
@@ -86,9 +86,9 @@ func padBlockCell(s string, w int) string {
 	return s + strings.Repeat(" ", w-runewidth.StringWidth(s))
 }
 
-// decoderRobotArtLines renders a friendly gold robot with a centered antenna and teal eyes.
+// reflectRobotArtLines renders a friendly gold robot with a centered antenna and teal eyes.
 // Half blocks preserve square pixels across four terminal rows.
-func decoderRobotArtLines() []string {
+func reflectRobotArtLines() []string {
 	pixels := [...]string{
 		"00011000",
 		"00111100",

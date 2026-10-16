@@ -1,18 +1,18 @@
 # Vercel fx Adoption Plan
 
-Status: Implemented in Decoder's native Go architecture
+Status: Implemented in Reflect's native Go architecture
 
 Source: `https://github.com/vercel-labs/fx`
 
 This plan records the useful ideas identified while comparing Vercel Labs'
-`fx` Unix-like coding agent with Decoder and its independent ecosystem repositories. It is an
-adoption plan, not a code-porting plan. Decoder should reimplement compatible
+`fx` Unix-like coding agent with Reflect and its independent ecosystem repositories. It is an
+adoption plan, not a code-porting plan. Reflect should reimplement compatible
 behavior in Go and preserve its existing provider, memory, review, audit,
 session, and security boundaries.
 
 ## Executive Decision
 
-Decoder should adopt the following `fx` ideas:
+Reflect should adopt the following `fx` ideas:
 
 1. Stable identities and operational commands for persisted permission rules.
 2. A unified machine-readable runtime status snapshot.
@@ -21,21 +21,21 @@ Decoder should adopt the following `fx` ideas:
    user authority.
 5. Compatibility aliases for common permission modes in CLI and ACP surfaces.
 6. Stronger subagent lifecycle and permission observability.
-7. A narrow embeddable host API over Decoder's existing daemon and ACP surfaces.
+7. A narrow embeddable host API over Reflect's existing daemon and ACP surfaces.
 
-Decoder should not copy `fx` source code, replace its Go runtime with Zig, create a
+Reflect should not copy `fx` source code, replace its Go runtime with Zig, create a
 second permission system, or reduce its code-intelligence tool surface merely to
 match `fx`'s smaller binary.
 
-## Existing Decoder Capabilities
+## Existing Reflect Capabilities
 
-The comparison found that Decoder already provides the foundation for most `fx`
+The comparison found that Reflect already provides the foundation for most `fx`
 features:
 
-| `fx` capability | Decoder implementation | Current decision |
+| `fx` capability | Reflect implementation | Current decision |
 |---|---|---|
-| Native single binary | Go static binary and cross-platform release builds | Keep Decoder implementation |
-| Agent loop | `internal/engine` | Keep Decoder implementation |
+| Native single binary | Go static binary and cross-platform release builds | Keep Reflect implementation |
+| Agent loop | `internal/engine` | Keep Reflect implementation |
 | Permission and host-policy split | `internal/engine/safety`, `internal/permissions`, `internal/trust` | Harden and document |
 | `ask`/automatic approval behavior | Autonomy profiles, governance, grants, hooks | Add compatibility aliases only |
 | Child agents | `internal/multiagent`, continuable children, cold resume | Add observability and configuration polish |
@@ -45,7 +45,7 @@ features:
 | ACP | `internal/acp` | Extend status/config parity where useful |
 | Swift and replay | sibling `swift` (Swift), `internal/session/replay` | Add terminal-level tape capability |
 | Persistent memory | sibling `harrier` (Harrier) | Do not replace with flat JSON state |
-| Provider runtime | sibling `mux` | Do not add provider logic to Decoder |
+| Provider runtime | sibling `relay` | Do not add provider logic to Reflect |
 
 ## Priority Model
 
@@ -63,11 +63,11 @@ when their original command, path, or workspace has changed.
 
 ### Scope and ownership
 
-- Primary implementation: Decoder `internal/permissions` and
+- Primary implementation: Reflect `internal/permissions` and
   `internal/engine/safety`.
 - Shared contract changes, if needed: sibling `eagle/policy`.
 - User-facing commands: `cmd` and the existing slash-command surface.
-- No changes to sibling `mux` or `falcon`.
+- No changes to sibling `relay` or `falcon`.
 
 ### Required behavior
 
@@ -88,12 +88,12 @@ when their original command, path, or workspace has changed.
 ### Proposed interfaces
 
 ```text
-decoder permissions list [--json]
-decoder permissions revoke <rule-id>
-decoder permissions reset [--scope user|project]
+reflect permissions list [--json]
+reflect permissions revoke <rule-id>
+reflect permissions reset [--scope user|project]
 ```
 
-The exact command names may follow existing Decoder conventions, but the typed
+The exact command names may follow existing Reflect conventions, but the typed
 operation should be shared by CLI, TUI, daemon, and ACP.
 
 ### Acceptance criteria
@@ -155,7 +155,7 @@ the daemon, ACP clients, and the interactive UI.
 
 ### Ownership
 
-- Snapshot contract: Decoder root or `eagle` if consumed cross-repo.
+- Snapshot contract: Reflect root or `eagle` if consumed cross-repo.
 - Assembly: `internal/engine`, `internal/session`, `internal/mcp`,
   `internal/permissions`, `internal/multiagent`.
 - Rendering: CLI/TUI and daemon adapters.
@@ -164,7 +164,7 @@ the daemon, ACP clients, and the interactive UI.
 
 ```text
 schema_version
-decoder_version
+reflect_version
 session_id
 workspace
 git_branch
@@ -193,8 +193,8 @@ identifiers rather than raw secrets.
 ### Required interfaces
 
 ```text
-decoder status
-decoder status --json
+reflect status
+reflect status --json
 ```
 
 The daemon and ACP should expose the same snapshot schema, with transport
@@ -212,14 +212,14 @@ metadata kept outside the product snapshot.
 
 ### Goal
 
-Add `fx`-style terminal byte and resize recording to complement Decoder's existing
+Add `fx`-style terminal byte and resize recording to complement Reflect's existing
 agent-session swift and replay features.
 
 ### Ownership
 
 - Preferred home: sibling `swift` (Swift) if the capability is intended for reuse by
   other agents.
-- Decoder integration: `internal/swift` or the TUI composition layer.
+- Reflect integration: `internal/swift` or the TUI composition layer.
 - Do not put terminal tape parsing in the agent engine.
 
 ### Required behavior
@@ -237,10 +237,10 @@ agent-session swift and replay features.
 ### Proposed interfaces
 
 ```text
-decoder swift record --output <path>
-decoder swift replay <path>
-decoder swift replay <path> --frames
-decoder swift replay <path> --json
+reflect swift record --output <path>
+reflect swift replay <path>
+reflect swift replay <path> --frames
+reflect swift replay <path> --json
 ```
 
 Existing Swift session capture remains the source of prompts, tool calls, git
@@ -260,35 +260,35 @@ ID.
 
 ### Goal
 
-Expose familiar `fx` permission names without weakening Decoder's richer policy
+Expose familiar `fx` permission names without weakening Reflect's richer policy
 engine.
 
 ### Mapping
 
-| Compatibility name | Decoder behavior |
+| Compatibility name | Reflect behavior |
 |---|---|
 | `ask` | Supervised or equivalent prompt-required policy |
 | `auto` | Automatic review/approval behavior where configured |
 | `yolo` | Explicit high-autonomy mode, still subject to governance, sandbox, and destructive-command hard blocks |
 
-These are aliases or presentation-layer modes, not a replacement for Decoder's
+These are aliases or presentation-layer modes, not a replacement for Reflect's
 autonomy tiers, governance ceiling, spec gates, and sandbox policy.
 
 ### Required behavior
 
 1. Accept names in configuration, CLI, and ACP only where the surface supports
    them.
-2. Display the effective Decoder tier and hard safety constraints.
+2. Display the effective Reflect tier and hard safety constraints.
 3. Never let `yolo` bypass governance, hard-deny rules, destructive-command
    blocks, or mandatory spec approval.
-4. Persist the canonical Decoder representation, not an ambiguous alias.
+4. Persist the canonical Reflect representation, not an ambiguous alias.
 5. Add migration and invalid-value diagnostics.
 
 ## P1: Subagent Lifecycle and Authority Observability
 
 ### Goal
 
-Adopt `fx`'s useful child-agent visibility while retaining Decoder's continuable
+Adopt `fx`'s useful child-agent visibility while retaining Reflect's continuable
 child sessions, worktree isolation, model routing, and delegated policy
 inheritance.
 
@@ -319,7 +319,7 @@ inheritance.
 ### Goal
 
 Improve discoverability and trust reporting using `fx`'s clear status model,
-without changing Decoder's existing MCP and skills architecture.
+without changing Reflect's existing MCP and skills architecture.
 
 ### Required behavior
 
@@ -344,7 +344,7 @@ without changing Decoder's existing MCP and skills architecture.
 ### Goal
 
 Offer a supported embedding boundary inspired by `fx`'s ACP and WASM surfaces,
-without committing Decoder to a WASM rewrite.
+without committing Reflect to a WASM rewrite.
 
 ### First implementation
 
@@ -417,12 +417,12 @@ make test-race
 make vet
 make lint
 make security
-decoder verify
+reflect verify
 ```
 
 For sibling-repository changes, run that repository's own tests and boundary checks before
-updating the Decoder pointer. Do not modify provider protocols or adapters in Decoder;
-those belong in the Mux repository.
+updating the Reflect pointer. Do not modify provider protocols or adapters in Reflect;
+those belong in the Relay repository.
 
 ## Delivery Sequence
 
@@ -456,7 +456,7 @@ those belong in the Mux repository.
 
 - Design and review the versioned swift artifact format in sibling `swift` (Swift).
 - Implement recording, replay, redaction, and deterministic golden tests.
-- Integrate recording controls into Decoder without coupling tape parsing to the
+- Integrate recording controls into Reflect without coupling tape parsing to the
   agent loop.
 
 ### Milestone 5: Host integration and trust UX
@@ -469,18 +469,18 @@ those belong in the Mux repository.
 ## Deliberately Rejected
 
 - Copying Zig implementation code from `vercel-labs/fx`.
-- Replacing Decoder's Go runtime or independent ecosystem repositories.
+- Replacing Reflect's Go runtime or independent ecosystem repositories.
 - Adding a second permission evaluator.
 - Replacing Harrier with flat JSON memory.
 - Replacing Swift session capture with terminal tapes.
-- Removing Decoder's code intelligence, review, audit, token, or provider features
+- Removing Reflect's code intelligence, review, audit, token, or provider features
   to target `fx`'s binary size.
 - Automatically executing repository-local MCP servers or hooks.
 - Adding WASM before daemon and ACP contracts are stable and proven.
 
 ## Success Criteria
 
-The adoption is successful when Decoder can provide the operational clarity of
+The adoption is successful when Reflect can provide the operational clarity of
 `fx` while retaining its stronger ecosystem architecture:
 
 - Every persistent permission rule can be listed and revoked by stable ID.
@@ -488,7 +488,7 @@ The adoption is successful when Decoder can provide the operational clarity of
 - TUI failures can be reproduced from a credential-free terminal tape.
 - Project configuration cannot silently grant private authority.
 - Child-agent authority, lifecycle, model, and budget state are inspectable.
-- Existing Decoder memory, provider, review, audit, MCP, ACP, and session behavior
+- Existing Reflect memory, provider, review, audit, MCP, ACP, and session behavior
   remains intact.
 
 ## Implemented Scope
@@ -504,7 +504,7 @@ The adoption is successful when Decoder can provide the operational clarity of
   continuable children, and cold resume retained as the authoritative runtime.
 
 The remaining items in this document are future refinements to the already
-implemented surfaces, not missing baseline features. Decoder's subprocess LSP
+implemented surfaces, not missing baseline features. Reflect's subprocess LSP
 manager remains a separate integration task: the current main `LSP` tool uses
 the codegraph path, while `internal/lsp` provides the richer language-server
 client and is not yet attached to the primary tool registry.

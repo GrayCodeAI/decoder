@@ -85,8 +85,8 @@ func TestPollDeviceLoginTerminalStates(t *testing.T) {
 			if !errors.Is(err, tc.want) {
 				t.Fatalf("error = %v, want %v", err, tc.want)
 			}
-			if !strings.Contains(err.Error(), "decoder cloud login") {
-				t.Fatalf("error = %q, want a hint to rerun decoder cloud login", err)
+			if !strings.Contains(err.Error(), "reflect cloud login") {
+				t.Fatalf("error = %q, want a hint to rerun reflect cloud login", err)
 			}
 		})
 	}
@@ -118,7 +118,7 @@ func TestPollDeviceLoginNonTerminalAndUnknownStates(t *testing.T) {
 
 func TestAPIErrorUnauthorizedHint(t *testing.T) {
 	err := (&APIError{Operation: "usage upload", StatusCode: http.StatusUnauthorized, Message: "Unauthorized"}).Error()
-	if !strings.Contains(err, "decoder cloud login") {
+	if !strings.Contains(err, "reflect cloud login") {
 		t.Fatalf("401 error = %q, want a reconnect hint", err)
 	}
 }

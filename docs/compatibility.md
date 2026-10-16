@@ -12,11 +12,11 @@ Platform/provider capability metadata is separate: [`platform-capabilities.json`
 
 ```jsonc
 {
-  "components":   ["decoder", "mux", ...],   // canonical eco roster
-  "dependencies": { "decoder": ["mux", ...] }, // who depends on who
+  "components":   ["reflect", "relay", ...],   // canonical eco roster
+  "dependencies": { "reflect": ["relay", ...] }, // who depends on who
   "matrices": [
-    { "name": "stable", "components": { "decoder": "0.1.0", "mux": "0.1.0", ... } },
-    { "name": "next",   "components": { "decoder": "main",  "mux": "main",  ... } }
+    { "name": "stable", "components": { "reflect": "0.1.0", "relay": "0.1.0", ... } },
+    { "name": "next",   "components": { "reflect": "main",  "relay": "main",  ... } }
   ]
 }
 ```
@@ -49,7 +49,7 @@ existing consumers.
 `.shared-templates/workflows/compatibility-test.yml.tmpl` is a reusable
 workflow that:
 
-1. Reads `testdata/compatibility-matrix.json` from the decoder repo.
+1. Reads `testdata/compatibility-matrix.json` from the reflect repo.
 2. Checks out each component at the version listed in the named matrix.
 3. Builds + tests the cross-repo integration scenarios.
 
@@ -60,7 +60,7 @@ It runs on:
 
 ## Why bother
 
-- **Bug reports become triageable.** "I ran decoder 0.4 with mux 0.2" — you
+- **Bug reports become triageable.** "I ran reflect 0.4 with relay 0.2" — you
   immediately know whether that combination was ever tested.
 - **Consumers can pin reliably.** Downstream projects that vendor multiple
   eco packages can pin to a known-good stable matrix instead of guessing.
@@ -71,17 +71,17 @@ It runs on:
 
 ## Pin freshness (advisory)
 
-Separate from the matrix above: `decoder`'s own `go.mod` directly pins shared
+Separate from the matrix above: `reflect`'s own `go.mod` directly pins shared
 leaf dependencies, and sibling-repository consumers can pin the *same*
 dependencies independently in their own `go.mod`. Go's minimal version
-selection means whatever `decoder` pins wins in `decoder`'s own build — but if a
+selection means whatever `reflect` pins wins in `reflect`'s own build — but if a
 consumer's own pin is older, that consumer's CI has never actually tested the
 version that ships. This is exactly the kind of drift that let a real bug
 through in July 2026 (a stale goreleaser pin sat unnoticed until the first
 tag push exercised it).
 
 `make compat-drift` (wired into this workflow as an advisory, non-blocking
-step) reports any such mismatch by comparing `decoder/go.mod` against each
+step) reports any such mismatch by comparing `reflect/go.mod` against each
 `../<repo>/go.mod`:
 
 ```bash
@@ -90,7 +90,7 @@ make compat-drift
 
 This **never fails the build** — it's a signal for humans to notice and
 re-pin the consumer, not a gate. It checks sibling repositories when they are
-present; a Decoder-only checkout simply reports no local consumers to compare.
+present; a Reflect-only checkout simply reports no local consumers to compare.
 
 ## Validating the file
 

@@ -1,5 +1,5 @@
-// Package decoder exposes the canonical project version.
-package decoder
+// Package reflect exposes the canonical project version.
+package reflect
 
 import (
 	_ "embed"

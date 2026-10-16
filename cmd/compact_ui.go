@@ -7,14 +7,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GrayCodeAI/decoder/internal/engine/token"
+	"github.com/GrayCodeAI/reflect/internal/engine/token"
 
 	tea "charm.land/bubbletea/v2"
 	lipgloss "charm.land/lipgloss/v2"
 	"github.com/mattn/go-runewidth"
 
-	"github.com/GrayCodeAI/decoder/internal/engine"
-	"github.com/GrayCodeAI/decoder/internal/ui/icons"
+	"github.com/GrayCodeAI/reflect/internal/engine"
+	"github.com/GrayCodeAI/reflect/internal/ui/icons"
 )
 
 const compactProgressBarWidth = 40

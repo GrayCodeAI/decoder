@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/GrayCodeAI/decoder/internal/storage"
+	"github.com/GrayCodeAI/reflect/internal/storage"
 )
 
-// Manifest defines a decoder plugin.
+// Manifest defines a reflect plugin.
 type Manifest struct {
 	Name        string       `json:"name"`
 	Version     string       `json:"version"`

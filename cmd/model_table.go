@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	lipgloss "charm.land/lipgloss/v2"
-	decoderconfig "github.com/GrayCodeAI/decoder/internal/config"
-	"github.com/GrayCodeAI/decoder/internal/ui/icons"
+	reflectconfig "github.com/GrayCodeAI/reflect/internal/config"
+	"github.com/GrayCodeAI/reflect/internal/ui/icons"
 	"github.com/mattn/go-runewidth"
 )
 
@@ -119,17 +119,17 @@ func modelTableRowFromOption(o configModelOption) modelTableRow {
 }
 
 func formatModelThinkingCell(o configModelOption) string {
-	supports := decoderconfig.ModelCapabilitySupportsThinking(o.Capabilities)
-	settings := decoderconfig.LoadSettings()
-	pref := decoderconfig.ThinkingPrefForModel(settings, o.ID)
+	supports := reflectconfig.ModelCapabilitySupportsThinking(o.Capabilities)
+	settings := reflectconfig.LoadSettings()
+	pref := reflectconfig.ThinkingPrefForModel(settings, o.ID)
 	if pref == nil && o.CanonicalID != "" && o.CanonicalID != o.ID {
-		pref = decoderconfig.ThinkingPrefForModel(settings, o.CanonicalID)
+		pref = reflectconfig.ThinkingPrefForModel(settings, o.CanonicalID)
 	}
 	provider := strings.TrimSpace(o.GatewayID)
 	if provider == "" {
 		provider = strings.TrimSpace(o.ProviderID)
 	}
-	return decoderconfig.FormatModelThinkingLabel(supports, pref, provider)
+	return reflectconfig.FormatModelThinkingLabel(supports, pref, provider)
 }
 
 func formatModelCapabilities(capabilities []string) string {
@@ -370,7 +370,7 @@ func modelTableFooter(total, scroll, end, allTotal int, muted lipgloss.Style) st
 	return muted.Render(fmt.Sprintf("%s%s · t toggle thinking · enter to select", prefix, label))
 }
 
-func modelTableRowFromCatalogEntry(m decoderconfig.EngineModel) modelTableRow {
+func modelTableRowFromCatalogEntry(m reflectconfig.EngineModel) modelTableRow {
 	name := strings.TrimSpace(m.DisplayName)
 	if name == "" {
 		name = m.ID
@@ -401,7 +401,7 @@ func modelTableRowFromCatalogEntry(m decoderconfig.EngineModel) modelTableRow {
 		Model:    name,
 		Provider: owner,
 		Caps:     formatModelCapabilities(m.Capabilities),
-		Think:    decoderconfig.FormatModelThinkingLabel(decoderconfig.ModelCapabilitySupportsThinking(m.Capabilities), decoderconfig.ThinkingPrefForModel(decoderconfig.LoadSettings(), m.ID), provider),
+		Think:    reflectconfig.FormatModelThinkingLabel(reflectconfig.ModelCapabilitySupportsThinking(m.Capabilities), reflectconfig.ThinkingPrefForModel(reflectconfig.LoadSettings(), m.ID), provider),
 		Price:    price,
 		Context:  formatModelTableContext(m.ContextWindow),
 		Free:     free,

@@ -248,17 +248,17 @@ func TestDefaultSkillDirsCrossAgent(t *testing.T) {
 	// Hermetic: pin HOME so the user-scoped skills dir is deterministic.
 	t.Setenv("HOME", t.TempDir())
 	dirs := DefaultSkillDirs()
-	foundDecoder := false
+	foundReflect := false
 	for _, d := range dirs {
 		if strings.Contains(d, "skills") {
-			foundDecoder = true
+			foundReflect = true
 			break
 		}
 	}
-	if !foundDecoder {
-		t.Error("expected decoder skills directory")
+	if !foundReflect {
+		t.Error("expected reflect skills directory")
 	}
 	if len(dirs) < 1 {
-		t.Errorf("expected at least 1 user-level Decoder skills dir, got %d", len(dirs))
+		t.Errorf("expected at least 1 user-level Reflect skills dir, got %d", len(dirs))
 	}
 }

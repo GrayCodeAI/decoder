@@ -1,8 +1,8 @@
-# ADR-0002: Decoder Cloud control plane inside GrayCode Platform
+# ADR-0002: Reflect Cloud control plane inside GrayCode Platform
 
 - Status: Accepted
 - Date: 2026-07-10
-- Owners: Decoder maintainers
+- Owners: Reflect maintainers
 
 ## Decision
 
@@ -10,17 +10,17 @@
 Cloudflare Worker applications:
 
 - `apps/bff` owns browser identity and the authenticated browser gateway;
-- `apps/worker`, deployed as `graycode-cloud`, owns the Decoder-specific control
+- `apps/worker`, deployed as `graycode-cloud`, owns the Reflect-specific control
   plane and source of truth for organizations, teams, projects, devices,
   sessions, usage, policies, entitlements, billing, audit, and graph records.
 
-Decoder remains local-first. It may send aggregate usage or explicitly requested
-graph data to Decoder Cloud only after the user connects a device. Engines never
-import GrayCode Platform or Decoder Cloud code; Decoder uses its isolated HTTP cloud
+Reflect remains local-first. It may send aggregate usage or explicitly requested
+graph data to Reflect Cloud only after the user connects a device. Engines never
+import GrayCode Platform or Reflect Cloud code; Reflect uses its isolated HTTP cloud
 adapter.
 
-The browser reaches Decoder Cloud only through the BFF's private
-`DecoderCloudService` Service Binding. The BFF resolves the authenticated
+The browser reaches Reflect Cloud only through the BFF's private
+`ReflectCloudService` Service Binding. The BFF resolves the authenticated
 principal; the Worker injects its cloud-only service credential. The browser
 never receives that credential.
 
@@ -29,11 +29,11 @@ never receives that credential.
 Interactive CLI authentication uses a browser device-authorization flow:
 
 ```text
-decoder cloud login
+reflect cloud login
   -> GrayCode Platform BFF/browser authentication
   -> user approves organization/project
-  -> Decoder Cloud Worker issues one project-scoped device token
-  -> Decoder stores it in the OS secure store
+  -> Reflect Cloud Worker issues one project-scoped device token
+  -> Reflect stores it in the OS secure store
 ```
 
 Automation uses project-scoped service accounts or API keys. Human credentials
@@ -41,7 +41,7 @@ must not be shared with CI systems.
 
 ## Consequences
 
-- GrayCode product activity remains separate from Decoder's authoritative usage
+- GrayCode product activity remains separate from Reflect's authoritative usage
   and billing ledger.
 - Usage events are versioned and idempotent, with token dimensions and session
   attribution.

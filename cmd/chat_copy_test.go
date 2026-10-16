@@ -7,7 +7,7 @@ import (
 	"charm.land/bubbles/v2/textarea"
 	tea "charm.land/bubbletea/v2"
 
-	decoderconfig "github.com/GrayCodeAI/decoder/internal/config"
+	reflectconfig "github.com/GrayCodeAI/reflect/internal/config"
 )
 
 func TestCopyableTranscript_IncludesInputDraft(t *testing.T) {
@@ -80,24 +80,24 @@ func TestIsCopyToClipboardKey(t *testing.T) {
 }
 
 func TestMouseEnabled_SettingsAndEnv(t *testing.T) {
-	t.Setenv("DECODER_MOUSE", "")
+	t.Setenv("REFLECT_MOUSE", "")
 	if !(chatModel{}).mouseEnabled() {
 		t.Fatal("expected mouse capture to default on")
 	}
 
 	disabled := false
-	m := chatModel{settings: decoderconfig.Settings{TuiMouse: &disabled}}
+	m := chatModel{settings: reflectconfig.Settings{TuiMouse: &disabled}}
 	if m.mouseEnabled() {
 		t.Fatal("expected settings tui_mouse=false to disable capture")
 	}
 
-	t.Setenv("DECODER_MOUSE", "0")
+	t.Setenv("REFLECT_MOUSE", "0")
 	if m.mouseEnabled() {
-		t.Fatal("expected DECODER_MOUSE=0 to disable capture")
+		t.Fatal("expected REFLECT_MOUSE=0 to disable capture")
 	}
 
-	t.Setenv("DECODER_MOUSE", "1")
+	t.Setenv("REFLECT_MOUSE", "1")
 	if !m.mouseEnabled() {
-		t.Fatal("expected DECODER_MOUSE=1 to enable capture")
+		t.Fatal("expected REFLECT_MOUSE=1 to enable capture")
 	}
 }

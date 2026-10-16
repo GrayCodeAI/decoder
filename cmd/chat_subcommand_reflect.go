@@ -3,7 +3,7 @@ package cmd
 import (
 	tea "charm.land/bubbletea/v2"
 
-	"github.com/GrayCodeAI/decoder/internal/engine"
+	"github.com/GrayCodeAI/reflect/internal/engine"
 )
 
 // reflectSubcommand implements the /reflect slash command. It

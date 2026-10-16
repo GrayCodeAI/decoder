@@ -1,6 +1,6 @@
 # Configuration
 
-Decoder reads configuration from settings files, environment variables, and has defaults for all options. This document covers the common configuration options.
+Reflect reads configuration from settings files, environment variables, and has defaults for all options. This document covers the common configuration options.
 
 ---
 
@@ -11,18 +11,18 @@ Configuration is resolved in this order (highest priority first):
 1. **CLI `--settings` JSON override** (`LoadSettingsWithOverride`)
 2. **Per-command CLI flags** (e.g., `--provider`, `--model`)
 3. **Environment variables** (only where explicitly read; there is no global env layer)
-4. **Project settings** (`.decoder/settings.json`, repository-safe subset only —
+4. **Project settings** (`.reflect/settings.json`, repository-safe subset only —
    `model`, `provider`, permissions, MCP servers and providers are stripped)
-5. **User settings** (`~/.decoder/settings.json`)
+5. **User settings** (`~/.reflect/settings.json`)
 6. **Built-in defaults**
 
 ---
 
 ## Settings File
 
-Location: `~/.decoder/settings.json`
+Location: `~/.reflect/settings.json`
 
-This is the main configuration file. Decoder writes to it when you save changes via `/config` or `/autonomy save`.
+This is the main configuration file. Reflect writes to it when you save changes via `/config` or `/autonomy save`.
 
 ### Basic Settings
 
@@ -106,34 +106,34 @@ Key environment variables for configuration.
 
 | Variable | Description |
 |----------|-------------|
-| `DECODER_Y0_FOLDER_TRUST` | Folder trust feature flag (default: `1`) |
-| `DECODER_Y0_MARKETPLACE` | Marketplace feature flag (default: `1`, set `0` to disable remote installs) |
-| `DECODER_DEPLOYMENT_ROUTING` | Not an environment variable: set `deployment_routing` in `settings.json` |
+| `REFLECT_Y0_FOLDER_TRUST` | Folder trust feature flag (default: `1`) |
+| `REFLECT_Y0_MARKETPLACE` | Marketplace feature flag (default: `1`, set `0` to disable remote installs) |
+| `REFLECT_DEPLOYMENT_ROUTING` | Not an environment variable: set `deployment_routing` in `settings.json` |
 
 ### Paths
 
 | Variable | Description |
 |----------|-------------|
-| `DECODER_HOME` | Harness home override used by identity only (default: `~/.decoder`); most config paths honor `DECODER_CONFIG_DIR` / `DECODER_STATE_DIR` / `DECODER_CACHE_DIR` instead |
+| `REFLECT_HOME` | Harness home override used by identity only (default: `~/.reflect`); most config paths honor `REFLECT_CONFIG_DIR` / `REFLECT_STATE_DIR` / `REFLECT_CACHE_DIR` instead |
 
 ---
 
 ## Project Configuration
 
-Place configuration in `.decoder/` within your repository:
+Place configuration in `.reflect/` within your repository:
 
 | File | Purpose |
 |------|---------|
-| `.decoder/settings.json` | Project settings (autonomy, rules) |
-| `.decoder/lsp.json` | LSP server configuration |
+| `.reflect/settings.json` | Project settings (autonomy, rules) |
+| `.reflect/lsp.json` | LSP server configuration |
 | `AGENTS.md` | Project instructions |
 
 ---
 
 ## MCP Servers
 
-Configure MCP servers in global `~/.decoder/settings.json` only — project
-`.decoder/settings.json` cannot register MCP servers (stripped by
+Configure MCP servers in global `~/.reflect/settings.json` only — project
+`.reflect/settings.json` cannot register MCP servers (stripped by
 `projectSafeSettings`; project automation additionally requires folder trust,
 see below):
 
@@ -169,7 +169,7 @@ Folder trust controls whether project automation (hooks, plugins, MCP, LSP) can 
 
 ### Trust Store
 
-Location: `~/.decoder/trusted_folders.toml`
+Location: `~/.reflect/trusted_folders.toml`
 
 ```toml
 [[folders]]

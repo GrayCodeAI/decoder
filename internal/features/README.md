@@ -1,4 +1,4 @@
-# Decoder feature modules
+# Reflect feature modules
 
 This directory is the migration boundary for product features.
 

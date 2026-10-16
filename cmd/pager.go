@@ -96,7 +96,7 @@ func StopPager() {
 // Returns "" if paging should be disabled.
 func resolvePager() string {
 	// Disable paging via environment.
-	if v := os.Getenv("DECODER_PAGER"); v != "" {
+	if v := os.Getenv("REFLECT_PAGER"); v != "" {
 		if v == "cat" || v == "none" {
 			return ""
 		}

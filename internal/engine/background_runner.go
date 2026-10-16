@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	agentcontracts "github.com/GrayCodeAI/decoder/internal/contracts/agent"
+	agentcontracts "github.com/GrayCodeAI/reflect/internal/contracts/agent"
 
-	"github.com/GrayCodeAI/decoder/internal/taskruntime"
-	"github.com/GrayCodeAI/decoder/internal/tool"
+	"github.com/GrayCodeAI/reflect/internal/taskruntime"
+	"github.com/GrayCodeAI/reflect/internal/tool"
 )
 
 // BackgroundTask represents an async subagent task running in the background.

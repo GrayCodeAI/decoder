@@ -18,7 +18,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GrayCodeAI/decoder/internal/types"
+	"github.com/GrayCodeAI/reflect/internal/types"
 )
 
 // LifeboatVersion is the on-disk schema version. Bump on non-additive
@@ -50,7 +50,7 @@ func NewLifeboatState(sessionID string) LifeboatState {
 // BuildLifeboat derives a lifeboat from a conversation's messages.
 // Extraction is heuristic on purpose: lifeboats are meant to be lightweight,
 // cheap, and never to throw on content we do not understand.
-func BuildLifeboat(sessionID string, messages []types.MuxMessage) LifeboatState {
+func BuildLifeboat(sessionID string, messages []types.RelayMessage) LifeboatState {
 	state := NewLifeboatState(sessionID)
 	state.MessageCount = len(messages)
 

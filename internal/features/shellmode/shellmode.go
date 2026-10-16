@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GrayCodeAI/decoder/internal/toolsafety"
+	"github.com/GrayCodeAI/reflect/internal/toolsafety"
 )
 
 const (

@@ -5,8 +5,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/GrayCodeAI/decoder/internal/permissions"
-	"github.com/GrayCodeAI/decoder/internal/permissions/stableid"
+	"github.com/GrayCodeAI/reflect/internal/permissions"
+	"github.com/GrayCodeAI/reflect/internal/permissions/stableid"
 )
 
 func newExactStore(t *testing.T) *permissions.StableRuleStore {

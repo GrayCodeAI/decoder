@@ -67,11 +67,11 @@ alwaysApply: true
 		}
 	}
 
-	// 3. Repair missing .decoder/specs/ directory
-	specsDir := filepath.Join(root, ".decoder", "specs")
+	// 3. Repair missing .reflect/specs/ directory
+	specsDir := filepath.Join(root, ".reflect", "specs")
 	if !dirExists(specsDir) {
 		if err := os.MkdirAll(specsDir, 0o750); err == nil {
-			result.RepairsPerformed = append(result.RepairsPerformed, "Created .decoder/specs/ directory for task specification management")
+			result.RepairsPerformed = append(result.RepairsPerformed, "Created .reflect/specs/ directory for task specification management")
 		}
 	}
 

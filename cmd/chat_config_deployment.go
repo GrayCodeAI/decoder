@@ -9,9 +9,9 @@ import (
 	tea "charm.land/bubbletea/v2"
 	lipgloss "charm.land/lipgloss/v2"
 
-	decoderconfig "github.com/GrayCodeAI/decoder/internal/config"
-	"github.com/GrayCodeAI/decoder/internal/engine"
-	"github.com/GrayCodeAI/decoder/internal/ui/icons"
+	reflectconfig "github.com/GrayCodeAI/reflect/internal/config"
+	"github.com/GrayCodeAI/reflect/internal/engine"
+	"github.com/GrayCodeAI/reflect/internal/ui/icons"
 )
 
 type configApplyCredentialsMsg struct {
@@ -24,39 +24,39 @@ type configApplyCredentialsMsg struct {
 
 func firstRunModelProvider(m chatModel) string {
 	ctx := context.Background()
-	if p := strings.TrimSpace(m.configModelProvider); p != "" && decoderconfig.HasStoredCredentialForProvider(ctx, p) {
+	if p := strings.TrimSpace(m.configModelProvider); p != "" && reflectconfig.HasStoredCredentialForProvider(ctx, p) {
 		return p
 	}
 	if m.session != nil {
-		if p := strings.TrimSpace(m.session.Provider()); p != "" && decoderconfig.HasStoredCredentialForProvider(ctx, p) {
+		if p := strings.TrimSpace(m.session.Provider()); p != "" && reflectconfig.HasStoredCredentialForProvider(ctx, p) {
 			return p
 		}
 	}
-	if p := strings.TrimSpace(decoderconfig.ActiveGateway(ctx)); p != "" && decoderconfig.HasStoredCredentialForProvider(ctx, p) {
+	if p := strings.TrimSpace(reflectconfig.ActiveGateway(ctx)); p != "" && reflectconfig.HasStoredCredentialForProvider(ctx, p) {
 		return p
 	}
-	if p := decoderconfig.DefaultModelProviderFilter(ctx); p != "" && decoderconfig.HasStoredCredentialForProvider(ctx, p) {
+	if p := reflectconfig.DefaultModelProviderFilter(ctx); p != "" && reflectconfig.HasStoredCredentialForProvider(ctx, p) {
 		return p
 	}
-	for _, p := range decoderconfig.AllSetupGateways() {
-		if decoderconfig.HasStoredCredentialForProvider(ctx, p) {
+	for _, p := range reflectconfig.AllSetupGateways() {
+		if reflectconfig.HasStoredCredentialForProvider(ctx, p) {
 			return p
 		}
 	}
 	return ""
 }
 
-func saveProviderKeyAsync(inference decoderconfig.CredentialInference, secret string) tea.Cmd {
+func saveProviderKeyAsync(inference reflectconfig.CredentialInference, secret string) tea.Cmd {
 	return saveCredentialAsync(inference, secret)
 }
 
 func saveOllamaAsync(baseURL string) tea.Cmd {
 	return func() tea.Msg {
-		inference, err := decoderconfig.LocalCredentialInference(configProviderOllama)
+		inference, err := reflectconfig.LocalCredentialInference(configProviderOllama)
 		if err != nil {
 			return configApplyCredentialsMsg{err: err}
 		}
-		inf := decoderconfig.CredentialInference{
+		inf := reflectconfig.CredentialInference{
 			ProviderID:   inference.ProviderID,
 			DeploymentID: inference.DeploymentID,
 			EnvVar:       inference.EnvVar,
@@ -66,22 +66,22 @@ func saveOllamaAsync(baseURL string) tea.Cmd {
 	}
 }
 
-func saveCredentialAsync(inference decoderconfig.CredentialInference, secret string) tea.Cmd {
+func saveCredentialAsync(inference reflectconfig.CredentialInference, secret string) tea.Cmd {
 	return func() tea.Msg {
 		ctx := context.Background()
-		if err := decoderconfig.SaveCredential(ctx, inference, secret); err != nil {
+		if err := reflectconfig.SaveCredential(ctx, inference, secret); err != nil {
 			return configApplyCredentialsMsg{
 				err:          err,
 				providerID:   inference.ProviderID,
 				deploymentID: inference.DeploymentID,
 			}
 		}
-		decoderconfig.InvalidateConfigUICache()
-		decoderconfig.RefreshConfigCredSnapshot(ctx)
-		result, err := decoderconfig.ApplyMuxCredentialsForProvider(ctx, inference.ProviderID)
-		if err != nil && decoderconfig.IsCatalogCacheRequired(err) {
-			if refreshErr := decoderconfig.RefreshCatalogAfterCredentials(ctx, nil); refreshErr == nil {
-				result, err = decoderconfig.ApplyMuxCredentialsForProvider(ctx, inference.ProviderID)
+		reflectconfig.InvalidateConfigUICache()
+		reflectconfig.RefreshConfigCredSnapshot(ctx)
+		result, err := reflectconfig.ApplyRelayCredentialsForProvider(ctx, inference.ProviderID)
+		if err != nil && reflectconfig.IsCatalogCacheRequired(err) {
+			if refreshErr := reflectconfig.RefreshCatalogAfterCredentials(ctx, nil); refreshErr == nil {
+				result, err = reflectconfig.ApplyRelayCredentialsForProvider(ctx, inference.ProviderID)
 			} else {
 				err = fmt.Errorf("%w; automatic catalog refresh failed: %w", err, refreshErr)
 			}
@@ -94,7 +94,7 @@ func saveCredentialAsync(inference decoderconfig.CredentialInference, secret str
 			}
 		}
 
-		entries, listErr := decoderconfig.ListEngineModels(ctx, inference.ProviderID, false)
+		entries, listErr := reflectconfig.ListEngineModels(ctx, inference.ProviderID, false)
 		if listErr != nil {
 			return configApplyCredentialsMsg{
 				err:          listErr,
@@ -102,9 +102,9 @@ func saveCredentialAsync(inference decoderconfig.CredentialInference, secret str
 				deploymentID: inference.DeploymentID,
 			}
 		}
-		opts := configModelOptionsFromMux(entries)
+		opts := configModelOptionsFromRelay(entries)
 		return configApplyCredentialsMsg{
-			summary:      decoderconfig.FormatApplyCredentialsSummary(result),
+			summary:      reflectconfig.FormatApplyCredentialsSummary(result),
 			providerID:   inference.ProviderID,
 			deploymentID: inference.DeploymentID,
 			modelOptions: opts,
@@ -134,15 +134,15 @@ func (m chatModel) startConfigURLInput(defaultURL string) (chatModel, tea.Cmd) {
 	m.configInput.EchoMode = textinput.EchoNormal
 	m.configInput.SetStyles(textinput.Styles{
 		Focused: textinput.StyleState{
-			Prompt: lipgloss.NewStyle().Foreground(decoderColor).Bold(true),
+			Prompt: lipgloss.NewStyle().Foreground(reflectColor).Bold(true),
 			Text:   lipgloss.NewStyle().Foreground(textPrimary),
 		},
 		Blurred: textinput.StyleState{
-			Prompt: lipgloss.NewStyle().Foreground(decoderColor).Bold(true),
+			Prompt: lipgloss.NewStyle().Foreground(reflectColor).Bold(true),
 			Text:   lipgloss.NewStyle().Foreground(textPrimary),
 		},
 		Cursor: textinput.CursorStyle{
-			Color: decoderColor,
+			Color: reflectColor,
 		},
 	})
 	m.configInput.Focus()
@@ -152,27 +152,27 @@ func (m chatModel) startConfigURLInput(defaultURL string) (chatModel, tea.Cmd) {
 func (m chatModel) handleConfigApplyCredentialsMsg(msg configApplyCredentialsMsg) (chatModel, tea.Cmd) {
 	m.configSaving = false
 	ctx := context.Background()
-	decoderconfig.RefreshConfigCredSnapshot(ctx)
+	reflectconfig.RefreshConfigCredSnapshot(ctx)
 	m = m.refreshConfigGatewayRows()
 	if msg.err != nil {
 		m.invalidateConnStatus()
 		if msg.providerID == configProviderOllama {
 			return m.returnToOllamaURLAfterError(msg.err)
 		}
-		notice := sanitizeConfigNotice(decoderconfig.FormatConfigProviderError(msg.providerID, msg.err))
-		saved := decoderconfig.HasStoredCredentialForProvider(ctx, msg.providerID) ||
+		notice := sanitizeConfigNotice(reflectconfig.FormatConfigProviderError(msg.providerID, msg.err))
+		saved := reflectconfig.HasStoredCredentialForProvider(ctx, msg.providerID) ||
 			strings.Contains(strings.ToLower(msg.err.Error()), "key saved in keychain")
 		if saved {
-			if decoderconfig.IsCatalogCacheRequired(msg.err) {
+			if reflectconfig.IsCatalogCacheRequired(msg.err) {
 				notice = "Key saved in " + credentialsStoreLabel() + " — model catalog unavailable: " + notice
-				notice += " · run decoder models refresh"
+				notice += " · run reflect models refresh"
 			} else if configCredentialRejected(msg.err) {
 				notice = "Key saved in " + credentialsStoreLabel() + " — provider rejected this key: " + notice
 			} else {
 				notice = "Key saved in " + credentialsStoreLabel() + " — catalog refresh failed: " + notice
 			}
-			if !decoderconfig.IsCatalogCacheRequired(msg.err) && !strings.Contains(strings.ToLower(notice), "refresh") {
-				notice += " · press r on " + decoderconfig.GatewayDisplayName(msg.providerID) + " to retry"
+			if !reflectconfig.IsCatalogCacheRequired(msg.err) && !strings.Contains(strings.ToLower(notice), "refresh") {
+				notice += " · press r on " + reflectconfig.GatewayDisplayName(msg.providerID) + " to retry"
 			}
 		} else {
 			notice = "Could not save key — " + notice
@@ -206,11 +206,11 @@ func (m chatModel) handleConfigApplyCredentialsMsg(msg configApplyCredentialsMsg
 		if idx := next.configGatewayRowIndex(post); idx >= 0 {
 			next.configSel = idx
 		}
-		next.configNotice = "Key updated for " + decoderconfig.GatewayDisplayName(post)
+		next.configNotice = "Key updated for " + reflectconfig.GatewayDisplayName(post)
 		return next, cmd
 	}
 	if msg.providerID == configProviderOllama {
-		_ = decoderconfig.SetGlobalSetting("provider", configProviderOllama)
+		_ = reflectconfig.SetGlobalSetting("provider", configProviderOllama)
 		next.syncSessionSelection()
 	}
 	next.configGuideAfterKey = false
@@ -253,9 +253,9 @@ func configCredentialRejected(err error) bool {
 }
 
 func (m chatModel) rebuildSessionTransport() (chatModel, tea.Cmd) {
-	m.settings = decoderconfig.LoadSettings()
+	m.settings = reflectconfig.LoadSettings()
 	m.syncSessionSelection()
-	selection := decoderconfig.EffectiveSelectionWithSettings(context.Background(), m.settings, decoderconfig.SelectionOptions{
+	selection := reflectconfig.EffectiveSelectionWithSettings(context.Background(), m.settings, reflectconfig.SelectionOptions{
 		ProviderOverride: firstNonEmptyTrimmed(m.session.Provider(), m.settings.Provider),
 		ModelOverride:    firstNonEmptyTrimmed(m.session.Model(), m.settings.Model),
 	})

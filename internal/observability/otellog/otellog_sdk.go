@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GrayCodeAI/decoder"
+	reflectmod "github.com/GrayCodeAI/reflect"
 
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp"
@@ -19,7 +19,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 
-	"github.com/GrayCodeAI/decoder/internal/identity"
+	"github.com/GrayCodeAI/reflect/internal/identity"
 )
 
 // maxTimerDelayMillis is a runtime protocol limit for timer delays (Node's
@@ -120,11 +120,11 @@ func NewBackend(cfg Config) (*Backend, error) {
 	}
 	serviceName := cfg.ServiceName
 	if serviceName == "" {
-		serviceName = "decoder"
+		serviceName = "reflect"
 	}
 	serviceVersion := cfg.ServiceVersion
 	if serviceVersion == "" {
-		serviceVersion = decoder.Version
+		serviceVersion = reflectmod.Version
 	}
 
 	if mode == ModeDisabled {
@@ -164,7 +164,7 @@ func NewBackend(cfg Config) (*Backend, error) {
 		return nil, err
 	}
 
-	const scope = "github.com/GrayCodeAI/decoder/internal/observability/otellog"
+	const scope = "github.com/GrayCodeAI/reflect/internal/observability/otellog"
 	enqueue := func(record Record) {
 		logger := provider.Logger(scope)
 		if record.Channel == ChannelOps {
@@ -354,7 +354,7 @@ func attrsToKeyValues(attrs map[string]any) []attribute.KeyValue {
 
 // DefaultConfig returns a config populated from environment variables,
 // mirroring the oteltrace conventions: telemetry is opt-in via
-// DECODER_ENABLE_TELEMETRY=1 and the logs endpoint comes from
+// REFLECT_ENABLE_TELEMETRY=1 and the logs endpoint comes from
 // OTEL_EXPORTER_OTLP_LOGS_ENDPOINT. Without both, the mode stays DISABLED.
 func DefaultConfig() Config {
 	cfg := Config{
@@ -362,10 +362,10 @@ func DefaultConfig() Config {
 		URL:             os.Getenv("OTEL_EXPORTER_OTLP_LOGS_ENDPOINT"),
 		Headers:         parseHeaders(os.Getenv("OTEL_EXPORTER_OTLP_HEADERS")),
 		ShutdownTimeout: DefaultShutdownTimeout,
-		ServiceName:     "decoder",
-		ServiceVersion:  decoder.Version,
+		ServiceName:     "reflect",
+		ServiceVersion:  reflectmod.Version,
 	}
-	if os.Getenv("DECODER_ENABLE_TELEMETRY") == "1" && cfg.URL != "" {
+	if os.Getenv("REFLECT_ENABLE_TELEMETRY") == "1" && cfg.URL != "" {
 		cfg.Mode = ModeFull
 	}
 	return cfg

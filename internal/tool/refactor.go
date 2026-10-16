@@ -761,7 +761,7 @@ func FormatRefactoringResult(result *RefactoringResult) string {
 
 // --- RefactorTool implements the Tool interface ---
 
-// RefactorTool exposes refactoring operations as a decoder tool.
+// RefactorTool exposes refactoring operations as a reflect tool.
 type RefactorTool struct {
 	refactorer *Refactorer
 }

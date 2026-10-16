@@ -17,7 +17,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/GrayCodeAI/decoder/internal/ui/icons"
+	"github.com/GrayCodeAI/reflect/internal/ui/icons"
 )
 
 // DocLintResult holds the documentation quality analysis for a single file.

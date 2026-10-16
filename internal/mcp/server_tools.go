@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/GrayCodeAI/decoder/internal/intelligence/memory"
-	"github.com/GrayCodeAI/decoder/internal/token"
+	"github.com/GrayCodeAI/reflect/internal/intelligence/memory"
+	"github.com/GrayCodeAI/reflect/internal/token"
 )
 
 // ToolExecutor is a function that executes a named tool with JSON input.
@@ -23,25 +23,25 @@ func readOnlyAnnotations(title string) *ToolAnnotations {
 	return &ToolAnnotations{Title: title, ReadOnlyHint: boolPtr(true), DestructiveHint: boolPtr(false)}
 }
 
-// RegisterDefaultTools registers decoder's standard capabilities as MCP tools.
-// If executor is non-nil, tools that delegate to decoder's tool registry will
+// RegisterDefaultTools registers reflect's standard capabilities as MCP tools.
+// If executor is non-nil, tools that delegate to reflect's tool registry will
 // use it for execution; otherwise those tools return a not-configured error.
 func RegisterDefaultTools(server *MCPServer, executor ToolExecutor) {
-	server.RegisterTool(decoderChatTool(executor))
-	server.RegisterTool(decoderSearchTool(executor))
-	server.RegisterTool(decoderMemoryRecallTool(executor))
-	server.RegisterTool(decoderMemoryStoreTool(executor))
-	server.RegisterTool(decoderCompressTool(executor))
+	server.RegisterTool(reflectChatTool(executor))
+	server.RegisterTool(reflectSearchTool(executor))
+	server.RegisterTool(reflectMemoryRecallTool(executor))
+	server.RegisterTool(reflectMemoryStoreTool(executor))
+	server.RegisterTool(reflectCompressTool(executor))
 }
 
-// decoderChatTool sends a prompt to decoder and returns the response.
-func decoderChatTool(executor ToolExecutor) MCPToolHandler {
+// reflectChatTool sends a prompt to reflect and returns the response.
+func reflectChatTool(executor ToolExecutor) MCPToolHandler {
 	return MCPToolHandler{
-		Name: "decoder_chat",
-		Description: "Send a prompt to the decoder AI coding agent and receive a response. " +
+		Name: "reflect_chat",
+		Description: "Send a prompt to the reflect AI coding agent and receive a response. " +
 			"WARNING: this runs an autonomous agent that may execute shell commands and modify files.",
 		Annotations: &ToolAnnotations{
-			Title:           "Run decoder agent",
+			Title:           "Run reflect agent",
 			ReadOnlyHint:    boolPtr(false),
 			DestructiveHint: boolPtr(true),
 			OpenWorldHint:   boolPtr(true),
@@ -51,7 +51,7 @@ func decoderChatTool(executor ToolExecutor) MCPToolHandler {
 			"properties": map[string]interface{}{
 				"prompt": map[string]interface{}{
 					"type":        "string",
-					"description": "The prompt or question to send to decoder.",
+					"description": "The prompt or question to send to reflect.",
 				},
 			},
 			"required": []string{"prompt"},
@@ -71,12 +71,12 @@ func decoderChatTool(executor ToolExecutor) MCPToolHandler {
 	}
 }
 
-// decoderSearchTool searches across decoder sessions.
-func decoderSearchTool(executor ToolExecutor) MCPToolHandler {
+// reflectSearchTool searches across reflect sessions.
+func reflectSearchTool(executor ToolExecutor) MCPToolHandler {
 	return MCPToolHandler{
-		Name:        "decoder_search",
-		Description: "Search across decoder sessions and conversation history.",
-		Annotations: readOnlyAnnotations("Search decoder sessions"),
+		Name:        "reflect_search",
+		Description: "Search across reflect sessions and conversation history.",
+		Annotations: readOnlyAnnotations("Search reflect sessions"),
 		InputSchema: map[string]interface{}{
 			"type": "object",
 			"properties": map[string]interface{}{
@@ -107,12 +107,12 @@ func decoderSearchTool(executor ToolExecutor) MCPToolHandler {
 	}
 }
 
-// decoderMemoryRecallTool recalls information from decoder's local memory store.
-func decoderMemoryRecallTool(executor ToolExecutor) MCPToolHandler {
+// reflectMemoryRecallTool recalls information from reflect's local memory store.
+func reflectMemoryRecallTool(executor ToolExecutor) MCPToolHandler {
 	return MCPToolHandler{
-		Name:        "decoder_memory_recall",
-		Description: "Recall stored information from decoder's local persistent memory.",
-		Annotations: readOnlyAnnotations("Recall from decoder memory"),
+		Name:        "reflect_memory_recall",
+		Description: "Recall stored information from reflect's local persistent memory.",
+		Annotations: readOnlyAnnotations("Recall from reflect memory"),
 		InputSchema: map[string]interface{}{
 			"type": "object",
 			"properties": map[string]interface{}{
@@ -157,13 +157,13 @@ func decoderMemoryRecallTool(executor ToolExecutor) MCPToolHandler {
 	}
 }
 
-// decoderMemoryStoreTool stores information to decoder's local memory store.
-func decoderMemoryStoreTool(executor ToolExecutor) MCPToolHandler {
+// reflectMemoryStoreTool stores information to reflect's local memory store.
+func reflectMemoryStoreTool(executor ToolExecutor) MCPToolHandler {
 	return MCPToolHandler{
-		Name:        "decoder_memory_store",
-		Description: "Store information in decoder's local persistent memory for future recall.",
+		Name:        "reflect_memory_store",
+		Description: "Store information in reflect's local persistent memory for future recall.",
 		Annotations: &ToolAnnotations{
-			Title:           "Store in decoder memory",
+			Title:           "Store in reflect memory",
 			ReadOnlyHint:    boolPtr(false),
 			DestructiveHint: boolPtr(false), // additive write, does not destroy existing data
 		},
@@ -208,11 +208,11 @@ func decoderMemoryStoreTool(executor ToolExecutor) MCPToolHandler {
 	}
 }
 
-// decoderCompressTool compresses text via the embedded token engine.
-func decoderCompressTool(executor ToolExecutor) MCPToolHandler {
+// reflectCompressTool compresses text via the embedded token engine.
+func reflectCompressTool(executor ToolExecutor) MCPToolHandler {
 	return MCPToolHandler{
-		Name:        "decoder_compress",
-		Description: "Compress text using decoder's embedded token engine to reduce token usage while preserving meaning.",
+		Name:        "reflect_compress",
+		Description: "Compress text using reflect's embedded token engine to reduce token usage while preserving meaning.",
 		Annotations: readOnlyAnnotations("Compress text (token engine)"),
 		InputSchema: map[string]interface{}{
 			"type": "object",

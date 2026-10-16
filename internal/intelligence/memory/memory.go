@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GrayCodeAI/decoder/internal/storage"
+	"github.com/GrayCodeAI/reflect/internal/storage"
 )
 
 // Memory stores extracted memories from sessions.

@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/GrayCodeAI/decoder/internal/provider/gateway"
-	"github.com/GrayCodeAI/mux/credentials"
-	muxengine "github.com/GrayCodeAI/mux/engine"
+	"github.com/GrayCodeAI/reflect/internal/provider/gateway"
+	"github.com/GrayCodeAI/relay/credentials"
+	relayengine "github.com/GrayCodeAI/relay/engine"
 )
 
 func TestContextUsedTokens_PrefersAPI(t *testing.T) {
@@ -21,21 +21,21 @@ func TestContextUsedTokens_PrefersAPI(t *testing.T) {
 	}
 }
 
-func TestNativeCompactionSupportUsesMuxCredentialStore(t *testing.T) {
+func TestNativeCompactionSupportUsesRelayCredentialStore(t *testing.T) {
 	ctx := context.Background()
 	store := &credentials.MapStore{}
-	runtime, err := muxengine.New(muxengine.Options{SecretStore: store})
+	runtime, err := relayengine.New(relayengine.Options{SecretStore: store})
 	if err != nil {
 		t.Fatal(err)
 	}
 	s := NewSessionWithClient(gateway.NewFromEngine(runtime).ChatClient(), "anthropic", "claude-sonnet-4-6", "sys", nil, true)
 	if s.supportsNativeCompaction() {
-		t.Fatal("expected no support before Mux has a credential")
+		t.Fatal("expected no support before Relay has a credential")
 	}
 	if err := store.Set(ctx, credentials.AccountForEnv("ANTHROPIC_API_KEY"), "sk-test"); err != nil {
 		t.Fatal(err)
 	}
 	if !s.supportsNativeCompaction() {
-		t.Fatal("expected support from Mux's injected credential store")
+		t.Fatal("expected support from Relay's injected credential store")
 	}
 }

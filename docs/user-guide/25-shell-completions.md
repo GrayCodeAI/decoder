@@ -1,15 +1,15 @@
 # Shell Completions
 
-decoder ships completion scripts for **bash**, **zsh**, **fish**, and **PowerShell**,
+reflect ships completion scripts for **bash**, **zsh**, **fish**, and **PowerShell**,
 plus a machine-readable **JSON** spec for IDE integration.
 
 ## Quick Install
 
 ```bash
 # Auto-install to the standard location for your shell and OS:
-decoder completion install bash
-decoder completion install zsh
-decoder completion install fish
+reflect completion install bash
+reflect completion install zsh
+reflect completion install fish
 ```
 
 ## Manual Setup
@@ -18,50 +18,50 @@ decoder completion install fish
 
 ```bash
 # Load for current session:
-source <(decoder completion bash)
+source <(reflect completion bash)
 
 # Persist (Linux):
-decoder completion bash > ~/.local/share/bash-completion/completions/decoder
+reflect completion bash > ~/.local/share/bash-completion/completions/reflect
 
 # Persist (macOS with Homebrew):
-decoder completion bash > /opt/homebrew/etc/bash_completion.d/decoder
+reflect completion bash > /opt/homebrew/etc/bash_completion.d/reflect
 ```
 
 ### Zsh
 
 ```bash
 # Load for current session:
-source <(decoder completion zsh)
+source <(reflect completion zsh)
 
 # Persist:
-decoder completion zsh > "${fpath[1]}/_decoder"
+reflect completion zsh > "${fpath[1]}/_reflect"
 ```
 
 ### Fish
 
 ```bash
 # Load for current session:
-decoder completion fish | source
+reflect completion fish | source
 
 # Persist:
-decoder completion fish > ~/.config/fish/completions/decoder.fish
+reflect completion fish > ~/.config/fish/completions/reflect.fish
 ```
 
 ### PowerShell
 
 ```powershell
 # Load for current session:
-decoder completion powershell | Out-String | Invoke-Expression
+reflect completion powershell | Out-String | Invoke-Expression
 
 # Persist: add to your $PROFILE
-decoder completion powershell > decoder.ps1
-. ./decoder.ps1
+reflect completion powershell > reflect.ps1
+. ./reflect.ps1
 ```
 
 ## JSON Spec (IDE Integration)
 
 ```bash
-decoder completion json
+reflect completion json
 ```
 
 Prints a machine-readable command/flag spec that IDEs and editor plugins can
@@ -69,10 +69,10 @@ consume for inline completions without shell integration.
 
 ## Install Paths
 
-`decoder completion install` resolves the correct path automatically:
+`reflect completion install` resolves the correct path automatically:
 
 | Shell | Linux | macOS (Homebrew) |
 |-------|-------|-------------------|
-| bash | `~/.local/share/bash-completion/completions/decoder` | `/opt/homebrew/etc/bash_completion.d/decoder` |
-| zsh | First `$fpath` entry (e.g. `/usr/local/share/zsh/site-functions/_decoder`) | Same |
-| fish | `~/.config/fish/completions/decoder.fish` | Same |
+| bash | `~/.local/share/bash-completion/completions/reflect` | `/opt/homebrew/etc/bash_completion.d/reflect` |
+| zsh | First `$fpath` entry (e.g. `/usr/local/share/zsh/site-functions/_reflect`) | Same |
+| fish | `~/.config/fish/completions/reflect.fish` | Same |

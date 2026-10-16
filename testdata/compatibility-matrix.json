@@ -4,22 +4,22 @@
   "version": "1",
   "updated": "2026-10-11",
   "components": [
-    "decoder",
-    "mux"
+    "reflect",
+    "relay"
   ],
   "dependencies": {
-    "decoder": [
-      "mux"
+    "reflect": [
+      "relay"
     ],
-    "mux": []
+    "relay": []
   },
   "matrices": [
     {
       "name": "next",
       "description": "Combination that the upcoming release will ship: each component's main branch. Tested in CI on every PR.",
       "components": {
-        "decoder": "main",
-        "mux": "main"
+        "reflect": "main",
+        "relay": "main"
       }
     }
   ]

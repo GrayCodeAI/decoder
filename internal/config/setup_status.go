@@ -45,16 +45,16 @@ func evaluateSetupFrom(hasCreds, hasModel bool) SetupState {
 	return st
 }
 
-// HasConfiguredDeployment reports whether at least one mux deployment has credentials.
+// HasConfiguredDeployment reports whether at least one relay deployment has credentials.
 func HasConfiguredDeployment(ctx context.Context) bool {
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	engine, err := newMuxEngine()
+	engine, err := newRelayEngine()
 	return err == nil && engine.EffectiveSelection(ctx, SelectionOptions{}).HasConfiguredDeployment
 }
 
-// HasSelectedModel reports whether mux provider.json has a selected model.
+// HasSelectedModel reports whether relay provider.json has a selected model.
 func HasSelectedModel() bool {
 	return strings.TrimSpace(ActiveModel(context.Background())) != ""
 }

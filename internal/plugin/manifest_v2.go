@@ -17,7 +17,7 @@ type ManifestV2 struct {
 	Author            string         `json:"author"`
 	Tools             []ManifestTool `json:"tools"`
 	Permissions       []string       `json:"permissions"`
-	MinDecoderVersion string         `json:"min_decoder_version"`
+	MinReflectVersion string         `json:"min_reflect_version"`
 
 	// V2 extensions
 	Mode         string                 `json:"mode,omitempty"`         // "subprocess" (default) or "daemon"
@@ -141,7 +141,7 @@ func (m *ManifestV2) ToV1() *ToolManifest {
 		Author:            m.Author,
 		Tools:             m.Tools,
 		Permissions:       m.Permissions,
-		MinDecoderVersion: m.MinDecoderVersion,
+		MinReflectVersion: m.MinReflectVersion,
 	}
 }
 

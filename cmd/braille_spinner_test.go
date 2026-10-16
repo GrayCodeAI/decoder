@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/GrayCodeAI/decoder/internal/ui/icons"
+	"github.com/GrayCodeAI/reflect/internal/ui/icons"
 )
 
 func TestBrailleSpinner_Tick(t *testing.T) {
@@ -29,7 +29,7 @@ func TestBrailleSpinner_Tick(t *testing.T) {
 
 func TestBrailleSpinner_AllStyles(t *testing.T) {
 	styles := []SpinnerStyle{
-		SpinnerBraille, SpinnerBrailleWave, SpinnerDecoder, SpinnerDNA,
+		SpinnerBraille, SpinnerBrailleWave, SpinnerReflect, SpinnerDNA,
 		SpinnerScan, SpinnerPulse, SpinnerSnake, SpinnerOrbit,
 		SpinnerWing, SpinnerTalons,
 	}
@@ -50,14 +50,14 @@ func TestBrailleSpinner_Random(t *testing.T) {
 	}
 }
 
-func TestDecoderSpinner_Frames(t *testing.T) {
-	if len(decoderSpinnerGlyphs) != 4 {
-		t.Fatalf("expected 4 compass glyphs, got %d", len(decoderSpinnerGlyphs))
+func TestReflectSpinner_Frames(t *testing.T) {
+	if len(reflectSpinnerGlyphs) != 4 {
+		t.Fatalf("expected 4 compass glyphs, got %d", len(reflectSpinnerGlyphs))
 	}
-	if decoderSpinnerGlyphs[0] != "◐" {
-		t.Fatalf("expected first compass frame ◐, got %q", decoderSpinnerGlyphs[0])
+	if reflectSpinnerGlyphs[0] != "◐" {
+		t.Fatalf("expected first compass frame ◐, got %q", reflectSpinnerGlyphs[0])
 	}
-	s := NewBrailleSpinner(SpinnerDecoder, "Working")
+	s := NewBrailleSpinner(SpinnerReflect, "Working")
 	f0 := s.Frame()
 	if !strings.Contains(f0, "◐") {
 		t.Fatalf("expected compass glyph, got %q", f0)
@@ -70,20 +70,20 @@ func TestDecoderSpinner_Frames(t *testing.T) {
 	}
 }
 
-func TestDecoderQuadBlock_LegacyFrames(t *testing.T) {
-	s := NewBrailleSpinner(SpinnerDecoderQuad, "Working")
+func TestReflectQuadBlock_LegacyFrames(t *testing.T) {
+	s := NewBrailleSpinner(SpinnerReflectQuad, "Working")
 	if !strings.Contains(s.Frame(), "▛") {
 		t.Fatalf("expected QuadBlock glyph, got %q", s.Frame())
 	}
 }
 
-func TestDecoderAnimatedDots_PresentInFrame(t *testing.T) {
-	s := NewBrailleSpinner(SpinnerDecoder, "Crafting")
+func TestReflectAnimatedDots_PresentInFrame(t *testing.T) {
+	s := NewBrailleSpinner(SpinnerReflect, "Crafting")
 	f := s.Frame()
 	// Three progress dots ride after the verb: one bright, two dim.
 	total := strings.Count(f, icons.CircleFilled()) + strings.Count(f, icons.CircleOutline())
-	if total != decoderTypingDots {
-		t.Errorf("expected %d trailing circle-dots, got %d in %q", decoderTypingDots, total, f)
+	if total != reflectTypingDots {
+		t.Errorf("expected %d trailing circle-dots, got %d in %q", reflectTypingDots, total, f)
 	}
 	// Tick advances the highlighted dot position.
 	idxBefore := s.dots

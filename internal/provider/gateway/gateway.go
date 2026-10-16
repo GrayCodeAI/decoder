@@ -1,9 +1,9 @@
-// Package gateway is Decoder's single boundary to Mux's provider runtime. It is
-// the only package that imports Mux; everything else speaks the decoder-owned
+// Package gateway is Reflect's single boundary to Relay's provider runtime. It is
+// the only package that imports Relay; everything else speaks the reflect-owned
 // Provider interface and the internal/types DTOs.
 //
-// decoder = product face (UX/agent/sessions) · mux = provider engine
-// One-way dependency only: mux never imports decoder. See README ecosystems.
+// reflect = product face (UX/agent/sessions) · relay = provider engine
+// One-way dependency only: relay never imports reflect. See README ecosystems.
 package gateway
 
 import (
@@ -11,21 +11,21 @@ import (
 	"log/slog"
 	"sync"
 
-	muxengine "github.com/GrayCodeAI/mux/engine"
-	"github.com/GrayCodeAI/mux/llm"
+	relayengine "github.com/GrayCodeAI/relay/engine"
+	"github.com/GrayCodeAI/relay/llm"
 )
 
-// Gateway is Decoder's single boundary to the Mux provider runtime. It embeds
+// Gateway is Reflect's single boundary to the Relay provider runtime. It embeds
 // Provider so every engine method is forwarded, and it is the only type that
-// constructs one (via New). All other Decoder packages hold a *Gateway or speak
-// the Provider interface — never an *muxengine.Engine.
+// constructs one (via New). All other Reflect packages hold a *Gateway or speak
+// the Provider interface — never an *relayengine.Engine.
 //
-// Construction is centralized here: New is the only call to muxengine.New and
-// the place Decoder declares its identity to the credential store.
-// Gateway is Decoder's single boundary to the Mux provider runtime. It embeds the
+// Construction is centralized here: New is the only call to relayengine.New and
+// the place Reflect declares its identity to the credential store.
+// Gateway is Reflect's single boundary to the Relay provider runtime. It embeds the
 // Provider roles so every engine method is forwarded, and it is the only type
-// that constructs one (via New). All other Decoder packages hold a *Gateway or speak
-// the Provider interface — never an *muxengine.Engine. *Gateway satisfies the
+// that constructs one (via New). All other Reflect packages hold a *Gateway or speak
+// the Provider interface — never an *relayengine.Engine. *Gateway satisfies the
 // composite Provider interface.
 type Gateway struct {
 	Generator
@@ -37,32 +37,32 @@ type Gateway struct {
 	CatalogMaintenance
 }
 
-// declareDecoderIdentity selects the "decoder" OS keychain namespace instead of
-// Mux's host-neutral default. Credentials must be configured in this namespace.
+// declareReflectIdentity selects the "reflect" OS keychain namespace instead of
+// Relay's host-neutral default. Credentials must be configured in this namespace.
 // It is idempotent and runs exactly once. Called from New so the
 // identity is always declared before any credential read, no matter which New
 // path runs first.
-var declareDecoderIdentity = sync.OnceFunc(func() {
-	muxengine.SetSecretStoreServiceName("decoder")
+var declareReflectIdentity = sync.OnceFunc(func() {
+	relayengine.SetSecretStoreServiceName("reflect")
 })
 
-// New composes the Mux engine for one effective settings snapshot and wraps it
-// as a Provider. It is the single composition root — every muxengine.New call
-// in Decoder flows through here.
+// New composes the Relay engine for one effective settings snapshot and wraps it
+// as a Provider. It is the single composition root — every relayengine.New call
+// in Reflect flows through here.
 func New(ctx context.Context, providers []CustomProviderConfig) (*Gateway, error) {
-	// Declare decoder's identity to the credential store FIRST, before
+	// Declare reflect's identity to the credential store FIRST, before
 	// constructing the engine, so no credential read ever happens under
-	// Mux's host-neutral default service name. The OnceFunc makes this
+	// Relay's host-neutral default service name. The OnceFunc makes this
 	// safe to call from every construction path.
-	declareDecoderIdentity()
+	declareReflectIdentity()
 
 	gateways := customGatewaysFromSettings(providers)
-	eng, err := muxengine.New(muxengine.Options{CustomGateways: gateways})
+	eng, err := relayengine.New(relayengine.Options{CustomGateways: gateways})
 	if err != nil {
 		return nil, err
 	}
 	// Gap-05: env-gated opt-in wiring of media/STT backends to the router
-	// facade. No-op unless DECODER_MEDIA=1 / DECODER_STT=1.
+	// facade. No-op unless REFLECT_MEDIA=1 / REFLECT_STT=1.
 	wireOptionalBackends(eng)
 	p := newEngineProvider(eng)
 	return &Gateway{
@@ -76,17 +76,17 @@ func New(ctx context.Context, providers []CustomProviderConfig) (*Gateway, error
 	}, nil
 }
 
-// BuildCustomGateways maps Decoder's OpenAI-compatible provider config onto
-// Mux's CustomGateway spec. Shared by gateway.New, config.mux_engine, and
+// BuildCustomGateways maps Reflect's OpenAI-compatible provider config onto
+// Relay's CustomGateway spec. Shared by gateway.New, config.relay_engine, and
 // engine.session_factory so a new CustomProviderConfig field only needs wiring
 // in one place.
-func BuildCustomGateways(providers []CustomProviderConfig) []muxengine.CustomGateway {
-	gateways := make([]muxengine.CustomGateway, 0, len(providers))
+func BuildCustomGateways(providers []CustomProviderConfig) []relayengine.CustomGateway {
+	gateways := make([]relayengine.CustomGateway, 0, len(providers))
 	for _, provider := range providers {
 		if provider.Name == "" && provider.BaseURL == "" {
 			continue
 		}
-		gateways = append(gateways, muxengine.CustomGateway{
+		gateways = append(gateways, relayengine.CustomGateway{
 			ID: provider.Name, BaseURL: provider.BaseURL,
 			CredentialEnv: provider.APIKeyEnv, DefaultModel: provider.Model,
 		})
@@ -95,11 +95,11 @@ func BuildCustomGateways(providers []CustomProviderConfig) []muxengine.CustomGat
 }
 
 // customGatewaysFromSettings is the internal alias kept for backward compat.
-func customGatewaysFromSettings(providers []CustomProviderConfig) []muxengine.CustomGateway {
+func customGatewaysFromSettings(providers []CustomProviderConfig) []relayengine.CustomGateway {
 	return BuildCustomGateways(providers)
 }
 
-// CustomProviderConfig is Decoder's spec for a user-defined OpenAI-compatible
+// CustomProviderConfig is Reflect's spec for a user-defined OpenAI-compatible
 // provider. Kept here (rather than reusing config.CustomProviderConfig) so the
 // gateway package does not import config and create an import cycle.
 type CustomProviderConfig struct {
@@ -109,7 +109,7 @@ type CustomProviderConfig struct {
 	Model     string
 }
 
-// ModelInfo is Decoder's product-facing view of Mux model metadata.
+// ModelInfo is Reflect's product-facing view of Relay model metadata.
 type ModelInfo struct {
 	Name        string  `json:"name"`
 	Provider    string  `json:"provider"`
@@ -120,7 +120,7 @@ type ModelInfo struct {
 	Recommended bool    `json:"recommended,omitempty"`
 }
 
-func fromEngineModel(model muxengine.Model) ModelInfo {
+func fromEngineModel(model relayengine.Model) ModelInfo {
 	return ModelInfo{
 		Name: model.ID, Provider: model.ProviderID,
 		ContextSize: model.ContextWindow,
@@ -129,7 +129,7 @@ func fromEngineModel(model muxengine.Model) ModelInfo {
 	}
 }
 
-// ChatClient returns a decoder ChatClient bound to this gateway's Provider.
+// ChatClient returns a reflect ChatClient bound to this gateway's Provider.
 func (g *Gateway) ChatClient() *translateProvider {
 	return newChatClientProvider(g)
 }
@@ -142,10 +142,10 @@ func (g *Gateway) MustSelectProvider() Provider {
 	return g
 }
 
-// NewFromEngine wraps an existing *muxengine.Engine as a Gateway. Tests that
-// inject an Mux SecretStore (e.g. compaction-support detection) use it so the
-// rest of Decoder still speaks the Gateway boundary.
-func NewFromEngine(eng *muxengine.Engine) *Gateway {
+// NewFromEngine wraps an existing *relayengine.Engine as a Gateway. Tests that
+// inject an Relay SecretStore (e.g. compaction-support detection) use it so the
+// rest of Reflect still speaks the Gateway boundary.
+func NewFromEngine(eng *relayengine.Engine) *Gateway {
 	if eng == nil {
 		return nil
 	}
@@ -162,8 +162,8 @@ func NewFromEngine(eng *muxengine.Engine) *Gateway {
 }
 
 // --- Stateless package-level lookups -------------------------------------
-// These delegate Mux reads to one shared default gateway so decoder-owned
-// policy packages (routing, config) never import Mux themselves. mux's
+// These delegate Relay reads to one shared default gateway so reflect-owned
+// policy packages (routing, config) never import Relay themselves. relay's
 // Engine reloads its catalog and provider config from disk on every method
 // call, so a single long-lived gateway returns identical freshness to
 // constructing one per call — this just avoids redundant construction. It
@@ -277,7 +277,7 @@ func ProviderForModel(ctx context.Context, modelName string) string {
 	return g.ProviderForModel(ctx, modelName)
 }
 
-// PreferredModel returns Mux's tier-preferred model for a provider.
+// PreferredModel returns Relay's tier-preferred model for a provider.
 func PreferredModel(ctx context.Context, provider string, class ModelClass, fallback string) string {
 	g := defaultGateway(ctx)
 	if g == nil {
@@ -322,46 +322,46 @@ func ModelNames(ctx context.Context) []string {
 	return g.ModelNames(ctx)
 }
 
-// --- decoder-owned mirror of Mux's ModelClass tier enum -------------------
+// --- reflect-owned mirror of Relay's ModelClass tier enum -------------------
 // Kept here (rather than importing neutral constants) so the boundary stays
-// one-way; values match muxengine.ModelClass.
-type ModelClass = muxengine.ModelClass
+// one-way; values match relayengine.ModelClass.
+type ModelClass = relayengine.ModelClass
 
 const (
 	ModelClassEconomical = llm.ModelClassEconomical
 	ModelClassBalanced   = llm.ModelClassBalanced
 	ModelClassPremium    = llm.ModelClassPremium
-	CheckFail            = muxengine.CheckFail
+	CheckFail            = relayengine.CheckFail
 )
 
 // NormalizeProviderID canonicalizes a host-facing provider/gateway id.
 func NormalizeProviderID(id string) string {
-	return muxengine.NormalizeProviderID(id)
+	return relayengine.NormalizeProviderID(id)
 }
 
-// --- Mux report/type re-exports config internals consume ----------------
-// These alias Mux types that a few config-only report paths return. They
-// live in gateway (the single Mux importer) rather than config.
+// --- Relay report/type re-exports config internals consume ----------------
+// These alias Relay types that a few config-only report paths return. They
+// live in gateway (the single Relay importer) rather than config.
 
 type (
-	PreflightReport         = muxengine.PreflightReport
-	PreflightOptions        = muxengine.PreflightOptions
-	ProviderStateSecurity   = muxengine.ProviderStateSecurity
-	DeploymentSummary       = muxengine.DeploymentSummary
-	CredentialStorageReport = muxengine.CredentialStorageReport
-	CredentialStatus        = muxengine.CredentialStatus
-	CredentialResolution    = muxengine.CredentialResolution
-	CredentialProvider      = muxengine.CredentialProvider
-	GatewayDefs             = muxengine.Gateway
-	CatalogSnapshot         = muxengine.CatalogSnapshot
-	Model                   = muxengine.Model
-	StatePaths              = muxengine.StatePaths
-	SelectionOptions        = muxengine.SelectionOptions
-	Selection               = muxengine.Selection
-	NativeCompactionRequest = muxengine.NativeCompactionRequest
+	PreflightReport         = relayengine.PreflightReport
+	PreflightOptions        = relayengine.PreflightOptions
+	ProviderStateSecurity   = relayengine.ProviderStateSecurity
+	DeploymentSummary       = relayengine.DeploymentSummary
+	CredentialStorageReport = relayengine.CredentialStorageReport
+	CredentialStatus        = relayengine.CredentialStatus
+	CredentialResolution    = relayengine.CredentialResolution
+	CredentialProvider      = relayengine.CredentialProvider
+	GatewayDefs             = relayengine.Gateway
+	CatalogSnapshot         = relayengine.CatalogSnapshot
+	Model                   = relayengine.Model
+	StatePaths              = relayengine.StatePaths
+	SelectionOptions        = relayengine.SelectionOptions
+	Selection               = relayengine.Selection
+	NativeCompactionRequest = relayengine.NativeCompactionRequest
 )
 
-// Package-level Mux helpers that config delegates to (gateway stays the only importer).
+// Package-level Relay helpers that config delegates to (gateway stays the only importer).
 
 func PreflightReportWithOptions(ctx context.Context, opts PreflightOptions) PreflightReport {
 	return PreflightWithProviders(ctx, nil, opts)
@@ -379,72 +379,72 @@ func PreflightWithProviders(ctx context.Context, providers []CustomProviderConfi
 }
 
 func FormatPreflight(report PreflightReport) string {
-	return muxengine.FormatPreflight(report)
+	return relayengine.FormatPreflight(report)
 }
 
 func IsCatalogCacheRequired(err error) bool {
-	return muxengine.IsCatalogCacheRequired(err)
+	return relayengine.IsCatalogCacheRequired(err)
 }
 
-// RegisteredProviderCount exposes Mux's first-class provider count through
-// Decoder's single provider-runtime boundary. The count derives from Mux's
-// provider registry, so adding a provider in Mux never requires a Decoder edit.
+// RegisteredProviderCount exposes Relay's first-class provider count through
+// Reflect's single provider-runtime boundary. The count derives from Relay's
+// provider registry, so adding a provider in Relay never requires a Reflect edit.
 func RegisteredProviderCount() int {
-	return muxengine.RegisteredGatewayCount()
+	return relayengine.RegisteredGatewayCount()
 }
 
-func SecretStoreName() string { return muxengine.SecretStoreName() }
+func SecretStoreName() string { return relayengine.SecretStoreName() }
 
 func CredentialStorage(ctx context.Context) CredentialStorageReport {
-	return muxengine.CredentialStorage(ctx)
+	return relayengine.CredentialStorage(ctx)
 }
 
 func CredentialGuidance(providerID, secret string) string {
-	return muxengine.CredentialGuidance(providerID, secret)
+	return relayengine.CredentialGuidance(providerID, secret)
 }
 
 func FormatSetupError(providerID string, err error) string {
-	return muxengine.FormatSetupError(providerID, err)
+	return relayengine.FormatSetupError(providerID, err)
 }
 
 // ParseInlineToolCalls extracts inline tool-call markup from model output.
-func ParseInlineToolCalls(content string) (string, []muxengine.ToolCall) {
-	return muxengine.ParseInlineToolCalls(content)
+func ParseInlineToolCalls(content string) (string, []relayengine.ToolCall) {
+	return relayengine.ParseInlineToolCalls(content)
 }
 
 func DefaultThinkingDisabled(providerID string) bool {
-	return muxengine.DefaultThinkingDisabled(providerID)
+	return relayengine.DefaultThinkingDisabled(providerID)
 }
 
 func ThinkingToggleSupported(providerID string) bool {
-	return muxengine.ThinkingToggleSupported(providerID)
+	return relayengine.ThinkingToggleSupported(providerID)
 }
 
 func (g *Gateway) DefaultThinkingDisabled(providerID string) bool {
-	return muxengine.DefaultThinkingDisabled(providerID)
+	return relayengine.DefaultThinkingDisabled(providerID)
 }
 
 func (g *Gateway) ThinkingToggleSupported(providerID string) bool {
-	return muxengine.ThinkingToggleSupported(providerID)
+	return relayengine.ThinkingToggleSupported(providerID)
 }
 
 // --- Test fixtures -----------------------------------------------------
-// Re-exported from engine so decoder tests inject credential fixtures through the
+// Re-exported from engine so reflect tests inject credential fixtures through the
 // single gateway+engine boundary. These are thin aliases only.
 
 // SetDefaultStore replaces the process-wide credential store (for tests).
-var SetDefaultStore = muxengine.SetDefaultStore
+var SetDefaultStore = relayengine.SetDefaultStore
 
 // DefaultStore returns the process-wide credential store (for tests).
-var DefaultStore = muxengine.DefaultStore
+var DefaultStore = relayengine.DefaultStore
 
 // MapStore is the in-memory credential store for tests (alias).
-type MapStore = muxengine.MapStore
+type MapStore = relayengine.MapStore
 
 // AccountForEnv returns the keychain account name for an env var.
-func AccountForEnv(envVar string) string { return muxengine.AccountForEnv(envVar) }
+func AccountForEnv(envVar string) string { return relayengine.AccountForEnv(envVar) }
 
 // HasSecret reports whether a secret exists for an env var (for tests).
 func HasSecret(ctx context.Context, envKey string) bool {
-	return muxengine.HasSecret(ctx, envKey)
+	return relayengine.HasSecret(ctx, envKey)
 }

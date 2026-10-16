@@ -3,12 +3,12 @@ package cmd
 import (
 	"testing"
 
-	decoderconfig "github.com/GrayCodeAI/decoder/internal/config"
-	"github.com/GrayCodeAI/decoder/internal/tool"
+	reflectconfig "github.com/GrayCodeAI/reflect/internal/config"
+	"github.com/GrayCodeAI/reflect/internal/tool"
 )
 
 func TestDefaultRegistryWiresLanguageServerManager(t *testing.T) {
-	registry, err := defaultRegistry(decoderconfig.Settings{})
+	registry, err := defaultRegistry(reflectconfig.Settings{})
 	if err != nil {
 		t.Fatal(err)
 	}

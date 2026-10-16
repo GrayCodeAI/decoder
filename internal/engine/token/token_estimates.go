@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/GrayCodeAI/decoder/internal/types"
+	"github.com/GrayCodeAI/reflect/internal/types"
 )
 
-func EstimateTokens(msgs []types.MuxMessage) int {
+func EstimateTokens(msgs []types.RelayMessage) int {
 	total := 0
 	for _, m := range msgs {
 		total += EstimateMessageTokens(m)
@@ -15,7 +15,7 @@ func EstimateTokens(msgs []types.MuxMessage) int {
 	return total
 }
 
-func EstimateMessageTokens(m types.MuxMessage) int {
+func EstimateMessageTokens(m types.RelayMessage) int {
 	tokens := CountTokens(m.Content)
 	for _, tc := range m.ToolUse {
 		tokens += CountTokens(tc.Name)

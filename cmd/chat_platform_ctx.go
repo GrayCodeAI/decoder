@@ -8,7 +8,7 @@ import (
 	"time"
 
 	tea "charm.land/bubbletea/v2"
-	decoderconfig "github.com/GrayCodeAI/decoder/internal/config"
+	reflectconfig "github.com/GrayCodeAI/reflect/internal/config"
 )
 
 var platformCtxCache struct {
@@ -51,7 +51,7 @@ type platformContextIndexMsg struct {
 
 func fetchPlatformContextIndexCmd() tea.Cmd {
 	return func() tea.Msg {
-		models, err := decoderconfig.ListPublicEngineModels(context.Background(), "xiaomi_mimo_payg")
+		models, err := reflectconfig.ListPublicEngineModels(context.Background(), "xiaomi_mimo_payg")
 		if err != nil {
 			return platformContextIndexMsg{err: err}
 		}

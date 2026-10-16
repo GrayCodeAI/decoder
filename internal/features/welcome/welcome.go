@@ -13,10 +13,10 @@ import (
 	_ "image/png"
 	"io"
 
-	"github.com/GrayCodeAI/decoder/internal/tui"
+	"github.com/GrayCodeAI/reflect/internal/tui"
 )
 
-//go:embed assets/decoder-mascot-display.png
+//go:embed assets/reflect-mascot-display.png
 var mascotPNG []byte
 
 // Enabled reports whether the active terminal can display the mascot.

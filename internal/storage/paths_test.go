@@ -26,26 +26,26 @@ func TestStorageDirsRespectOverrides(t *testing.T) {
 	}
 }
 
-func TestProviderConfigPathUsesMuxOverrideWithoutMovingDecoderSettings(t *testing.T) {
-	decoderDir := filepath.Join(t.TempDir(), "decoder")
-	muxDir := filepath.Join(t.TempDir(), "mux")
-	t.Setenv(envConfigDir, decoderDir)
-	t.Setenv(envMuxConfigDir, muxDir)
+func TestProviderConfigPathUsesRelayOverrideWithoutMovingReflectSettings(t *testing.T) {
+	reflectDir := filepath.Join(t.TempDir(), "reflect")
+	relayDir := filepath.Join(t.TempDir(), "relay")
+	t.Setenv(envConfigDir, reflectDir)
+	t.Setenv(envRelayConfigDir, relayDir)
 
-	if got, want := ProviderConfigPath(), filepath.Join(muxDir, "provider.json"); got != want {
-		t.Fatalf("ProviderConfigPath() = %q, want MUX_CONFIG_DIR path %q", got, want)
+	if got, want := ProviderConfigPath(), filepath.Join(relayDir, "provider.json"); got != want {
+		t.Fatalf("ProviderConfigPath() = %q, want RELAY_CONFIG_DIR path %q", got, want)
 	}
-	if got, want := SettingsPath(), filepath.Join(decoderDir, "settings.json"); got != want {
-		t.Fatalf("SettingsPath() = %q, want DECODER_CONFIG_DIR path %q", got, want)
+	if got, want := SettingsPath(), filepath.Join(reflectDir, "settings.json"); got != want {
+		t.Fatalf("SettingsPath() = %q, want REFLECT_CONFIG_DIR path %q", got, want)
 	}
 }
 
-func TestProviderConfigPathDefaultsToMuxDir(t *testing.T) {
-	t.Setenv(envConfigDir, filepath.Join(t.TempDir(), "decoder"))
-	t.Setenv(envMuxConfigDir, "  ")
+func TestProviderConfigPathDefaultsToRelayDir(t *testing.T) {
+	t.Setenv(envConfigDir, filepath.Join(t.TempDir(), "reflect"))
+	t.Setenv(envRelayConfigDir, "  ")
 
-	if got, want := ProviderConfigPath(), filepath.Join(mustUserConfigDir(), "mux", "provider.json"); got != want {
-		t.Fatalf("ProviderConfigPath() = %q, want Mux default %q", got, want)
+	if got, want := ProviderConfigPath(), filepath.Join(mustUserConfigDir(), "relay", "provider.json"); got != want {
+		t.Fatalf("ProviderConfigPath() = %q, want Relay default %q", got, want)
 	}
 }
 

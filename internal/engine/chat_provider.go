@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/GrayCodeAI/decoder/internal/provider/gateway"
-	"github.com/GrayCodeAI/decoder/internal/types"
+	"github.com/GrayCodeAI/reflect/internal/provider/gateway"
+	"github.com/GrayCodeAI/reflect/internal/types"
 )
 
-// BuildChatProvider adapts Decoder's engine-backed session client to the smaller
+// BuildChatProvider adapts Reflect's engine-backed session client to the smaller
 // provider contract used by host integrations such as Kestrel. Model resolution,
-// credentials, routing, and transport remain owned by Mux's engine facade.
+// credentials, routing, and transport remain owned by Relay's engine facade.
 func BuildChatProvider(ctx context.Context, selection gateway.Selection, legacyProvider string) (types.ChatProvider, string, error) {
 	client, provider, _, err := BuildChatClient(ctx, selection, legacyProvider)
 	if err != nil {
@@ -19,7 +19,7 @@ func BuildChatProvider(ctx context.Context, selection gateway.Selection, legacyP
 	}
 	provider = strings.TrimSpace(provider)
 	if provider == "" {
-		return nil, "", fmt.Errorf("mux transport: provider unavailable")
+		return nil, "", fmt.Errorf("relay transport: provider unavailable")
 	}
 	return &engineChatProvider{
 		client:   client,
@@ -28,7 +28,7 @@ func BuildChatProvider(ctx context.Context, selection gateway.Selection, legacyP
 	}, provider, nil
 }
 
-// engineChatProvider keeps compatibility-only provider behavior at Decoder's
+// engineChatProvider keeps compatibility-only provider behavior at Reflect's
 // integration edge while all generation goes through the engine ChatClient.
 type engineChatProvider struct {
 	client   ChatClient
@@ -38,7 +38,7 @@ type engineChatProvider struct {
 
 var _ types.ChatProvider = (*engineChatProvider)(nil)
 
-func (p *engineChatProvider) Chat(ctx context.Context, messages []types.MuxMessage, opts types.ChatOptions) (*types.MuxResponse, error) {
+func (p *engineChatProvider) Chat(ctx context.Context, messages []types.RelayMessage, opts types.ChatOptions) (*types.RelayResponse, error) {
 	if strings.TrimSpace(opts.Provider) == "" {
 		opts.Provider = p.provider
 	}
@@ -48,7 +48,7 @@ func (p *engineChatProvider) Chat(ctx context.Context, messages []types.MuxMessa
 	return p.client.Chat(ctx, messages, opts)
 }
 
-func (p *engineChatProvider) StreamChat(ctx context.Context, messages []types.MuxMessage, opts types.ChatOptions) (*types.StreamResult, error) {
+func (p *engineChatProvider) StreamChat(ctx context.Context, messages []types.RelayMessage, opts types.ChatOptions) (*types.StreamResult, error) {
 	if strings.TrimSpace(opts.Provider) == "" {
 		opts.Provider = p.provider
 	}

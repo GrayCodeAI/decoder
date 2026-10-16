@@ -28,9 +28,9 @@ func TestBuildSystemPromptContainsSections(t *testing.T) {
 
 	// Verify it contains content from each section
 	for _, want := range []string{
-		"Decoder",    // from role.md
+		"Reflect",    // from role.md
 		"Tool Usage", // from tools.md
-		"URLs are a supported Decoder capability", // URL requests must use web tools
+		"URLs are a supported Reflect capability", // URL requests must use web tools
 		"report the concrete error",               // failures must be actionable
 		"Coding Practices",                        // from practices.md
 		"Think Before Coding",                     // from practices.md
@@ -133,7 +133,7 @@ func TestLoadTemplate(t *testing.T) {
 	if err != nil {
 		t.Fatalf("LoadTemplate(role.md) failed: %v", err)
 	}
-	if !strings.Contains(content, "Decoder") {
-		t.Error("role.md template missing 'Decoder'")
+	if !strings.Contains(content, "Reflect") {
+		t.Error("role.md template missing 'Reflect'")
 	}
 }

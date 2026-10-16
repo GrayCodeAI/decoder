@@ -6,7 +6,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
-	decoderconfig "github.com/GrayCodeAI/decoder/internal/config"
+	reflectconfig "github.com/GrayCodeAI/reflect/internal/config"
 )
 
 type configRemoveCredentialMsg struct {
@@ -17,7 +17,7 @@ type configRemoveCredentialMsg struct {
 
 func removeCredentialAsync(provider string) tea.Cmd {
 	return func() tea.Msg {
-		removed, err := decoderconfig.RemoveStoredCredential(context.Background(), provider)
+		removed, err := reflectconfig.RemoveStoredCredential(context.Background(), provider)
 		return configRemoveCredentialMsg{
 			provider: provider,
 			removed:  removed,
@@ -34,10 +34,10 @@ func (m chatModel) handleConfigRemoveCredentialMsg(msg configRemoveCredentialMsg
 	}
 	delete(modelCache, msg.provider)
 	ctx := context.Background()
-	decoderconfig.RefreshConfigCredSnapshot(ctx)
+	reflectconfig.RefreshConfigCredSnapshot(ctx)
 	m = m.refreshConfigGatewayRows()
-	if decoderconfig.ShouldClearSelectionAfterCredentialRemove(ctx, msg.provider) {
-		_ = decoderconfig.ClearActiveSelection(ctx)
+	if reflectconfig.ShouldClearSelectionAfterCredentialRemove(ctx, msg.provider) {
+		_ = reflectconfig.ClearActiveSelection(ctx)
 		m.configModelProvider = ""
 		m.configModelOptions = nil
 		m.session.SetProvider("")
@@ -46,8 +46,8 @@ func (m chatModel) handleConfigRemoveCredentialMsg(msg configRemoveCredentialMsg
 	m.configTab = configTabGateways
 	m.configSel = 0
 	m.configScroll = 0
-	m.configNotice = fmt.Sprintf("Removed API key for %s", decoderconfig.GatewayDisplayName(msg.provider))
-	if !decoderconfig.HasConfiguredDeploymentCached(ctx) {
+	m.configNotice = fmt.Sprintf("Removed API key for %s", reflectconfig.GatewayDisplayName(msg.provider))
+	if !reflectconfig.HasConfiguredDeploymentCached(ctx) {
 		m.configNotice += " — add an API key to continue"
 	}
 	next, cmd := m.rebuildSessionTransport()
@@ -59,7 +59,7 @@ func (m chatModel) handleConfigRemoveCredentialMsg(msg configRemoveCredentialMsg
 
 func (m chatModel) openConfigRemoveKeyPanel() (chatModel, tea.Cmd) {
 	next, cmd := m.openConfigAtTab(configTabGateways)
-	if len(decoderconfig.ConfiguredCredentialProviders()) == 0 {
+	if len(reflectconfig.ConfiguredCredentialProviders()) == 0 {
 		next.configNotice = "No stored API keys"
 	}
 	return next, cmd

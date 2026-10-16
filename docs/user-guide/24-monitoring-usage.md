@@ -1,6 +1,6 @@
 # Monitoring and Usage
 
-Decoder tracks token usage, costs, and session activity for monitoring and debugging.
+Reflect tracks token usage, costs, and session activity for monitoring and debugging.
 
 ---
 
@@ -11,8 +11,8 @@ Token usage is tracked per session and aggregated.
 ### View Usage
 
 ```bash
-decoder usage
-decoder doctor    # Full health report
+reflect usage
+reflect doctor    # Full health report
 ```
 
 Usage shows:
@@ -24,12 +24,12 @@ Usage shows:
 
 ## Telemetry
 
-Decoder can send anonymous usage telemetry.
+Reflect can send anonymous usage telemetry.
 
 ### Enable/Disable
 
 ```json
-// ~/.decoder/settings.json
+// ~/.reflect/settings.json
 {
   "telemetry": {
     "enabled": false
@@ -40,7 +40,7 @@ Decoder can send anonymous usage telemetry.
 Or:
 
 ```bash
-decoder --telemetry    # Enable
+reflect --telemetry    # Enable
 haw --no-telemetry  # Disable
 ```
 
@@ -77,7 +77,7 @@ Accessible via `/ecosystem` in TUI.
 
 ## Cloud Integration
 
-Decoder Cloud provides managed usage tracking:
+Reflect Cloud provides managed usage tracking:
 
 - Organization-level metrics
 - Budget alerts

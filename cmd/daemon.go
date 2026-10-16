@@ -14,20 +14,20 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/GrayCodeAI/decoder/internal/engine/safety"
+	"github.com/GrayCodeAI/reflect/internal/engine/safety"
 
-	decoderconfig "github.com/GrayCodeAI/decoder/internal/config"
-	"github.com/GrayCodeAI/decoder/internal/daemon"
-	"github.com/GrayCodeAI/decoder/internal/engine"
-	"github.com/GrayCodeAI/decoder/internal/executiongraph"
-	"github.com/GrayCodeAI/decoder/internal/fsutil"
-	"github.com/GrayCodeAI/decoder/internal/multiagent/agents"
-	"github.com/GrayCodeAI/decoder/internal/netutil"
-	"github.com/GrayCodeAI/decoder/internal/observability/logger"
-	"github.com/GrayCodeAI/decoder/internal/observability/otellog"
-	"github.com/GrayCodeAI/decoder/internal/observability/oteltrace"
-	"github.com/GrayCodeAI/decoder/internal/securitylog"
-	"github.com/GrayCodeAI/decoder/internal/storage"
+	reflectconfig "github.com/GrayCodeAI/reflect/internal/config"
+	"github.com/GrayCodeAI/reflect/internal/daemon"
+	"github.com/GrayCodeAI/reflect/internal/engine"
+	"github.com/GrayCodeAI/reflect/internal/executiongraph"
+	"github.com/GrayCodeAI/reflect/internal/fsutil"
+	"github.com/GrayCodeAI/reflect/internal/multiagent/agents"
+	"github.com/GrayCodeAI/reflect/internal/netutil"
+	"github.com/GrayCodeAI/reflect/internal/observability/logger"
+	"github.com/GrayCodeAI/reflect/internal/observability/otellog"
+	"github.com/GrayCodeAI/reflect/internal/observability/oteltrace"
+	"github.com/GrayCodeAI/reflect/internal/securitylog"
+	"github.com/GrayCodeAI/reflect/internal/storage"
 	"github.com/spf13/cobra"
 )
 
@@ -45,8 +45,8 @@ var (
 
 var daemonCmd = &cobra.Command{
 	Use:   "daemon",
-	Short: "Manage the decoder background server",
-	Long:  "Run decoder as a background HTTP server for programmatic/CI access.",
+	Short: "Manage the reflect background server",
+	Long:  "Run reflect as a background HTTP server for programmatic/CI access.",
 }
 
 var daemonStartCmd = &cobra.Command{
@@ -70,7 +70,7 @@ var daemonStatusCmd = &cobra.Command{
 func init() {
 	daemonStartCmd.Flags().IntVarP(&daemonPort, "port", "p", 4590, "Port to listen on")
 	daemonStartCmd.Flags().StringVar(&daemonHost, "host", netutil.LoopbackHost, "Host to bind to (default: 127.0.0.1, use 0.0.0.0 for remote access)")
-	daemonStartCmd.Flags().StringVar(&daemonAPIKey, "api-key", "", "API key for protected daemon endpoints (defaults to DECODER_DAEMON_API_KEY or a generated key)")
+	daemonStartCmd.Flags().StringVar(&daemonAPIKey, "api-key", "", "API key for protected daemon endpoints (defaults to REFLECT_DAEMON_API_KEY or a generated key)")
 	daemonStartCmd.Flags().StringVar(&daemonLogLevel, "log-level", "INFO", "Log level for daemon output (DEBUG, INFO, WARN, ERROR)")
 	daemonStartCmd.Flags().StringSliceVar(&daemonCORSOrigins, "cors", []string{}, "Comma-separated list of allowed CORS origins (empty disables CORS, '*' allows all)")
 	daemonStartCmd.Flags().StringVar(&daemonTLSCertFile, "tls-cert", "", "Path to TLS certificate file (enables HTTPS when paired with --tls-key)")
@@ -83,9 +83,9 @@ func init() {
 }
 
 func runDaemonStart(_ *cobra.Command, _ []string) error {
-	settings := decoderconfig.LoadSettings()
+	settings := reflectconfig.LoadSettings()
 
-	// Initialize OpenTelemetry telemetry (opt-in via DECODER_ENABLE_TELEMETRY=1).
+	// Initialize OpenTelemetry telemetry (opt-in via REFLECT_ENABLE_TELEMETRY=1).
 	telemetryProviders, telemetryErr := oteltrace.InitTelemetry(oteltrace.DefaultTelemetryConfig())
 	if telemetryErr != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", auditTint(fmt.Sprintf("warning: telemetry initialization failed: %v", telemetryErr), warnAmber))
@@ -113,7 +113,7 @@ func runDaemonStart(_ *cobra.Command, _ []string) error {
 	}
 
 	// Set up file-backed logging for the daemon. Logs go to
-	// ~/.decoder/state/daemon.log with slog structured output.
+	// ~/.reflect/state/daemon.log with slog structured output.
 	logFile, logErr := openDaemonLogFile()
 	var daemonLogger *logger.Logger
 	if logErr != nil {
@@ -130,10 +130,10 @@ func runDaemonStart(_ *cobra.Command, _ []string) error {
 	}
 
 	// Replace the discarded logger with the real file-backed logger.
-	newSession := newConfiguredDecoderSessionFactory(settings, daemonLogger)
+	newSession := newConfiguredReflectSessionFactory(settings, daemonLogger)
 
 	// Log startup banner.
-	daemonLogger.Info("decoder daemon starting", map[string]interface{}{
+	daemonLogger.Info("reflect daemon starting", map[string]interface{}{
 		"host":              daemonHost,
 		"port":              daemonPort,
 		"telemetry_enabled": telemetryProviders != nil && telemetryProviders.IsEnabled(),
@@ -141,7 +141,7 @@ func runDaemonStart(_ *cobra.Command, _ []string) error {
 
 	apiKey := daemonAPIKey
 	if apiKey == "" {
-		apiKey = os.Getenv("DECODER_DAEMON_API_KEY")
+		apiKey = os.Getenv("REFLECT_DAEMON_API_KEY")
 	}
 	if apiKey == "" {
 		var err error
@@ -211,9 +211,9 @@ func runDaemonStart(_ *cobra.Command, _ []string) error {
 		)
 	})
 
-	// Wire Mux's authoritative local preflight into GET /v1/ready. A session
-	// factory only proves Decoder can attempt construction; readiness additionally
-	// requires Mux's provider state, catalog, credentials, and model selection.
+	// Wire Relay's authoritative local preflight into GET /v1/ready. A session
+	// factory only proves Reflect can attempt construction; readiness additionally
+	// requires Relay's provider state, catalog, credentials, and model selection.
 	srv.SetReadyFn(daemonReadyProbe(factory))
 	addr, err := srv.Start()
 	if err != nil {
@@ -229,19 +229,19 @@ func runDaemonStart(_ *cobra.Command, _ []string) error {
 	})
 	defer preheater.Stop()
 
-	fmt.Printf("decoder daemon running on http://%s\n", addr)
+	fmt.Printf("reflect daemon running on http://%s\n", addr)
 	fmt.Println("Endpoints: GET /v1/health, GET /v1/ready, POST /v1/chat, GET /v1/sessions, GET /v1/metrics")
 	fmt.Println("Protected endpoints require Authorization: Bearer <api-key> or X-API-Key.")
 	if len(apiKey) > 8 {
 		fmt.Printf("API key: %s...%s\n", apiKey[:4], apiKey[len(apiKey)-4:])
 	} else {
-		fmt.Println("API key: (set via --api-key or DECODER_DAEMON_API_KEY)")
+		fmt.Println("API key: (set via --api-key or REFLECT_DAEMON_API_KEY)")
 	}
 	fmt.Printf("Logs: %s\n", filepath.Join(storage.DaemonRunDir(), "daemon.log"))
 	if telemetryProviders != nil && telemetryProviders.IsEnabled() {
 		fmt.Println("Telemetry: enabled (OTLP export configured)")
 	} else {
-		fmt.Println("Telemetry: disabled (set DECODER_ENABLE_TELEMETRY=1 to enable)")
+		fmt.Println("Telemetry: disabled (set REFLECT_ENABLE_TELEMETRY=1 to enable)")
 	}
 	keyFile := filepath.Join(storage.DaemonRunDir(), "daemon.key")
 	_ = os.MkdirAll(filepath.Dir(keyFile), 0o700)
@@ -285,7 +285,7 @@ func runDaemonStart(_ *cobra.Command, _ []string) error {
 }
 
 // openDaemonLogFile opens (or creates) the daemon log file at
-// ~/.decoder/state/daemon.log and returns it. The directory is created if needed.
+// ~/.reflect/state/daemon.log and returns it. The directory is created if needed.
 func openDaemonLogFile() (*os.File, error) {
 	dir := storage.DaemonRunDir()
 	if err := os.MkdirAll(dir, 0o750); err != nil { // #nosec G301 -- daemon run dir needs group traversal
@@ -329,26 +329,26 @@ func slogLevelFromString(s string) slog.Level {
 }
 
 // daemonReadyProbe builds the readiness function installed via SetReadyFn. It
-// performs Mux's local preflight (provider state, catalog, credentials, and
+// performs Relay's local preflight (provider state, catalog, credentials, and
 // model selection) under a short timeout:
 //
 //   - No session factory wired      -> not ready ("engine not configured").
 //   - Preflight reports ready        -> ready.
-//   - Preflight reports incomplete   -> not ready with the failed Mux check.
+//   - Preflight reports incomplete   -> not ready with the failed Relay check.
 //
-// This never performs a paid/live model call — Mux preflight only inspects
+// This never performs a paid/live model call — Relay preflight only inspects
 // local catalog/credential/model state — so it is safe to call on every probe.
 func daemonReadyProbe(factory daemon.SessionFactory) func() (bool, string) {
-	return daemonReadyProbeWithPreflight(factory, decoderconfig.EnginePreflightReport)
+	return daemonReadyProbeWithPreflight(factory, reflectconfig.EnginePreflightReport)
 }
 
-func daemonReadyProbeWithPreflight(factory daemon.SessionFactory, preflight func(context.Context) decoderconfig.EnginePreflight) func() (bool, string) {
+func daemonReadyProbeWithPreflight(factory daemon.SessionFactory, preflight func(context.Context) reflectconfig.EnginePreflight) func() (bool, string) {
 	return func() (bool, string) {
 		if factory == nil {
 			return false, "engine not configured"
 		}
 		if preflight == nil {
-			return false, "Mux readiness probe not configured"
+			return false, "Relay readiness probe not configured"
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
@@ -362,13 +362,13 @@ func daemonReadyProbeWithPreflight(factory daemon.SessionFactory, preflight func
 				if detail == "" {
 					detail = "failed"
 				}
-				return false, fmt.Sprintf("Mux %s: %s", check.Name, detail)
+				return false, fmt.Sprintf("Relay %s: %s", check.Name, detail)
 			}
 		}
 		if ctx.Err() != nil {
-			return false, "Mux preflight timed out"
+			return false, "Relay preflight timed out"
 		}
-		return false, "Mux preflight is not ready"
+		return false, "Relay preflight is not ready"
 	}
 }
 
@@ -399,14 +399,14 @@ func generateDaemonAPIKey() (string, error) {
 	return base64.RawURLEncoding.EncodeToString(b[:]), nil
 }
 
-// daemonAutonomyFromFlag resolves the --autonomy flag / DECODER_DAEMON_AUTONOMY
+// daemonAutonomyFromFlag resolves the --autonomy flag / REFLECT_DAEMON_AUTONOMY
 // env var into the server-side autonomy cap. An empty value leaves the
 // default cap (AutonomySemi) in place; invalid values fail closed at
 // "supervised" rather than silently allowing full autonomy.
 func daemonAutonomyFromFlag(s string) safety.AutonomyLevel {
 	s = strings.TrimSpace(s)
 	if s == "" {
-		s = os.Getenv("DECODER_DAEMON_AUTONOMY")
+		s = os.Getenv("REFLECT_DAEMON_AUTONOMY")
 	}
 	if s == "" {
 		return 0 // zero => DefaultMaxAutonomy in the daemon

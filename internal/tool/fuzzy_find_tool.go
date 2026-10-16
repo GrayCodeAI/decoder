@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/GrayCodeAI/decoder/internal/fuzzyfind"
+	"github.com/GrayCodeAI/reflect/internal/fuzzyfind"
 )
 
 // FuzzyFindTool searches a project tree for files matching a fuzzy query,

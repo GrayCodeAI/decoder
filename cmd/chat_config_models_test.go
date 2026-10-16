@@ -3,7 +3,7 @@ package cmd
 import (
 	"testing"
 
-	decoderconfig "github.com/GrayCodeAI/decoder/internal/config"
+	reflectconfig "github.com/GrayCodeAI/reflect/internal/config"
 )
 
 func TestFilterConfigModelOptions(t *testing.T) {
@@ -45,7 +45,7 @@ func TestModelOptionIsActive(t *testing.T) {
 }
 
 func TestConfigModelOptionsCarryResolvedEngineIdentity(t *testing.T) {
-	opts := configModelOptionsFromMux([]decoderconfig.EngineModel{{
+	opts := configModelOptionsFromRelay([]reflectconfig.EngineModel{{
 		ID: "models/gemini-pro", CanonicalID: "google/gemini-pro",
 		ProviderID: "google", GatewayID: "gemini", Capabilities: []string{"tools", "vision"},
 	}})

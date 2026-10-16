@@ -14,8 +14,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GrayCodeAI/decoder/internal/storage"
-	"github.com/GrayCodeAI/decoder/internal/trust"
+	"github.com/GrayCodeAI/reflect/internal/storage"
+	"github.com/GrayCodeAI/reflect/internal/trust"
 )
 
 // PluginState represents the lifecycle state of a dynamic plugin.
@@ -147,7 +147,7 @@ func NewDynamicPluginManager(dirs []string, tools ToolRegistrar, hooks HookRegis
 }
 
 // DiscoverAll scans all plugin directories and registers discovered plugins.
-// Project-scoped plugin directories require folder trust when DECODER_Y0_FOLDER_TRUST is on.
+// Project-scoped plugin directories require folder trust when REFLECT_Y0_FOLDER_TRUST is on.
 func (dm *DynamicPluginManager) DiscoverAll() error {
 	dm.mu.Lock()
 	defer dm.mu.Unlock()
@@ -700,7 +700,7 @@ func manifestV2ToPlugin(m *ManifestV2, path string) *Plugin {
 			Description:       m.Description,
 			Author:            m.Author,
 			Permissions:       m.Permissions,
-			MinDecoderVersion: m.MinDecoderVersion,
+			MinReflectVersion: m.MinReflectVersion,
 		},
 	}
 

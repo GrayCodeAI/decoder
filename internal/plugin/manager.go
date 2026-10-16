@@ -14,7 +14,7 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/GrayCodeAI/decoder/internal/storage"
+	"github.com/GrayCodeAI/reflect/internal/storage"
 )
 
 const maxPluginOutputBytes = 8 << 20
@@ -68,7 +68,7 @@ type ToolManifest struct {
 	Author            string         `json:"author"`
 	Tools             []ManifestTool `json:"tools"`
 	Permissions       []string       `json:"permissions"`
-	MinDecoderVersion string         `json:"min_decoder_version"`
+	MinReflectVersion string         `json:"min_reflect_version"`
 }
 
 // WasmManifest is the manifest for WASM-based plugins.
@@ -79,7 +79,7 @@ type WasmManifest struct {
 	Author            string        `json:"author"`
 	Tools             []WasmToolDef `json:"tools"`
 	Permissions       []string      `json:"permissions"`
-	MinDecoderVersion string        `json:"min_decoder_version"`
+	MinReflectVersion string        `json:"min_reflect_version"`
 	WasmPath          string        `json:"wasm_path"` // relative path to .wasm file
 }
 
@@ -116,7 +116,7 @@ type SecurityIssue struct {
 }
 
 // NewPluginManager creates a new PluginManager with the given directories.
-// If no directories are provided, defaults to Decoder user state.
+// If no directories are provided, defaults to Reflect user state.
 func NewPluginManager(dirs ...string) *PluginManager {
 	if len(dirs) == 0 {
 		dirs = []string{
@@ -354,7 +354,7 @@ func Validate(manifest *ToolManifest) []string {
 // ParseManifest reads and parses a plugin.json file from the given plugin directory.
 func ParseManifest(pluginDir string) (*ToolManifest, error) {
 	path := filepath.Join(pluginDir, "plugin.json")
-	data, err := os.ReadFile(path) // #nosec G304 -- pluginDir is a locally installed plugin directory under a Decoder-managed plugins root, not raw external input
+	data, err := os.ReadFile(path) // #nosec G304 -- pluginDir is a locally installed plugin directory under a Reflect-managed plugins root, not raw external input
 	if err != nil {
 		return nil, fmt.Errorf("read manifest: %w", err)
 	}
@@ -584,7 +584,7 @@ func isTextContent(data []byte) bool {
 // ParseWasmManifest reads and parses a plugin.json file for a WASM plugin.
 func ParseWasmManifest(pluginDir string) (*WasmManifest, error) {
 	path := filepath.Join(pluginDir, "plugin.json")
-	data, err := os.ReadFile(path) // #nosec G304 -- pluginDir is a locally installed plugin directory under a Decoder-managed plugins root, not raw external input
+	data, err := os.ReadFile(path) // #nosec G304 -- pluginDir is a locally installed plugin directory under a Reflect-managed plugins root, not raw external input
 	if err != nil {
 		return nil, fmt.Errorf("read manifest: %w", err)
 	}

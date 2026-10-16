@@ -5,18 +5,18 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/GrayCodeAI/decoder/internal/provider/gateway"
-	"github.com/GrayCodeAI/decoder/internal/theme"
+	"github.com/GrayCodeAI/reflect/internal/provider/gateway"
+	"github.com/GrayCodeAI/reflect/internal/theme"
 )
 
-// PersistAPIKey saves a provider API key via mux (OS secret store).
+// PersistAPIKey saves a provider API key via relay (OS secret store).
 func PersistAPIKey(ctx context.Context, envKey, secret string) error {
 	secret = strings.TrimSpace(secret)
 	envKey = strings.TrimSpace(envKey)
 	if secret == "" || envKey == "" {
 		return nil
 	}
-	engine, err := newMuxEngine()
+	engine, err := newRelayEngine()
 	if err != nil {
 		return err
 	}
@@ -27,7 +27,7 @@ func PersistAPIKey(ctx context.Context, envKey, secret string) error {
 	return nil
 }
 
-// CredentialInference is one mux provider match for a pasted API key.
+// CredentialInference is one relay provider match for a pasted API key.
 type CredentialInference struct {
 	ProviderID   string
 	DeploymentID string
@@ -35,7 +35,7 @@ type CredentialInference struct {
 	DisplayName  string
 }
 
-// CredentialProviderOption is one mux provider row for /config pickers.
+// CredentialProviderOption is one relay provider row for /config pickers.
 type CredentialProviderOption struct {
 	ProviderID   string
 	DeploymentID string
@@ -46,7 +46,7 @@ type CredentialProviderOption struct {
 	Rank         int
 }
 
-// CredentialResolveResult is mux paste-key resolution (format check + full provider list; no prefix inference).
+// CredentialResolveResult is relay paste-key resolution (format check + full provider list; no prefix inference).
 type CredentialResolveResult struct {
 	FormatOK                bool
 	FormatError             string
@@ -54,9 +54,9 @@ type CredentialResolveResult struct {
 	ProbeDisambiguationUsed bool
 }
 
-// ResolveCredential validates format and lists all providers from mux registry.
+// ResolveCredential validates format and lists all providers from relay registry.
 func ResolveCredential(ctx context.Context, secret string) CredentialResolveResult {
-	engine, err := newMuxEngine()
+	engine, err := newRelayEngine()
 	if err != nil {
 		return CredentialResolveResult{FormatError: err.Error()}
 	}
@@ -91,9 +91,9 @@ func InferenceFromOption(opt CredentialProviderOption) CredentialInference {
 	}
 }
 
-// SaveCredential validates, probes, and stores via mux keychain.
+// SaveCredential validates, probes, and stores via relay keychain.
 func SaveCredential(ctx context.Context, inference CredentialInference, secret string) error {
-	engine, err := newMuxEngine()
+	engine, err := newRelayEngine()
 	if err != nil {
 		return err
 	}
@@ -106,7 +106,7 @@ func SaveCredential(ctx context.Context, inference CredentialInference, secret s
 
 // HasStoredCredentialForProvider reports whether the OS secret store has a key for this gateway.
 func HasStoredCredentialForProvider(ctx context.Context, providerID string) bool {
-	engine, err := newMuxEngine()
+	engine, err := newRelayEngine()
 	if err != nil {
 		return false
 	}
@@ -117,7 +117,7 @@ func HasStoredCredentialForProvider(ctx context.Context, providerID string) bool
 // CredentialEnvironmentConflict reports a safe environment-vs-keychain
 // mismatch for a provider. It returns identifiers only, never secret values.
 func CredentialEnvironmentConflict(ctx context.Context, providerID string) (envVar string, conflict bool) {
-	engine, err := newMuxEngine()
+	engine, err := newRelayEngine()
 	if err != nil {
 		return "", false
 	}
@@ -137,7 +137,7 @@ func ConfiguredCredentialProviders() []string {
 	return configuredCredentialProvidersCached(context.Background())
 }
 
-// FormatCredentialCLIStatus returns decoder credentials status output (providers, not raw env names).
+// FormatCredentialCLIStatus returns reflect credentials status output (providers, not raw env names).
 func FormatCredentialCLIStatus(ctx context.Context) string {
 	if ctx == nil {
 		ctx = context.Background()
@@ -165,7 +165,7 @@ func RemoveStoredCredential(ctx context.Context, target string) ([]string, error
 	if target == "" {
 		return nil, fmt.Errorf("provider or env var name required")
 	}
-	engine, err := newMuxEngine()
+	engine, err := newRelayEngine()
 	if err != nil {
 		return nil, err
 	}
@@ -189,7 +189,7 @@ func MaskCredentialForProvider(ctx context.Context, provider string) string {
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	engine, err := newMuxEngine()
+	engine, err := newRelayEngine()
 	if err == nil {
 		status, statusErr := engine.CredentialStatus(ctx, provider)
 		if statusErr == nil && status.Masked != "" {
@@ -214,7 +214,7 @@ func maskCredentialSecret(secret string) string {
 
 // CredentialInferenceForProvider returns save metadata for a gateway chosen in /config.
 func CredentialInferenceForProvider(providerID string) (CredentialInference, error) {
-	engine, err := newMuxEngine()
+	engine, err := newRelayEngine()
 	if err != nil {
 		return CredentialInference{}, err
 	}
@@ -235,7 +235,7 @@ func LocalCredentialInference(providerID string) (CredentialInference, error) {
 	return CredentialInferenceForProvider(providerID)
 }
 
-// FormatConfigProviderError maps mux setup errors to user-facing /config hints.
+// FormatConfigProviderError maps relay setup errors to user-facing /config hints.
 func FormatConfigProviderError(providerID string, err error) string {
 	if err == nil {
 		return ""

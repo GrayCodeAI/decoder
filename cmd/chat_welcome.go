@@ -8,22 +8,22 @@ import (
 	"sort"
 	"strings"
 
-	decoderconfig "github.com/GrayCodeAI/decoder/internal/config"
-	"github.com/GrayCodeAI/decoder/internal/engine"
-	"github.com/GrayCodeAI/decoder/internal/session"
-	"github.com/GrayCodeAI/decoder/internal/tool"
+	reflectconfig "github.com/GrayCodeAI/reflect/internal/config"
+	"github.com/GrayCodeAI/reflect/internal/engine"
+	"github.com/GrayCodeAI/reflect/internal/session"
+	"github.com/GrayCodeAI/reflect/internal/tool"
 )
 
 type welcomeStatusSnapshot struct {
-	setup    decoderconfig.SetupState
+	setup    reflectconfig.SetupState
 	agentsOK bool
 }
 
 func loadWelcomeStatusSnapshot() welcomeStatusSnapshot {
 	ctx := context.Background()
 	return welcomeStatusSnapshot{
-		setup:    decoderconfig.EvaluateSetupCached(ctx),
-		agentsOK: decoderconfig.LoadAgentsMD() != "",
+		setup:    reflectconfig.EvaluateSetupCached(ctx),
+		agentsOK: reflectconfig.LoadAgentsMD() != "",
 	}
 }
 
@@ -69,8 +69,8 @@ func (m *chatModel) rebuildWelcomeCache(opts ...any) {
 	m.welcomeCache = buildWelcomeMessageWithSnapshotAndMascot(m.session, m.sessionID, m.registry, nil, m.settings, skillsCount, connectedMCPCount(m.registry), frame, width, height, m.welcomeStatusSnapshot(), m.lastCommand, m.mascotEnabled)
 }
 
-// buildWelcomeMessage renders the branded inline DECODER welcome block.
-func buildWelcomeMessage(sess *engine.Session, sessionID string, registry *tool.Registry, saved *session.Session, settings decoderconfig.Settings, skillsCount int, blinkClosed bool, width, height int) string {
+// buildWelcomeMessage renders the branded inline REFLECT welcome block.
+func buildWelcomeMessage(sess *engine.Session, sessionID string, registry *tool.Registry, saved *session.Session, settings reflectconfig.Settings, skillsCount int, blinkClosed bool, width, height int) string {
 	frame := 0
 	if blinkClosed {
 		frame = 2
@@ -78,11 +78,11 @@ func buildWelcomeMessage(sess *engine.Session, sessionID string, registry *tool.
 	return buildWelcomeMessageWithSnapshot(sess, sessionID, registry, saved, settings, skillsCount, connectedMCPCount(registry), frame, width, height, loadWelcomeStatusSnapshot(), "")
 }
 
-func buildWelcomeMessageWithSnapshot(sess *engine.Session, sessionID string, registry *tool.Registry, saved *session.Session, settings decoderconfig.Settings, skillsCount, mcpCount int, eyeFrame int, width, height int, snapshot welcomeStatusSnapshot, lastCommand string) string {
+func buildWelcomeMessageWithSnapshot(sess *engine.Session, sessionID string, registry *tool.Registry, saved *session.Session, settings reflectconfig.Settings, skillsCount, mcpCount int, eyeFrame int, width, height int, snapshot welcomeStatusSnapshot, lastCommand string) string {
 	return buildWelcomeMessageWithSnapshotAndMascot(sess, sessionID, registry, saved, settings, skillsCount, mcpCount, eyeFrame, width, height, snapshot, lastCommand, false)
 }
 
-func buildWelcomeMessageWithSnapshotAndMascot(sess *engine.Session, sessionID string, registry *tool.Registry, saved *session.Session, settings decoderconfig.Settings, skillsCount, mcpCount int, eyeFrame int, width, height int, snapshot welcomeStatusSnapshot, lastCommand string, useMascot bool) string {
+func buildWelcomeMessageWithSnapshotAndMascot(sess *engine.Session, sessionID string, registry *tool.Registry, saved *session.Session, settings reflectconfig.Settings, skillsCount, mcpCount int, eyeFrame int, width, height int, snapshot welcomeStatusSnapshot, lastCommand string, useMascot bool) string {
 	if width <= 0 {
 		width = 80
 	}
@@ -100,7 +100,7 @@ func buildWelcomeMessageWithSnapshotAndMascot(sess *engine.Session, sessionID st
 	}
 	var b strings.Builder
 	b.WriteString("\n")
-	heading := ansiBold + "Decoder" + ansiReset + ansiDim + "  " + version + ansiReset
+	heading := ansiBold + "Reflect" + ansiReset + ansiDim + "  " + version + ansiReset
 	selection := "Choose a model with /config"
 	if sess != nil && strings.TrimSpace(sess.Model()) != "" {
 		selection = shortModelID(sess.Model())
@@ -113,7 +113,7 @@ func buildWelcomeMessageWithSnapshotAndMascot(sess *engine.Session, sessionID st
 		workspace = "."
 	}
 	details := []string{heading, ansiDim + selection + ansiReset, ansiDim + shortenHomePath(workspace) + ansiReset, ""}
-	mascot := decoderRobotArtLines()
+	mascot := reflectRobotArtLines()
 	if width-indent >= 50 {
 		for i, art := range mascot {
 			b.WriteString(line(ansiOrange + art + ansiReset + "  " + details[i]))
@@ -188,7 +188,7 @@ func welcomeIndicatorRow(skillsCount int, agentsOK bool, mcpCount int, activeC, 
 	return activeC + strings.Join(parts, " · ") + rst
 }
 
-// welcomeModeBadge is intentionally absent; decoder uses host permission tiers.
+// welcomeModeBadge is intentionally absent; reflect uses host permission tiers.
 
 func actLine(saved *session.Session, sessionID string) string {
 	if saved != nil && len(sessionID) >= 8 {
@@ -201,7 +201,7 @@ func toolListSummary(registry *tool.Registry) string {
 	if registry == nil {
 		return "No tools enabled."
 	}
-	tools := registry.MuxTools()
+	tools := registry.RelayTools()
 	registered := len(registry.PrimaryTools())
 	if len(tools) == 0 {
 		return "No tools enabled."
@@ -231,7 +231,7 @@ func envSummary(provider, model string) string {
 
 func envSummaryWithSelection(provider, model string, includeSelection bool) string {
 	var providers []string
-	for _, gateway := range decoderconfig.GatewayStatuses(context.Background(), provider, model) {
+	for _, gateway := range reflectconfig.GatewayStatuses(context.Background(), provider, model) {
 		providers = append(providers, gateway.ID)
 	}
 	sort.Strings(providers)
@@ -239,17 +239,17 @@ func envSummaryWithSelection(provider, model string, includeSelection bool) stri
 	if includeSelection {
 		b.WriteString(fmt.Sprintf("Provider: %s\nModel: %s\n\n", provider, model))
 	}
-	b.WriteString(fmt.Sprintf("Credentials (%s):\n", decoderconfig.CredentialStoreName()))
+	b.WriteString(fmt.Sprintf("Credentials (%s):\n", reflectconfig.CredentialStoreName()))
 	for _, providerID := range providers {
-		b.WriteString(fmt.Sprintf("  %s: %s\n", providerID, decoderconfig.EnvKeyStatus(providerID)))
+		b.WriteString(fmt.Sprintf("  %s: %s\n", providerID, reflectconfig.EnvKeyStatus(providerID)))
 	}
 	return strings.TrimRight(b.String(), "\n")
 }
 
-func configCommandSummary(settings decoderconfig.Settings) string {
+func configCommandSummary(settings reflectconfig.Settings) string {
 	_ = settings
-	providerName := displayConfigValue(decoderconfig.ActiveProvider(context.Background()))
-	modelName := displayConfigValue(decoderconfig.ActiveModel(context.Background()))
+	providerName := displayConfigValue(reflectconfig.ActiveProvider(context.Background()))
+	modelName := displayConfigValue(reflectconfig.ActiveModel(context.Background()))
 	keys := configuredKeyList()
 	keysColor := infoSky
 	if keys == "(none)" {
@@ -259,15 +259,15 @@ func configCommandSummary(settings decoderconfig.Settings) string {
 
   /config  → paste API key (OS keychain) + pick model
   /path    → verify readiness in TUI
-  decoder path (CLI)
+  reflect path (CLI)
 
 %s:
   %s %s
   %s %s
   %s %s
 
-Model catalog and routing live in mux — decoder is the UI only.`,
-		auditTint("Setup (mux)", textPrimary),
+Model catalog and routing live in relay — reflect is the UI only.`,
+		auditTint("Setup (relay)", textPrimary),
 		auditTint("Current", textPrimary),
 		auditTint("provider:", textMuted), auditTint(providerName, infoSky),
 		auditTint("model:", textMuted), auditTint(modelName, infoSky),
@@ -275,7 +275,7 @@ Model catalog and routing live in mux — decoder is the UI only.`,
 }
 
 func apiKeyConfigSummary() string {
-	return auditTint("API keys ("+decoderconfig.CredentialStoreName()+")", textPrimary) + "\n" + indentedAPIKeyLines()
+	return auditTint("API keys ("+reflectconfig.CredentialStoreName()+")", textPrimary) + "\n" + indentedAPIKeyLines()
 }
 
 func configuredKeyList() string {
@@ -321,11 +321,11 @@ func apiKeyStatusColor(status string) color.Color {
 }
 
 func apiKeyStatusLines() []string {
-	providers := decoderconfig.AllSetupGateways()
+	providers := reflectconfig.AllSetupGateways()
 	sort.Strings(providers)
 	var lines []string
 	for _, provider := range providers {
-		lines = append(lines, fmt.Sprintf("%s: %s", provider, decoderconfig.EnvKeyStatus(provider)))
+		lines = append(lines, fmt.Sprintf("%s: %s", provider, reflectconfig.EnvKeyStatus(provider)))
 	}
 	return lines
 }

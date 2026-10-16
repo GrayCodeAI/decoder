@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GrayCodeAI/decoder/internal/acp"
+	"github.com/GrayCodeAI/reflect/internal/acp"
 )
 
 var (

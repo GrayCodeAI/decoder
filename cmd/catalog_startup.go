@@ -4,7 +4,7 @@ import (
 	"context"
 	"os"
 
-	decoderconfig "github.com/GrayCodeAI/decoder/internal/config"
+	reflectconfig "github.com/GrayCodeAI/reflect/internal/config"
 )
 
 var (
@@ -13,15 +13,15 @@ var (
 )
 
 func ensureCatalogBeforeAgent(ctx context.Context, strict bool) error {
-	opts := decoderconfig.CatalogStartupOptions{
+	opts := reflectconfig.CatalogStartupOptions{
 		ForceRefresh:    refreshCatalogFlag,
 		SkipAutoRefresh: skipCatalogRefreshFlag,
 		VerboseOutput:   refreshCatalogFlag,
 	}
 	if strict {
-		return decoderconfig.PrepareCatalogForSession(ctx, os.Stderr, opts)
+		return reflectconfig.PrepareCatalogForSession(ctx, os.Stderr, opts)
 	}
-	decoderconfig.StartupCatalogPrefetch(ctx)
+	reflectconfig.StartupCatalogPrefetch(ctx)
 	return nil
 }
 
@@ -29,5 +29,5 @@ func startBackgroundCatalogRefresh(ctx context.Context) {
 	if skipCatalogRefreshFlag {
 		return
 	}
-	decoderconfig.ScheduleBackgroundCatalogRefresh(ctx)
+	reflectconfig.ScheduleBackgroundCatalogRefresh(ctx)
 }

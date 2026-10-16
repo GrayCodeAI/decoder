@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/GrayCodeAI/decoder/internal/intelligence/memory"
+	"github.com/GrayCodeAI/reflect/internal/intelligence/memory"
 )
 
 // EvolvingMemoryAdapter bridges memory.EvolvingMemory to the EvolvingMemoryInterface.

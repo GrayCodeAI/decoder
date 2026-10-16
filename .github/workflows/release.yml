@@ -1,4 +1,4 @@
-# Release workflow for decoder. A maintainer pushes a v<VERSION> tag after the
+# Release workflow for reflect. A maintainer pushes a v<VERSION> tag after the
 # release PR (VERSION + CHANGELOG) has merged; creating v* tags is restricted by
 # the repository ruleset "protect-release-tags". See docs/RELEASING.md.
 # Source of truth: .shared-templates/workflows/go-release.yml.tmpl
@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GOPROXY: "https://proxy.golang.org,direct"
-      # Release builds resolve every dependency (including mux) from
+      # Release builds resolve every dependency (including relay) from
       # go.mod/go.sum through the public proxy — never from sibling checkouts.
       GOWORK: "off"
     steps:

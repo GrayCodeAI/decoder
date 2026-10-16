@@ -5,12 +5,12 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/GrayCodeAI/decoder/internal/types"
+	"github.com/GrayCodeAI/reflect/internal/types"
 )
 
 func TestLifeboatRoundTrip(t *testing.T) {
 	tmp := t.TempDir()
-	t.Setenv("DECODER_STATE_DIR", tmp)
+	t.Setenv("REFLECT_STATE_DIR", tmp)
 
 	id := "test-lifeboat"
 	state := NewLifeboatState(id)
@@ -56,7 +56,7 @@ func TestLifeboatRoundTrip(t *testing.T) {
 
 func TestLifeboatMissing(t *testing.T) {
 	tmp := t.TempDir()
-	t.Setenv("DECODER_STATE_DIR", tmp)
+	t.Setenv("REFLECT_STATE_DIR", tmp)
 	got, err := LoadLifeboat("never-saved")
 	if err != ErrNotFound {
 		t.Fatalf("want ErrNotFound got %v", err)
@@ -68,7 +68,7 @@ func TestLifeboatMissing(t *testing.T) {
 
 func TestLifeboatValidation(t *testing.T) {
 	tmp := t.TempDir()
-	t.Setenv("DECODER_STATE_DIR", tmp)
+	t.Setenv("REFLECT_STATE_DIR", tmp)
 	if _, err := SaveLifeboat("../escape", NewLifeboatState("x")); err == nil {
 		t.Fatal("expected invalid id error")
 	}
@@ -86,7 +86,7 @@ func TestLifeboatValidation(t *testing.T) {
 }
 
 func TestLifeboatBuildHeuristics(t *testing.T) {
-	msgs := []types.MuxMessage{
+	msgs := []types.RelayMessage{
 		{Role: "user", Content: "please fix billing"},
 		{Role: "assistant", Content: "Decision: use postgres\nWill use cache 5m\nOpen question: migrate or drop column?"},
 		{Role: "assistant", Content: "Reading touched /repo/billing.go and /repo/x.md"},
@@ -113,7 +113,7 @@ func TestLifeboatBuildHeuristics(t *testing.T) {
 
 func TestLifeboatFutureVersionRejected(t *testing.T) {
 	tmp := t.TempDir()
-	t.Setenv("DECODER_STATE_DIR", tmp)
+	t.Setenv("REFLECT_STATE_DIR", tmp)
 	id := "ver-future"
 	path, _ := LifeboatPath(id)
 	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {

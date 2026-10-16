@@ -4,9 +4,9 @@ import (
 	"strconv"
 	"strings"
 
-	chatfeature "github.com/GrayCodeAI/decoder/internal/features/chat"
-	"github.com/GrayCodeAI/decoder/internal/textutil"
-	"github.com/GrayCodeAI/decoder/internal/ui/icons"
+	chatfeature "github.com/GrayCodeAI/reflect/internal/features/chat"
+	"github.com/GrayCodeAI/reflect/internal/textutil"
+	"github.com/GrayCodeAI/reflect/internal/ui/icons"
 	"github.com/mattn/go-runewidth"
 )
 

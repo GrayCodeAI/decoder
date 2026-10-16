@@ -4,18 +4,18 @@ import (
 	"context"
 	"time"
 
-	"github.com/GrayCodeAI/decoder/internal/engine/token"
+	"github.com/GrayCodeAI/reflect/internal/engine/token"
 
-	"github.com/GrayCodeAI/decoder/internal/types"
+	"github.com/GrayCodeAI/reflect/internal/types"
 
-	"github.com/GrayCodeAI/decoder/internal/engine/compact"
+	"github.com/GrayCodeAI/reflect/internal/engine/compact"
 )
 
 type MicroCompactStrategy struct{}
 
 func (s *MicroCompactStrategy) Name() string { return "micro" }
 
-func (s *MicroCompactStrategy) ShouldTrigger(msgs []types.MuxMessage, tokenCount, threshold int) bool {
+func (s *MicroCompactStrategy) ShouldTrigger(msgs []types.RelayMessage, tokenCount, threshold int) bool {
 	if tokenCount < threshold/2 {
 		return false
 	}

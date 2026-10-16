@@ -3,25 +3,25 @@ package gateway
 import (
 	"testing"
 
-	"github.com/GrayCodeAI/decoder/internal/types"
-	muxengine "github.com/GrayCodeAI/mux/engine"
+	"github.com/GrayCodeAI/reflect/internal/types"
+	relayengine "github.com/GrayCodeAI/relay/engine"
 )
 
-func TestEngineAdapterPreservesDecoderRequestOptions(t *testing.T) {
+func TestEngineAdapterPreservesReflectRequestOptions(t *testing.T) {
 	topP := 0.75
 	thinking := true
 	request := toEngineRequest(
-		[]types.MuxMessage{{
+		[]types.RelayMessage{{
 			Role:         "user",
 			Content:      "inspect",
 			ContentParts: []types.ContentPart{{Type: "image_url", ImageURL: &types.ImageURLPart{URL: "data:image/png;base64,abc"}}},
 		}},
 		types.ChatOptions{
 			Provider: "openrouter", Model: "openrouter/auto", MaxTokens: 2048,
-			Tools:  []types.MuxTool{{Name: "read_file", Description: "read", Parameters: map[string]interface{}{"type": "object"}}},
+			Tools:  []types.RelayTool{{Name: "read_file", Description: "read", Parameters: map[string]interface{}{"type": "object"}}},
 			System: "system", EnableCaching: true, ReasoningEffort: "high",
 			GLMThinkingEnabled: &thinking, TopP: &topP, ServiceTier: "priority",
-			MetadataUserID: "decoder-user-1",
+			MetadataUserID: "reflect-user-1",
 			ResponseFormat: &types.ResponseFormat{Type: "json_schema", Schema: `{"type":"object"}`},
 		},
 		types.ContinuationConfig{MaxContinuations: 2, MaxTotalTokens: 9000},
@@ -38,7 +38,7 @@ func TestEngineAdapterPreservesDecoderRequestOptions(t *testing.T) {
 	if !request.Options.EnableCaching || request.Options.ReasoningEffort != "high" || request.Options.ThinkingEnabled == nil || request.Options.GLMThinkingEnabled == nil || request.Options.TopP == nil || request.Options.ServiceTier != "priority" {
 		t.Fatalf("advanced options lost: %+v", request.Options)
 	}
-	if request.Metadata.UserID != "decoder-user-1" {
+	if request.Metadata.UserID != "reflect-user-1" {
 		t.Fatalf("metadata user ID lost: %+v", request.Metadata)
 	}
 	if len(request.Messages) != 1 || len(request.Messages[0].ContentParts) != 1 || request.Messages[0].ContentParts[0].ImageURL == nil || request.Messages[0].ContentParts[0].ImageURL.URL == "" {
@@ -61,31 +61,31 @@ func TestEngineAdapterOnlyRequiresGLMReasoningWhenEnabled(t *testing.T) {
 	}
 }
 
-func TestEngineAdapterNormalizesEventsForDecoderLoop(t *testing.T) {
+func TestEngineAdapterNormalizesEventsForReflectLoop(t *testing.T) {
 	tests := []struct {
-		in       muxengine.Event
+		in       relayengine.Event
 		wantType string
 		emit     bool
 		provider string
 		model    string
 	}{
 		{
-			in: muxengine.Event{Type: muxengine.EventRouteSelected, Route: &muxengine.Route{
+			in: relayengine.Event{Type: relayengine.EventRouteSelected, Route: &relayengine.Route{
 				Provider: "openai", Model: "openai/gpt-5", DeploymentRouting: true,
 			}},
 			wantType: "route_selected", emit: true, provider: "openai", model: "openai/gpt-5",
 		},
 		{
-			in: muxengine.Event{Type: muxengine.EventRouteChanged, Route: &muxengine.Route{
+			in: relayengine.Event{Type: relayengine.EventRouteChanged, Route: &relayengine.Route{
 				Provider: "anthropic", Model: "anthropic/claude-sonnet-4-6", DeploymentRouting: true,
 			}},
 			wantType: "route_changed", emit: true, provider: "anthropic", model: "anthropic/claude-sonnet-4-6",
 		},
-		{in: muxengine.Event{Type: muxengine.EventContentDelta, Content: "x"}, wantType: "content", emit: true},
-		{in: muxengine.Event{Type: muxengine.EventThinkingDelta}, wantType: "thinking", emit: true},
-		{in: muxengine.Event{Type: muxengine.EventToolCallDone, ToolCall: &muxengine.ToolCall{Name: "read"}}, wantType: "tool_call", emit: true},
-		{in: muxengine.Event{Type: muxengine.EventUsage, Usage: &muxengine.Usage{TotalTokens: 8}}, wantType: "usage", emit: true},
-		{in: muxengine.Event{Type: muxengine.EventDone, StopReason: "end_turn", Usage: &muxengine.Usage{PromptTokens: 5, CompletionTokens: 3, TotalTokens: 8}}, wantType: "done", emit: true},
+		{in: relayengine.Event{Type: relayengine.EventContentDelta, Content: "x"}, wantType: "content", emit: true},
+		{in: relayengine.Event{Type: relayengine.EventThinkingDelta}, wantType: "thinking", emit: true},
+		{in: relayengine.Event{Type: relayengine.EventToolCallDone, ToolCall: &relayengine.ToolCall{Name: "read"}}, wantType: "tool_call", emit: true},
+		{in: relayengine.Event{Type: relayengine.EventUsage, Usage: &relayengine.Usage{TotalTokens: 8}}, wantType: "usage", emit: true},
+		{in: relayengine.Event{Type: relayengine.EventDone, StopReason: "end_turn", Usage: &relayengine.Usage{PromptTokens: 5, CompletionTokens: 3, TotalTokens: 8}}, wantType: "done", emit: true},
 	}
 	for _, tt := range tests {
 		got, emit := fromEngineEvent(tt.in)
@@ -95,16 +95,16 @@ func TestEngineAdapterNormalizesEventsForDecoderLoop(t *testing.T) {
 		if tt.provider != "" && (got.Route == nil || got.Route.Provider != tt.provider || got.Route.Model != tt.model || !got.Route.DeploymentRouting) {
 			t.Fatalf("event %q lost resolved route: %+v", tt.in.Type, got.Route)
 		}
-		if tt.in.Type == muxengine.EventDone && (got.Usage == nil || got.Usage.PromptTokens != 5 || got.Usage.CompletionTokens != 3 || got.Usage.TotalTokens != 8) {
+		if tt.in.Type == relayengine.EventDone && (got.Usage == nil || got.Usage.PromptTokens != 5 || got.Usage.CompletionTokens != 3 || got.Usage.TotalTokens != 8) {
 			t.Fatalf("terminal usage lost: %+v", got.Usage)
 		}
 	}
 }
 
 func TestEngineAdapterPreservesResolvedRouteInBlockingResponse(t *testing.T) {
-	got := fromEngineResponse(&muxengine.GenerateResponse{
+	got := fromEngineResponse(&relayengine.GenerateResponse{
 		Content: "ok",
-		Route: &muxengine.Route{
+		Route: &relayengine.Route{
 			Provider: "openai", Model: "openai/gpt-5", DeploymentRouting: true,
 		},
 	})

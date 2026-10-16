@@ -1,13 +1,13 @@
-# Releasing decoder
+# Releasing reflect
 
-Decoder is pre-1.0. Releases are cut by hand: a maintainer merges a release PR
+Reflect is pre-1.0. Releases are cut by hand: a maintainer merges a release PR
 that sets `VERSION` and the `CHANGELOG.md` section, then pushes the matching
 `v<VERSION>` tag. The tag triggers
 [`.github/workflows/release.yml`](../.github/workflows/release.yml), which
 builds, signs and publishes the GitHub release. There is no release-please or
 other bot: nothing bumps `VERSION` or writes `CHANGELOG.md` automatically.
 
-The next release version comes from [`VERSION`](../VERSION). The new Decoder
+The next release version comes from [`VERSION`](../VERSION). The new Reflect
 series restarts below the historical hawk versions; use explicit tags for
 Go installation rather than assuming `@latest` selects this series.
 
@@ -21,7 +21,7 @@ actor. A push of a `v*` tag by anyone else is rejected, so a write-access
 account cannot trigger a signed release. Inspect it with:
 
 ```bash
-gh api repos/GrayCodeAI/decoder/rulesets/24053191
+gh api repos/GrayCodeAI/reflect/rulesets/24053191
 ```
 
 The `main` branch is separately protected (required status checks, no force
@@ -34,8 +34,8 @@ pushes).
    - `CHANGELOG.md`: rename `## [Unreleased]` to `## [X.Y.Z] — YYYY-MM-DD`
      and add a new, empty `## [Unreleased]` above it. This section becomes the
      GitHub release notes verbatim.
-   - `testdata/compatibility-matrix.json`: set the `stable` matrix to decoder
-     `X.Y.Z` and the mux version pinned in `go.mod`.
+   - `testdata/compatibility-matrix.json`: set the `stable` matrix to reflect
+     `X.Y.Z` and the relay version pinned in `go.mod`.
    - `README.md` install section: point the `install.sh` URL at the new tag.
    - Run locally:
 
@@ -49,15 +49,15 @@ pushes).
 
    ```bash
    git fetch origin
-   git tag -s vX.Y.Z -m "decoder vX.Y.Z" <merge-commit-sha>
+   git tag -s vX.Y.Z -m "reflect vX.Y.Z" <merge-commit-sha>
    git push origin vX.Y.Z
    ```
 
 4. **Watch** the `release` workflow run to completion (next section).
 5. **Verify** the published release as a user would (see
    [Verifying a release](#verifying-a-release)), including
-   `curl -fsSL https://raw.githubusercontent.com/GrayCodeAI/decoder/vX.Y.Z/install.sh | DECODER_REQUIRE_COSIGN=1 sh`
-   and `go install github.com/GrayCodeAI/decoder/cmd/decoder@vX.Y.Z`.
+   `curl -fsSL https://raw.githubusercontent.com/GrayCodeAI/reflect/vX.Y.Z/install.sh | REFLECT_REQUIRE_COSIGN=1 sh`
+   and `go install github.com/GrayCodeAI/reflect/cmd/reflect@vX.Y.Z`.
 
 `make release` deliberately refuses to publish from a workstation: releases are
 signed with the workflow's GitHub OIDC identity, which a local run cannot have.
@@ -70,15 +70,15 @@ On a pushed `v*` tag, with `permissions: contents: write, id-token: write`:
    `v` + `VERSION` and `CHANGELOG.md` has a non-empty `## [<VERSION>]`
    section; that section is extracted as the release notes.
 2. `scripts/check-no-replace-directives.sh` refuses local `replace`
-   directives. The job sets `GOWORK=off`, so dependencies (including mux)
+   directives. The job sets `GOWORK=off`, so dependencies (including relay)
    come only from `go.mod`/`go.sum` via the public proxy.
 3. syft (`anchore/sbom-action/download-syft`) and cosign
    (`sigstore/cosign-installer`) are installed; both actions are pinned by
    commit SHA.
 4. GoReleaser v2.17.0 (`.goreleaser.yml`) builds and publishes:
-   - `decoder_<version>_<os>_<arch>.tar.gz` for linux and darwin and `.zip` for
+   - `reflect_<version>_<os>_<arch>.tar.gz` for linux and darwin and `.zip` for
      windows, each on amd64 and arm64 (six archives, `-trimpath`, `CGO_ENABLED=0`);
-   - `decoder_<version>_source.tar.gz`;
+   - `reflect_<version>_source.tar.gz`;
    - one SPDX SBOM per archive (`<archive>.spdx.sbom.json`);
    - `checksums.txt` (SHA-256 of every asset above);
    - `checksums.txt.sigstore.json`, a cosign keyless Sigstore bundle
@@ -91,11 +91,11 @@ On a pushed `v*` tag, with `permissions: contents: write, id-token: write`:
 
 ```bash
 tag=vX.Y.Z
-gh release download "$tag" --repo GrayCodeAI/decoder \
+gh release download "$tag" --repo GrayCodeAI/reflect \
   --pattern checksums.txt --pattern checksums.txt.sigstore.json \
-  --pattern "decoder_${tag#v}_linux_amd64.tar.gz"
+  --pattern "reflect_${tag#v}_linux_amd64.tar.gz"
 cosign verify-blob --bundle checksums.txt.sigstore.json \
-  --certificate-identity "https://github.com/GrayCodeAI/decoder/.github/workflows/release.yml@refs/tags/$tag" \
+  --certificate-identity "https://github.com/GrayCodeAI/reflect/.github/workflows/release.yml@refs/tags/$tag" \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
   checksums.txt
 sha256sum --ignore-missing -c checksums.txt
@@ -104,17 +104,17 @@ sha256sum --ignore-missing -c checksums.txt
 `install.sh` performs the same checks: it always verifies the SHA-256, verifies
 the bundle when cosign (v2.4 or later; v3 recommended) is installed, says so
 plainly when it is not, and refuses to install without cosign when
-`DECODER_REQUIRE_COSIGN=1`.
+`REFLECT_REQUIRE_COSIGN=1`.
 
 ## Distribution channels
 
 | Channel | Status |
 |---|---|
-| GitHub release archives | Pending a Decoder release with matching archives. |
-| `install.sh` | Pending a Decoder release; refuses known hawk-era tags. |
-| `go install github.com/GrayCodeAI/decoder/cmd/decoder@latest` | Use an explicit Decoder tag or `@main`; historical higher tags affect `@latest`. |
-| GitHub Action (`.github/actions/decoder`) | Requires Decoder release archives; installs through `install.sh` with cosign required. |
-| systemd unit (`packaging/systemd/decoder-daemon.service`) | Template for running `decoder daemon`; see the troubleshooting guide. |
+| GitHub release archives | Pending a Reflect release with matching archives. |
+| `install.sh` | Pending a Reflect release; refuses known hawk-era tags. |
+| `go install github.com/GrayCodeAI/reflect/cmd/reflect@latest` | Use an explicit Reflect tag or `@main`; historical higher tags affect `@latest`. |
+| GitHub Action (`.github/actions/reflect`) | Requires Reflect release archives; installs through `install.sh` with cosign required. |
+| systemd unit (`packaging/systemd/reflect-daemon.service`) | Template for running `reflect daemon`; see the troubleshooting guide. |
 | Homebrew | **Not available.** Needs a `GrayCodeAI/homebrew-tap` repository, a fine-grained token with write access to it stored as a secret, and a `homebrew_casks` stanza in `.goreleaser.yml`. |
 | npm | **Not available.** The scaffolding in `npm/` is marked private; see [`npm/README.md`](../npm/README.md). |
 | Nix | **Not available.** The old flake could not evaluate and was removed; a new one needs a computed `vendorHash`, a committed `flake.lock` and `nix flake check` in CI. |
@@ -133,5 +133,5 @@ release.
   from the `CHANGELOG.md` section and the "Full changelog" compare link is
   omitted.
 - The historical higher-numbered hawk releases must not be confused with the
-  reset Decoder series. Publishing a lower version does not automatically make
+  reset Reflect series. Publishing a lower version does not automatically make
   it the Go proxy's `@latest`. Use explicit tags; do not rewrite existing tags.

@@ -130,7 +130,7 @@ func (tc *TerminalContext) captureTerminalOutput() string {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-	out, err := exec.CommandContext(ctx, "sh", "-c", tc.captureCmd).Output() // #nosec G204 -- captureCmd is one of a fixed set of internally-detected commands (tmux/screen/osascript), not external input
+	out, err := exec.CommandContext(ctx, "sh", "-c", tc.captureCmd).Output() // #nosec G204 -- captureCmd is one of a fixed set of internally-detected commands (__TRELAY_PROTECT__/screen/osascript), not external input
 	if err != nil {
 		return ""
 	}
@@ -145,12 +145,12 @@ func (tc *TerminalContext) captureTerminalOutput() string {
 	return strings.Join(lines, "\n")
 }
 
-// detectTerminalCapture checks for tmux, screen, or macOS terminal APIs.
+// detectTerminalCapture checks for __TRELAY_PROTECT__, screen, or macOS terminal APIs.
 func detectTerminalCapture() string {
-	// tmux takes priority (works inside terminal emulators)
-	if os.Getenv("TMUX") != "" {
-		if _, err := exec.LookPath("tmux"); err == nil {
-			return "tmux capture-pane -p"
+	// __TRELAY_PROTECT__ takes priority (works inside terminal emulators)
+	if os.Getenv("TRELAY") != "" {
+		if _, err := exec.LookPath("__TRELAY_PROTECT__"); err == nil {
+			return "__TRELAY_PROTECT__ capture-pane -p"
 		}
 	}
 	// screen

@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GrayCodeAI/decoder/internal/permissions"
-	"github.com/GrayCodeAI/decoder/internal/spec"
+	"github.com/GrayCodeAI/reflect/internal/permissions"
+	"github.com/GrayCodeAI/reflect/internal/spec"
 )
 
 // specConfigForPrompt loads the user's spec configuration and returns it
@@ -75,7 +75,7 @@ func constitutionForPrompt(slug string) string {
 	if err != nil {
 		return ""
 	}
-	path := filepath.Join(cwd, ".decoder", "specs", slug, "constitution.md")
+	path := filepath.Join(cwd, ".reflect", "specs", slug, "constitution.md")
 
 	constitutionCache.Lock()
 	if constitutionCache.path == path {

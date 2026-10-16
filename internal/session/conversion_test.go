@@ -4,11 +4,11 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/GrayCodeAI/decoder/internal/types"
+	"github.com/GrayCodeAI/reflect/internal/types"
 )
 
 func TestRuntimeMessageRoundTrip(t *testing.T) {
-	in := []types.MuxMessage{
+	in := []types.RelayMessage{
 		{
 			Role:    "assistant",
 			Content: "working",

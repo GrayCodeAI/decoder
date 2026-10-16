@@ -49,7 +49,7 @@ func parseClaims(token string) (*Claims, error) {
 // MaxTokenAge is the maximum age of a token.
 const MaxTokenAge = 3600
 
-var defaultIssuer = "decoder"
+var defaultIssuer = "reflect"
 `)
 
 	// pkg/auth/jwt.go - implements Validator

@@ -9,8 +9,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GrayCodeAI/decoder/internal/safewrite"
-	"github.com/GrayCodeAI/decoder/internal/storage"
+	"github.com/GrayCodeAI/reflect/internal/safewrite"
+	"github.com/GrayCodeAI/reflect/internal/storage"
 )
 
 // Snapshot records a point-in-time copy of a session.

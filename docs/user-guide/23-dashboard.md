@@ -1,6 +1,6 @@
 # Dashboard and HUD
 
-The Decoder dashboard provides system status and monitoring information.
+The Reflect dashboard provides system status and monitoring information.
 
 ---
 
@@ -9,7 +9,7 @@ The Decoder dashboard provides system status and monitoring information.
 In the TUI:
 
 ```
-/ecosystem         # Ecosystem status (Mux and token pipeline)
+/ecosystem         # Ecosystem status (Relay and token pipeline)
 /path              # Developer path readiness
 /preflight         # Quick health check
 ```
@@ -18,11 +18,11 @@ In the TUI:
 
 ## Ecosystem Status
 
-Shows the status of all Decoder components:
+Shows the status of all Reflect components:
 
 | Component | Status |
 |-----------|--------|
-| Mux (providers) | Ready / Error |
+| Relay (providers) | Ready / Error |
 | token pipeline | Available |
 | memory | Ready |
 
@@ -33,7 +33,7 @@ Shows the status of all Decoder components:
 Check readiness to chat:
 
 ```bash
-decoder path
+reflect path
 ```
 
 This verifies:

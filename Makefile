@@ -1,16 +1,16 @@
 # Canonical GrayCodeAI Makefile for Go binary repos.
 # Source of truth: .shared-templates/Makefile.binary.tmpl at the eco root.
-# Placeholders rendered per repo: decoder, ..
+# Placeholders rendered per repo: reflect, ..
 
 # ---------------------------------------------------------------------------
 # Project metadata
 # ---------------------------------------------------------------------------
-NAME      := decoder
-MAIN_PKG  := ./cmd/decoder
+NAME      := reflect
+MAIN_PKG  := ./cmd/reflect
 
 # ---------------------------------------------------------------------------
 # Versioning — sourced only from VERSION.
-# See https://github.com/GrayCodeAI/decoder/blob/main/docs/versioning.md.
+# See https://github.com/GrayCodeAI/reflect/blob/main/docs/versioning.md.
 # ---------------------------------------------------------------------------
 VERSION := $(shell tr -d '[:space:]' < VERSION)
 COMMIT  := $(shell git rev-parse --short HEAD 2>/dev/null || echo "none")
@@ -35,7 +35,7 @@ GOVULNCHECK  := $(GOBIN_DIR)/govulncheck
 # ---------------------------------------------------------------------------
 # Phony declarations (alphabetical).
 # ---------------------------------------------------------------------------
-.PHONY: all bench boundaries build check-replace ci clean ecosystem-guard feature-boundaries-guard mux-client-guard mux-engine-guard manifest-guard peer-guard internal-layers-guard package-boundaries-guard release-parity cover cover-new fmt help install lint lint-fix \
+.PHONY: all bench boundaries build check-replace ci clean ecosystem-guard feature-boundaries-guard relay-client-guard relay-engine-guard manifest-guard peer-guard internal-layers-guard package-boundaries-guard release-parity cover cover-new fmt help install lint lint-fix \
         release release-check release-snapshot security setup smoke path sync test test-10x test-live test-new test-race tidy version vet api-docs api-validate workspace
 
 check-replace: ## Fail if go.mod has local replace directives (run before tagging)
@@ -132,19 +132,19 @@ fmt-check: ## Verify formatting without rewriting files (CI-safe).
 vet: ## Run go vet.
 	go vet ./...
 
-ecosystem-guard: ## Fail if external ecosystem repos import decoder/internal.
+ecosystem-guard: ## Fail if external ecosystem repos import reflect/internal.
 	bash ./scripts/check-ecosystem-boundaries.sh
 
-mux-client-guard: ## Fail on any production mux/client import.
-	bash ./scripts/check-mux-client-imports.sh
+relay-client-guard: ## Fail on any production relay/client import.
+	bash ./scripts/check-relay-client-imports.sh
 
-mux-engine-guard: ## Require all production Mux imports to use the stable engine facade.
-	bash ./scripts/check-mux-engine-boundary.sh
+relay-engine-guard: ## Require all production Relay imports to use the stable engine facade.
+	bash ./scripts/check-relay-engine-boundary.sh
 
-peer-guard: ## Fail if support engines import each other instead of depending only on Decoder contracts.
+peer-guard: ## Fail if support engines import each other instead of depending only on Reflect contracts.
 	bash ./scripts/check-support-repo-coupling.sh
 
-internal-layers-guard: ## Enforce one-way dependencies across stable Decoder internal layers.
+internal-layers-guard: ## Enforce one-way dependencies across stable Reflect internal layers.
 	bash ./scripts/check-internal-layer-imports.sh
 
 package-boundaries-guard: ## Enforce AST/package-graph boundaries with file/line diagnostics.
@@ -153,7 +153,7 @@ package-boundaries-guard: ## Enforce AST/package-graph boundaries with file/line
 feature-boundaries-guard: ## Prevent feature packages from importing delivery or sibling features.
 	bash ./scripts/check-feature-boundaries.sh
 
-boundaries: manifest-guard check-replace ecosystem-guard feature-boundaries-guard mux-client-guard mux-engine-guard peer-guard internal-layers-guard package-boundaries-guard ## Alias for all boundary guards (matches `make boundaries` in engine repos).
+boundaries: manifest-guard check-replace ecosystem-guard feature-boundaries-guard relay-client-guard relay-engine-guard peer-guard internal-layers-guard package-boundaries-guard ## Alias for all boundary guards (matches `make boundaries` in engine repos).
 
 release-parity: ## Verify every go.mod ecosystem version resolves to a reachable remote commit.
 	bash ./scripts/check-module-release-parity.sh
@@ -181,7 +181,7 @@ ci: version-check tidy fmt-check vet boundaries lint test-race security api-vali
 	@echo "All CI checks passed."
 
 smoke: ## Quick build + doctor + ecosystem verification.
-	./scripts/smoke-decoder.sh
+	./scripts/smoke-reflect.sh
 
 path: ## Verify developer path (setup, security, milestone tests).
 	./scripts/verify-developer-path.sh
@@ -205,7 +205,7 @@ workspace: ## Regenerate the ecosystem root go.work from ecosystem.yaml.
 	@bash ./scripts/generate-workspace.sh
 
 setup: workspace ## Set up local development environment and development tools.
-	@echo "=== Setting up decoder development environment ==="
+	@echo "=== Setting up reflect development environment ==="
 	@echo "✓ go.work generated and synced from ecosystem.yaml"
 	@echo ""
 	@echo "=== Environment check ==="
@@ -231,7 +231,7 @@ help: ## Show this help.
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
 
 # ---------------------------------------------------------------------------
-# Compatibility matrix (decoder-specific extension to the canonical template).
+# Compatibility matrix (reflect-specific extension to the canonical template).
 # Validates compatibility-matrix.json and reports the resolved versions for
 # a chosen matrix entry. Wired into the compatibility-test workflow.
 # ---------------------------------------------------------------------------
@@ -243,7 +243,7 @@ compat-test: ## Validate testdata/compatibility-matrix.json and report the 'next
 compat-check: ## Strict validation — non-zero exit if any component lacks a version.
 	@go run ./cmd/compat-test -matrix=next -strict -file=testdata/compatibility-matrix.json
 
-compat-drift: ## Advisory: report pin drift between Decoder and sibling repositories. Never fails.
+compat-drift: ## Advisory: report pin drift between Reflect and sibling repositories. Never fails.
 	@go run ./cmd/compat-test -check-external -file=testdata/compatibility-matrix.json
 
 .PHONY: hooks sync

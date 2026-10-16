@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/GrayCodeAI/decoder/internal/jobs"
+	"github.com/GrayCodeAI/reflect/internal/jobs"
 )
 
 // resetJobsRegistry swaps the package-level registry for a fresh one and

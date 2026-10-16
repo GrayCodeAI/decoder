@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/GrayCodeAI/decoder/internal/session"
-	"github.com/GrayCodeAI/decoder/internal/theme"
+	"github.com/GrayCodeAI/reflect/internal/session"
+	"github.com/GrayCodeAI/reflect/internal/theme"
 	"github.com/spf13/cobra"
 )
 
@@ -18,14 +18,14 @@ var (
 var searchCmd = &cobra.Command{
 	Use:   "search <query>",
 	Short: "Search across saved sessions",
-	Long: `Full-text search across all saved decoder sessions.
+	Long: `Full-text search across all saved reflect sessions.
 
 Searches message content, tool results, and assistant responses.
 
 Examples:
-  decoder search "authentication"
-  decoder search --limit 5 "database migration"
-  decoder search "func main"`,
+  reflect search "authentication"
+  reflect search --limit 5 "database migration"
+  reflect search "func main"`,
 	Args: cobra.ExactArgs(1),
 	RunE: runSearch,
 }

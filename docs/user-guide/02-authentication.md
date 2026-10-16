@@ -1,14 +1,14 @@
 # Authentication
 
-Decoder supports several authentication methods, including API key configuration through the TUI and multi-provider support via Mux.
+Reflect supports several authentication methods, including API key configuration through the TUI and multi-provider support via Relay.
 
 ---
 
 ## API Key Configuration
 
-On first launch, Decoder opens the TUI where you can configure credentials. Press `/config` or `/autonomy` to open the configuration picker. Your API keys are stored in your OS keychain (macOS Keychain or Linux keyring), never in plain text or environment variables.
+On first launch, Reflect opens the TUI where you can configure credentials. Press `/config` or `/autonomy` to open the configuration picker. Your API keys are stored in your OS keychain (macOS Keychain or Linux keyring), never in plain text or environment variables.
 
-Decoder supports multiple providers:
+Reflect supports multiple providers:
 
 | Provider | ID | Key |
 |----------|----|-----|
@@ -24,10 +24,10 @@ Decoder supports multiple providers:
 
 ```bash
 # Verify credential status
-decoder credentials status
+reflect credentials status
 
 # Run the TUI and use /config to set keys interactively
-decoder
+reflect
 ```
 
 ### Environment Variables (Fallback)
@@ -36,7 +36,7 @@ For CI/CD or headless environments, you can set API keys as environment variable
 
 ```bash
 export XAI_API_KEY="xai-..."
-decoder
+reflect
 ```
 
 Fireworks uses its OpenAI-compatible API. Set `FIREWORKS_API_KEY`; the default
@@ -49,19 +49,19 @@ base URL is `https://api.fireworks.ai/inference/v1`. See the official
 
 ## Provider Configuration
 
-Decoder uses Mux for provider routing, health checks, and retry logic. To configure providers:
+Reflect uses Relay for provider routing, health checks, and retry logic. To configure providers:
 
 ```bash
 # In the TUI, press /config to open provider settings
-decoder
+reflect
 
 # Or validate readiness
-decoder path
+reflect path
 ```
 
 ### Deployment-Aware Routing
 
-For deployment-aware routing, set in `.decoder/settings.json`:
+For deployment-aware routing, set in `.reflect/settings.json`:
 
 ```json
 {
@@ -72,10 +72,10 @@ For deployment-aware routing, set in `.decoder/settings.json`:
 Or export:
 
 ```bash
-export DECODER_DEPLOYMENT_ROUTING=true
+export REFLECT_DEPLOYMENT_ROUTING=true
 ```
 
-Decoder will route canonical model IDs through Mux's deployment catalog. Refresh the catalog with:
+Reflect will route canonical model IDs through Relay's deployment catalog. Refresh the catalog with:
 
 ```
 /refresh-model-catalog
@@ -90,7 +90,7 @@ Authenticate developers through your own Identity Provider (IdP) — such as Okt
 ### Configure via Settings
 
 ```json
-// .decoder/settings.json
+// .reflect/settings.json
 {
   "oidc": {
     "issuer": "https://acme.okta.com",
@@ -99,7 +99,7 @@ Authenticate developers through your own Identity Provider (IdP) — such as Okt
 }
 ```
 
-Decoder discovers endpoints via `{issuer}/.well-known/openid-configuration`, opens the IdP login page, and stores tokens in the keychain. Tokens auto-refresh silently via the stored `refresh_token`.
+Reflect discovers endpoints via `{issuer}/.well-known/openid-configuration`, opens the IdP login page, and stores tokens in the keychain. Tokens auto-refresh silently via the stored `refresh_token`.
 
 ### Required Scopes
 
@@ -116,7 +116,7 @@ When browser-based login isn't possible — for example, on sandboxed VMs, CI ru
 
 ### How It Works
 
-1. Decoder runs your command via `sh -c "<command>"`
+1. Reflect runs your command via `sh -c "<command>"`
 2. Your binary runs whatever auth flow it needs
 3. **stdout** is captured and parsed as an access token
 4. **stderr** carries human-readable output surfaced to the user
@@ -139,7 +139,7 @@ JSON with optional refresh token:
 ### Configuration
 
 ```json
-// .decoder/settings.json
+// .reflect/settings.json
 {
   "auth_provider_command": "/usr/local/bin/my-auth-provider",
   "auth_provider_label": "Acme Corp"
@@ -149,17 +149,17 @@ JSON with optional refresh token:
 Or via environment variables:
 
 ```bash
-export DECODER_AUTH_PROVIDER_COMMAND="/usr/local/bin/my-auth-provider"
-export DECODER_AUTH_PROVIDER_LABEL="Acme Corp"
+export REFLECT_AUTH_PROVIDER_COMMAND="/usr/local/bin/my-auth-provider"
+export REFLECT_AUTH_PROVIDER_LABEL="Acme Corp"
 ```
 
 ### Token Refresh
 
-When Decoder needs to refresh an expired token, it re-runs your binary with `DECODER_AUTH_EXPIRED=1` set in the environment:
+When Reflect needs to refresh an expired token, it re-runs your binary with `REFLECT_AUTH_EXPIRED=1` set in the environment:
 
 ```bash
 #!/bin/sh
-if [ "$DECODER_AUTH_EXPIRED" = "1" ]; then
+if [ "$REFLECT_AUTH_EXPIRED" = "1" ]; then
     echo "Refreshing token..." >&2
     TOKEN=$(my-company-auth --refresh --silent)
 else
@@ -182,16 +182,16 @@ echo "{\"access_token\": \"$TOKEN\", \"expires_in\": 3600}"
 Check credential status at any time:
 
 ```bash
-decoder credentials status
+reflect credentials status
 ```
 
-This verifies keychain entries and validates Mux's provider status.
+This verifies keychain entries and validates Relay's provider status.
 
 ---
 
 ## Credential Precedence
 
-Decoder resolves credentials in this order:
+Reflect resolves credentials in this order:
 
 1. **Per-model configuration** — set via `/config` or settings
 2. **Keychain entry** — obtained through TUI configuration
@@ -203,7 +203,7 @@ During a session, the active method handles all refreshes.
 
 ## Multi-Provider Support
 
-Decoder works with any LLM provider through Mux's adapter system:
+Reflect works with any LLM provider through Relay's adapter system:
 
 | Provider | Status |
 |----------|--------|

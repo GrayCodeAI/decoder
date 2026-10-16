@@ -5,7 +5,7 @@
 **Date:** 2026-07-05
 **Source:** Historical comparison document; feature and market claims require
 independent revalidation. Architecture status is tracked in
-`docs/architecture/decoder-architecture-baseline.md`.
+`docs/architecture/reflect-architecture-baseline.md`.
 
 ---
 
@@ -27,14 +27,14 @@ Numeric scores are intentionally not used as current architecture evidence.
 
 ## Phase 1: High Priority (Immediate - Score Impact: +0.5)
 
-### 1. Add VS Code Extension Integration (decoder repo)
+### 1. Add VS Code Extension Integration (reflect repo)
 
 **Effort:** Large (2-3 weeks)
 **Priority:** HIGH
 
 **What:**
-- Create `decoder-vscode` repo for VS Code extension
-- Use Decoder SDK for communication
+- Create `reflect-vscode` repo for VS Code extension
+- Use Reflect SDK for communication
 - Add WebSocket transport for real-time updates
 
 **Why:**
@@ -45,12 +45,12 @@ Numeric scores are intentionally not used as current architecture evidence.
 **Implementation Plan:**
 ```bash
 # Create new repo
-mkdir decoder-vscode
-cd decoder-vscode
+mkdir reflect-vscode
+cd reflect-vscode
 
 # Initialize
 git init
-go mod init github.com/GrayCodeAI/decoder-vscode
+go mod init github.com/GrayCodeAI/reflect-vscode
 
 # Add extension scaffold
 mkdir -p cmd extension/src
@@ -64,8 +64,8 @@ go get golang.org/x/net/websocket
 # Create extension files
 cat > extension/package.json << 'EOF'
 {
-  "name": "decoder",
-  "displayName": "Decoder",
+  "name": "reflect",
+  "displayName": "Reflect",
   "description": "AI coding assistant in terminal",
   "version": "0.1.0",
   "engines": { "vscode": "^1.90.0" },
@@ -75,14 +75,14 @@ cat > extension/package.json << 'EOF'
   "contributes": {
     "commands": [
       {
-        "command": "decoder.activate",
-        "title": "Activate Decoder"
+        "command": "reflect.activate",
+        "title": "Activate Reflect"
       }
     ],
     "menus": {
       "commandPalette": [
         {
-          "command": "decoder.activate",
+          "command": "reflect.activate",
           "when": "editorLangId"
         }
       ]
@@ -94,22 +94,22 @@ EOF
 # Add extension scaffold
 cat > extension/src/extension.ts << 'EOF'
 import * as vscode from 'vscode';
-import * as decodersdk from '@graycodeai/decodersdk';
+import * as reflectsdk from '@graycodeai/reflectsdk';
 
 export function activate(context: vscode.ExtensionContext) {
-  const client = new decodersdk.Client();
+  const client = new reflectsdk.Client();
   
   // Register completion provider
   vscode.languages.registerCompletionItemProvider(
     'go',
-    new DecoderCompletionProvider(client),
+    new ReflectCompletionProvider(client),
     'g', 'h'
   );
   
   // Register hover provider
   vscode.languages.registerHoverProvider(
     'go',
-    new DecoderHoverProvider(client)
+    new ReflectHoverProvider(client)
   );
 }
 EOF
@@ -123,7 +123,7 @@ vsce publish
 
 **Repository Structure:**
 ```
-decoder-vscode/
+reflect-vscode/
 ├── extension/           # VS Code extension code
 │   ├── src/
 │   │   ├── extension.ts
@@ -140,25 +140,25 @@ decoder-vscode/
 
 ---
 
-### 2. Add Extension Marketplace (decoder repo)
+### 2. Add Extension Marketplace (reflect repo)
 
 **Effort:** Medium (1-2 weeks)
 **Priority:** HIGH
 
 **What:**
 - Create marketplace for community extensions
-- Add extension discovery endpoint to decoder
+- Add extension discovery endpoint to reflect
 - Create `starling` integration
 - Add version compatibility checking
 
 **Why:**
 - Top agents have 100+ extensions
-- Build ecosystem around Decoder
+- Build ecosystem around Reflect
 - Increase adoption
 
 **Implementation Plan:**
 ```go
-// Add to decoder
+// Add to reflect
 package marketplace
 
 // Extension represents a community extension
@@ -261,7 +261,7 @@ func (s *Session) handleGetExtension(w http.ResponseWriter, r *http.Request) {
 // Handle install extension
 func (s *Session) handleInstallExtension(w http.ResponseWriter, r *http.Request) {
     var req InstallRequest
-    json.NewDecoder(r.Body).Decode(&req)
+    json.NewReflect(r.Body).Decode(&req)
     
     // Install extension
     err := installExtension(req.ID)
@@ -305,12 +305,12 @@ cat >> SKILL.md << 'EOF'
 
 To discover available extensions, use:
 ```
-decoder extensions list
+reflect extensions list
 ```
 
 To install an extension:
 ```
-decoder extensions install <extension-id>
+reflect extensions install <extension-id>
 ```
 EOF
 ```
@@ -418,7 +418,7 @@ func (f *Forum) handleIndex(w http.ResponseWriter, r *http.Request) {
 
 func (f *Forum) handleCreatePost(w http.ResponseWriter, r *http.Request) {
     post := Post{}
-    json.NewDecoder(r.Body).Decode(&post)
+    json.NewReflect(r.Body).Decode(&post)
     f.posts = append(f.posts, post)
     http.Redirect(w, r, "/", http.StatusSeeOther)
 }
@@ -431,7 +431,7 @@ go build forum.go
 
 ---
 
-### 5. Add More Extension Points (decoder)
+### 5. Add More Extension Points (reflect)
 
 **Effort:** Small (3-5 days)
 **Priority:** MEDIUM
@@ -499,7 +499,7 @@ func main() {
 
 ## Phase 3: Low Priority (Backlog - Score Impact: +0.2)
 
-### 6. Add AI Code Completion (mux)
+### 6. Add AI Code Completion (relay)
 
 **Effort:** Medium (1-2 weeks)
 **Priority:** LOW
@@ -514,7 +514,7 @@ func main() {
 
 ---
 
-### 7. Add Debugging Support (decoder)
+### 7. Add Debugging Support (reflect)
 
 **Effort:** Large (2-3 weeks)
 **Priority:** LOW
@@ -530,7 +530,7 @@ func main() {
 
 ---
 
-### 8. Add Web UI for Monitoring (decoder)
+### 8. Add Web UI for Monitoring (reflect)
 
 **Effort:** Small (3-5 days)
 **Priority:** LOW
@@ -562,7 +562,7 @@ func main() {
 
 ---
 
-### 10. Add Completion Endpoint to mux
+### 10. Add Completion Endpoint to relay
 
 **Effort:** Medium (1 week)
 **Priority:** LOW
@@ -579,7 +579,7 @@ func main() {
 
 ## Detailed Repo-Specific Roadmap
 
-### **decoder** (Main Repo) - Primary Product
+### **reflect** (Main Repo) - Primary Product
 
 | Phase | Improvement | Effort | Impact | Status |
 |-------|--------------|--------|--------|--------|
@@ -590,7 +590,7 @@ func main() {
 | 3 | Add Web UI for monitoring | Small | +0.2 | Planned |
 | 3 | Add SDK analytics | Small | +0.1 | Planned |
 
-Current architecture status: see `docs/architecture/decoder-architecture-baseline.md`.
+Current architecture status: see `docs/architecture/reflect-architecture-baseline.md`.
 
 ---
 
@@ -628,7 +628,7 @@ Current architecture status: see `docs/architecture/decoder-architecture-baselin
 
 ---
 
-### **mux** (LLM Runtime)
+### **relay** (LLM Runtime)
 
 | Phase | Improvement | Effort | Impact | Status |
 |-------|--------------|--------|--------|--------|
@@ -657,7 +657,7 @@ Current architecture status: see `docs/architecture/decoder-architecture-baselin
 
 The roadmap is sequenced by product value and implementation effort. It does
 not assign target architecture scores. Current architecture status is tracked
-in `docs/architecture/decoder-architecture-baseline.md`.
+in `docs/architecture/reflect-architecture-baseline.md`.
 
 ---
 
@@ -667,7 +667,7 @@ in `docs/architecture/decoder-architecture-baseline.md`.
 |------|--------|------------|
 | Marketplace competition | High | Focus on quality extensions |
 | Community building | Medium | Active engagement, good docs |
-| Development velocity | Medium | Prioritize decoder SDK first |
+| Development velocity | Medium | Prioritize reflect SDK first |
 | Adoption curve | Medium | VS Code extension is key |
 
 ---

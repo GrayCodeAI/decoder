@@ -2,7 +2,7 @@
 # A maintainer pushes a v<VERSION> tag after the release PR (VERSION +
 # CHANGELOG) merges; protect v* tags with a repository ruleset.
 # Source of truth: .shared-templates/workflows/go-release.yml.tmpl
-# (decoder's .github/workflows/release.yml is the reference rendering).
+# (reflect's .github/workflows/release.yml is the reference rendering).
 
 name: release
 
@@ -35,7 +35,7 @@ jobs:
 
       # Refuses a tag that disagrees with VERSION or has no CHANGELOG section,
       # and extracts that section as the release notes. Copy
-      # scripts/check-release-tag.sh from decoder.
+      # scripts/check-release-tag.sh from reflect.
       - name: Check tag against VERSION and CHANGELOG
         run: bash ./scripts/check-release-tag.sh --notes "${RUNNER_TEMP}/release-notes.md" "${GITHUB_REF_NAME}"
 

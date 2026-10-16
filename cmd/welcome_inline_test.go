@@ -8,9 +8,9 @@ import (
 
 	"charm.land/bubbles/v2/textarea"
 
-	decoderconfig "github.com/GrayCodeAI/decoder/internal/config"
-	"github.com/GrayCodeAI/decoder/internal/tool"
-	"github.com/GrayCodeAI/decoder/internal/ui/icons"
+	reflectconfig "github.com/GrayCodeAI/reflect/internal/config"
+	"github.com/GrayCodeAI/reflect/internal/tool"
+	"github.com/GrayCodeAI/reflect/internal/ui/icons"
 )
 
 type welcomeMCPStub struct {
@@ -26,7 +26,7 @@ func TestWelcomeScreenNerdIconsUnique(t *testing.T) {
 	icons.SetMode(icons.ModeNerd)
 	defer icons.SetMode(icons.ModeASCII)
 
-	out := buildWelcomeMessage(nil, "", nil, nil, decoderconfig.Settings{}, 0, false, 100, 24)
+	out := buildWelcomeMessage(nil, "", nil, nil, reflectconfig.Settings{}, 0, false, 100, 24)
 	seen := make(map[rune]struct{})
 	for _, r := range out {
 		if r < 0xE000 || r > 0xF8FF {
@@ -48,7 +48,7 @@ func (s welcomeMCPStub) Execute(context.Context, json.RawMessage) (string, error
 func (s welcomeMCPStub) MCPServerName() string { return s.server }
 
 func TestBuildWelcomeMessage_InlineShowsSetupGuidance(t *testing.T) {
-	out := buildWelcomeMessage(nil, "", nil, nil, decoderconfig.Settings{}, 0, false, 100, 24)
+	out := buildWelcomeMessage(nil, "", nil, nil, reflectconfig.Settings{}, 0, false, 100, 24)
 	if !strings.Contains(out, "v") {
 		t.Fatalf("inline welcome should show version, got:\n%s", out)
 	}
@@ -58,8 +58,8 @@ func TestBuildWelcomeMessage_InlineShowsSetupGuidance(t *testing.T) {
 }
 
 func TestBuildWelcomeMessage_InlineShowsGuidance(t *testing.T) {
-	out := buildWelcomeMessageWithSnapshot(nil, "", nil, nil, decoderconfig.Settings{}, 1, 0, 0, 100, 24, welcomeStatusSnapshot{agentsOK: true}, "")
-	for _, want := range []string{"Decoder", "Project instructions loaded", "1 skill", `Try "explain this repo"`, "/help"} {
+	out := buildWelcomeMessageWithSnapshot(nil, "", nil, nil, reflectconfig.Settings{}, 1, 0, 0, 100, 24, welcomeStatusSnapshot{agentsOK: true}, "")
+	for _, want := range []string{"Reflect", "Project instructions loaded", "1 skill", `Try "explain this repo"`, "/help"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("welcome missing %q: %s", want, out)
 		}
@@ -72,7 +72,7 @@ func TestBuildWelcomeMessage_InlineShowsGuidance(t *testing.T) {
 }
 
 func TestBuildWelcomeMessage_ShortTerminalUsesCompactCopy(t *testing.T) {
-	out := buildWelcomeMessage(nil, "", nil, nil, decoderconfig.Settings{}, 0, false, 72, 20)
+	out := buildWelcomeMessage(nil, "", nil, nil, reflectconfig.Settings{}, 0, false, 72, 20)
 	if strings.Contains(out, "PgUp/Dn scroll chat") || strings.Contains(out, "for new session") {
 		t.Fatalf("compact welcome should drop verbose descriptions, got:\n%s", out)
 	}
@@ -81,10 +81,10 @@ func TestBuildWelcomeMessage_ShortTerminalUsesCompactCopy(t *testing.T) {
 	}
 }
 
-func TestBuildWelcomeMessage_WideTerminalUsesDecoderWordmark(t *testing.T) {
+func TestBuildWelcomeMessage_WideTerminalUsesReflectWordmark(t *testing.T) {
 	for _, width := range []int{24, 40, 80, 120, 200} {
-		out := buildWelcomeMessageWithSnapshot(nil, "", nil, nil, decoderconfig.Settings{}, 2, 1, 0, width, 40, welcomeStatusSnapshot{agentsOK: true}, "")
-		if !strings.Contains(out, "Decoder") || !strings.Contains(out, "v"+DisplayVersion()) || !strings.Contains(out, "▀▀") || !strings.Contains(out, "▄▄") {
+		out := buildWelcomeMessageWithSnapshot(nil, "", nil, nil, reflectconfig.Settings{}, 2, 1, 0, width, 40, welcomeStatusSnapshot{agentsOK: true}, "")
+		if !strings.Contains(out, "Reflect") || !strings.Contains(out, "v"+DisplayVersion()) || !strings.Contains(out, "▀▀") || !strings.Contains(out, "▄▄") {
 			t.Fatalf("width %d lost name/version: %s", width, out)
 		}
 		for _, line := range strings.Split(out, "\n") {
@@ -95,17 +95,17 @@ func TestBuildWelcomeMessage_WideTerminalUsesDecoderWordmark(t *testing.T) {
 	}
 }
 
-func TestBuildWelcomeMessage_DecoderWordmarkIsStatic(t *testing.T) {
-	first := buildWelcomeMessageWithSnapshot(nil, "", nil, nil, decoderconfig.Settings{}, 0, 0, 0, 120, 40, welcomeStatusSnapshot{}, "")
-	blink := buildWelcomeMessageWithSnapshot(nil, "", nil, nil, decoderconfig.Settings{}, 0, 0, 2, 120, 40, welcomeStatusSnapshot{}, "")
+func TestBuildWelcomeMessage_ReflectWordmarkIsStatic(t *testing.T) {
+	first := buildWelcomeMessageWithSnapshot(nil, "", nil, nil, reflectconfig.Settings{}, 0, 0, 0, 120, 40, welcomeStatusSnapshot{}, "")
+	blink := buildWelcomeMessageWithSnapshot(nil, "", nil, nil, reflectconfig.Settings{}, 0, 0, 2, 120, 40, welcomeStatusSnapshot{}, "")
 	if first != blink {
 		t.Fatal("welcome heading should not animate")
 	}
 }
 
 func TestBuildWelcomeMessage_GraphicalMascotKeepsTextFallback(t *testing.T) {
-	out := buildWelcomeMessageWithSnapshotAndMascot(nil, "", nil, nil, decoderconfig.Settings{}, 0, 0, 0, 120, 40, welcomeStatusSnapshot{setup: decoderconfig.SetupState{NeedsSetup: true}}, "", true)
-	if !strings.Contains(out, "Decoder") || !strings.Contains(out, "/config") || !strings.Contains(out, "▀▀") {
+	out := buildWelcomeMessageWithSnapshotAndMascot(nil, "", nil, nil, reflectconfig.Settings{}, 0, 0, 0, 120, 40, welcomeStatusSnapshot{setup: reflectconfig.SetupState{NeedsSetup: true}}, "", true)
+	if !strings.Contains(out, "Reflect") || !strings.Contains(out, "/config") || !strings.Contains(out, "▀▀") {
 		t.Fatalf("welcome must retain heading and actionable setup guidance: %s", out)
 	}
 }

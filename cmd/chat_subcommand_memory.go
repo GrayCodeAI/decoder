@@ -5,7 +5,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
-	decoderconfig "github.com/GrayCodeAI/decoder/internal/config"
+	reflectconfig "github.com/GrayCodeAI/reflect/internal/config"
 )
 
 // memorySubcommand implements the /memory slash command.
@@ -17,7 +17,7 @@ func (m *memorySubcommand) Aliases() []string   { return nil }
 func (m *memorySubcommand) Description() string { return "print project instructions (AGENTS.md)" }
 func (m *memorySubcommand) Usage() string       { return "" }
 func (m *memorySubcommand) Handle(ml *chatModel, args []string, text string) (tea.Model, tea.Cmd) {
-	md := strings.TrimSpace(decoderconfig.LoadAgentsMD())
+	md := strings.TrimSpace(reflectconfig.LoadAgentsMD())
 	if md == "" {
 		ml.messages = append(ml.messages, displayMsg{role: "system", content: "No AGENTS.md project instructions found."})
 	} else {

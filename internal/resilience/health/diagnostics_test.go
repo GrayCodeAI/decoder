@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GrayCodeAI/decoder/internal/provider/gateway"
+	"github.com/GrayCodeAI/reflect/internal/provider/gateway"
 )
 
 func TestNewDiagnostics(t *testing.T) {
@@ -143,7 +143,7 @@ func TestFormatResults(t *testing.T) {
 
 	output := FormatResults(suite)
 
-	if !strings.Contains(output, "Decoder Diagnostics") {
+	if !strings.Contains(output, "Reflect Diagnostics") {
 		t.Error("Output should contain header")
 	}
 	if !strings.Contains(output, "test_pass") {
@@ -363,23 +363,23 @@ func TestCheckAPIKeySet(t *testing.T) {
 }
 
 func TestCheckModelConfigured(t *testing.T) {
-	orig := os.Getenv("DECODER_MODEL")
-	os.Unsetenv("DECODER_MODEL")
+	orig := os.Getenv("REFLECT_MODEL")
+	os.Unsetenv("REFLECT_MODEL")
 	defer func() {
 		if orig != "" {
-			os.Setenv("DECODER_MODEL", orig)
+			os.Setenv("REFLECT_MODEL", orig)
 		}
 	}()
 
 	result := checkModelConfigured()
 	if result.Status != "warn" {
-		t.Errorf("Expected warn when DECODER_MODEL not set, got %q", result.Status)
+		t.Errorf("Expected warn when REFLECT_MODEL not set, got %q", result.Status)
 	}
 
-	os.Setenv("DECODER_MODEL", "claude-opus-4-20250514")
+	os.Setenv("REFLECT_MODEL", "claude-opus-4-20250514")
 	result = checkModelConfigured()
 	if result.Status != "pass" {
-		t.Errorf("Expected pass when DECODER_MODEL is set, got %q", result.Status)
+		t.Errorf("Expected pass when REFLECT_MODEL is set, got %q", result.Status)
 	}
 }
 

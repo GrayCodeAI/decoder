@@ -142,32 +142,32 @@ func TestFileFormat(t *testing.T) {
 
 func TestHomeDirEnvOverride(t *testing.T) {
 	freshHome(t)
-	t.Setenv("DECODER_HOME", "")
+	t.Setenv("REFLECT_HOME", "")
 	home, err := HomeDir()
 	if err != nil {
 		t.Fatal(err)
 	}
-	// Without DECODER_HOME the resolved home ends in /.decoder.
-	if !strings.HasSuffix(home, ".decoder") {
-		t.Fatalf("HomeDir() = %q, want ~/.decoder default", home)
+	// Without REFLECT_HOME the resolved home ends in /.reflect.
+	if !strings.HasSuffix(home, ".reflect") {
+		t.Fatalf("HomeDir() = %q, want ~/.reflect default", home)
 	}
 }
 
-func TestHomeDirUsesDECODERHomeEnv(t *testing.T) {
+func TestHomeDirUsesREFLECTHomeEnv(t *testing.T) {
 	freshHome(t)
-	t.Setenv("DECODER_HOME", "/tmp/decoder-home-test")
+	t.Setenv("REFLECT_HOME", "/tmp/reflect-home-test")
 	home, err := HomeDir()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if home != "/tmp/decoder-home-test" {
-		t.Fatalf("HomeDir() = %q, want DECODER_HOME value", home)
+	if home != "/tmp/reflect-home-test" {
+		t.Fatalf("HomeDir() = %q, want REFLECT_HOME value", home)
 	}
 }
 
 func TestSetHomeDirOverrideWins(t *testing.T) {
 	home := freshHome(t)
-	t.Setenv("DECODER_HOME", "/tmp/ignored-home")
+	t.Setenv("REFLECT_HOME", "/tmp/ignored-home")
 	SetHomeDir(home)
 	got, err := HomeDir()
 	if err != nil {

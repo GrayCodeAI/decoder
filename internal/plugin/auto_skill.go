@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/GrayCodeAI/decoder/internal/theme"
-	"github.com/GrayCodeAI/decoder/internal/ui/icons"
+	"github.com/GrayCodeAI/reflect/internal/theme"
+	"github.com/GrayCodeAI/reflect/internal/ui/icons"
 )
 
 // ProjectSignal represents a detected project characteristic.
@@ -184,7 +184,7 @@ func RunAutoSkill(dir string) (string, error) {
 	}
 
 	if installed > 0 {
-		_, _ = fmt.Fprintf(&b, "\n%s", theme.Tint(fmt.Sprintf("Installed %d skill(s) to Decoder user state", installed), theme.ReportSuccess))
+		_, _ = fmt.Fprintf(&b, "\n%s", theme.Tint(fmt.Sprintf("Installed %d skill(s) to Reflect user state", installed), theme.ReportSuccess))
 	}
 	return b.String(), nil
 }

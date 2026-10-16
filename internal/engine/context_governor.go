@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/GrayCodeAI/decoder/internal/engine/token"
+	"github.com/GrayCodeAI/reflect/internal/engine/token"
 
-	"github.com/GrayCodeAI/decoder/internal/engine/compact"
+	"github.com/GrayCodeAI/reflect/internal/engine/compact"
 
-	"github.com/GrayCodeAI/decoder/internal/engine/ctxmgr"
-	modelPkg "github.com/GrayCodeAI/decoder/internal/provider/routing"
+	"github.com/GrayCodeAI/reflect/internal/engine/ctxmgr"
+	modelPkg "github.com/GrayCodeAI/reflect/internal/provider/routing"
 )
 
 const (

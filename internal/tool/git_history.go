@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/GrayCodeAI/decoder/internal/gitcmd"
+	"github.com/GrayCodeAI/reflect/internal/gitcmd"
 )
 
 // GitHistoryTool provides git history mining for developer workflow insights.

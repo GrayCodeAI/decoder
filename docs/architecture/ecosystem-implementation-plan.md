@@ -1,7 +1,7 @@
 # Ecosystem Architecture Implementation Plan
 
 This is the execution plan for the independent-repository architecture around
-Decoder. The plan treats `graycode-eco` as a parent folder only. It does not add a
+Reflect. The plan treats `graycode-eco` as a parent folder only. It does not add a
 root repository, root runtime module, or second product CLI.
 
 ## Target architecture
@@ -10,12 +10,12 @@ root repository, root runtime module, or second product CLI.
 SDKs (Sparrow / Robin / Wren)
               |
               v
-       Decoder CLI and daemon
+       Reflect CLI and daemon
               |
    +----------+----------+
    |          |          |
    v          v          v
-Mux     Harrier     Shrike
+Relay     Harrier     Shrike
 models    memory      tokens
    |          |          |
    +----------+----------+
@@ -28,20 +28,20 @@ models    memory      tokens
 Falcon MCP kit     GrayCode Platform
                    HTTP / cloud plane
 
-Swift, Kestrel, and Merlin are additional Decoder capabilities.
-Starling extends Decoder through skills. Owl reads the canonical manifest.
+Swift, Kestrel, and Merlin are additional Reflect capabilities.
+Starling extends Reflect through skills. Owl reads the canonical manifest.
 ```
 
 ## Invariants
 
-1. `decoder` is the only main product CLI and orchestration root.
+1. `reflect` is the only main product CLI and orchestration root.
 2. `eagle` owns neutral cross-repository contracts.
-3. Engines do not import Decoder internals or peer engines.
-4. SDKs use Decoder's public HTTP/OpenAPI surface.
-5. Starling uses Decoder's skill/plugin surface.
-6. Owl consumes `decoder/ecosystem.yaml` as a read-only projection source.
+3. Engines do not import Reflect internals or peer engines.
+4. SDKs use Reflect's public HTTP/OpenAPI surface.
+5. Starling uses Reflect's skill/plugin surface.
+6. Owl consumes `reflect/ecosystem.yaml` as a read-only projection source.
 7. No Go module imports `graycode-platform`.
-8. Decoder uses the platform only through optional authenticated runtime calls.
+8. Reflect uses the platform only through optional authenticated runtime calls.
 9. Every release must work with `GOWORK=off` and published module versions.
 
 ## Phase 1: Repository and naming baseline — complete
@@ -50,57 +50,57 @@ Starling extends Decoder through skills. Owl reads the canonical manifest.
 - Keep `graycode-eco` file-free except for checked-out repository directories.
 - Use bird codenames consistently for directories, module paths, and repository
   names.
-- Keep `decoder/ecosystem.yaml` as the canonical inventory.
+- Keep `reflect/ecosystem.yaml` as the canonical inventory.
 - Keep `owl/ecosystem.json` synchronized with the canonical inventory.
 - Remove old repository directories and old module paths from active source.
 
 Acceptance checks:
 
 ```text
-bash decoder/scripts/ecosystem-manifest.sh validate
+bash reflect/scripts/ecosystem-manifest.sh validate
 bash owl/scripts/sync-ecosystem.sh
 ```
 
 ## Phase 2: Contract and dependency boundaries — complete locally
 
-- Keep Eagle imports in Decoder and engines limited to shared contracts.
+- Keep Eagle imports in Reflect and engines limited to shared contracts.
 - Keep Falcon imports limited to MCP-serving components.
-- Keep Decoder's Mux integration behind `mux/engine`.
-- Keep Decoder's SDKs outside the Go workspace and outside engine dependencies.
+- Keep Reflect's Relay integration behind `relay/engine`.
+- Keep Reflect's SDKs outside the Go workspace and outside engine dependencies.
 - Keep platform integration at the HTTP/Service Binding boundary.
-- Keep graph and quality projections as explicit, reviewed Decoder integration
+- Keep graph and quality projections as explicit, reviewed Reflect integration
   surfaces; do not spread their implementation types into unrelated packages.
 
 Acceptance checks:
 
 ```text
-bash decoder/scripts/check-ecosystem-boundaries.sh
-bash decoder/scripts/check-support-repo-coupling.sh
-bash decoder/scripts/check-mux-engine-boundary.sh
-bash decoder/scripts/check-mux-client-imports.sh
-bash decoder/scripts/check-no-replace-directives.sh
+bash reflect/scripts/check-ecosystem-boundaries.sh
+bash reflect/scripts/check-support-repo-coupling.sh
+bash reflect/scripts/check-relay-engine-boundary.sh
+bash reflect/scripts/check-relay-client-imports.sh
+bash reflect/scripts/check-no-replace-directives.sh
 ```
 
 ## Phase 3: Published-module cutover — pending external release
 
-The local Mux source already uses Eagle contracts. Decoder's current published
-Mux pseudo-version still declares the retired compatibility contract
-transitively, so this phase requires publishing the compatible Mux revision.
+The local Relay source already uses Eagle contracts. Reflect's current published
+Relay pseudo-version still declares the retired compatibility contract
+transitively, so this phase requires publishing the compatible Relay revision.
 
-1. Publish the current Eagle-compatible Mux revision.
+1. Publish the current Eagle-compatible Relay revision.
 2. Resolve its canonical Go pseudo-version from the published commit.
-3. Update Decoder's Mux requirement to that version.
-4. Run `GOWORK=off go mod tidy` in Decoder.
-5. Confirm the retired compatibility module is absent from Decoder's module graph.
+3. Update Reflect's Relay requirement to that version.
+4. Run `GOWORK=off go mod tidy` in Reflect.
+5. Confirm the retired compatibility module is absent from Reflect's module graph.
 6. Remove any obsolete transition excludes.
-7. Run Decoder's standalone release-parity checks.
+7. Run Reflect's standalone release-parity checks.
 
 Acceptance checks:
 
 ```text
 GOWORK=off go mod tidy
 GOWORK=off go list -m all
-bash decoder/scripts/check-module-release-parity.sh
+bash reflect/scripts/check-module-release-parity.sh
 GOWORK=off go test ./...
 ```
 
@@ -109,7 +109,7 @@ The release graph must resolve from published module versions.
 
 ## Phase 4: SDK and platform integration — complete locally; release verify
 
-- Keep Sparrow, Robin, and Wren aligned with Decoder's public API snapshots.
+- Keep Sparrow, Robin, and Wren aligned with Reflect's public API snapshots.
 - Keep SDKs independent from engines and Eagle implementation packages.
 - Keep the Web app calling the BFF rather than reaching into Worker internals.
 - Keep the BFF-to-Worker connection private through the configured Service
@@ -131,11 +131,11 @@ pnpm run format:check
 
 ## Phase 5: Continuous verification
 
-- Run the manifest and boundary checks on every Decoder ecosystem change.
+- Run the manifest and boundary checks on every Reflect ecosystem change.
 - Run standalone module-mode tests before release; workspace tests are an
   additional integration pass.
 - Regenerate Owl after every canonical manifest change.
-- Reject new imports of Decoder internals from sibling repositories.
+- Reject new imports of Reflect internals from sibling repositories.
 - Reject new direct SDK-to-engine or engine-to-peer-engine dependencies.
 - Record any intentional boundary exception in the architecture document and
   add a focused test or guard for it.
@@ -146,10 +146,10 @@ The architecture is complete when:
 
 - all local invariants and boundary checks pass;
 - all repositories match the canonical manifest;
-- Decoder builds and tests with `GOWORK=off`;
+- Reflect builds and tests with `GOWORK=off`;
 - SDK and platform contract checks pass; and
-- the published Mux revision no longer brings the retired compatibility
-  contract into Decoder's standalone module graph.
+- the published Relay revision no longer brings the retired compatibility
+  contract into Reflect's standalone module graph.
 
 Current state: Phases 1, 2, and the local portion of Phase 4 are complete.
 Phase 3 is the only remaining release-dependent item.

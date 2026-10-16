@@ -1,4 +1,4 @@
-// Package ext defines the single, run-scoped extension contract that Decoder (and
+// Package ext defines the single, run-scoped extension contract that Reflect (and
 // sub-agents) use to plug in policy, redaction, verifiers, budgets and audit
 // logging. It intentionally has no dependency on the LLM transport: callers
 // translate a concrete tool call into the request shape below and feed back the

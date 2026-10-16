@@ -4,22 +4,22 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/GrayCodeAI/decoder/internal/engine/token"
+	"github.com/GrayCodeAI/reflect/internal/engine/token"
 
-	"github.com/GrayCodeAI/decoder/internal/engine/compact"
+	"github.com/GrayCodeAI/reflect/internal/engine/compact"
 
-	"github.com/GrayCodeAI/decoder/internal/types"
-	"github.com/GrayCodeAI/mux/llm"
+	"github.com/GrayCodeAI/reflect/internal/types"
+	"github.com/GrayCodeAI/relay/llm"
 )
 
 // ProviderNativeCompactStrategy delegates provider-specific compaction to
-// Mux. Decoder owns when conversation state is compacted and how the resulting
-// summary is inserted; Mux owns credentials and provider transport details.
+// Relay. Reflect owns when conversation state is compacted and how the resulting
+// summary is inserted; Relay owns credentials and provider transport details.
 type ProviderNativeCompactStrategy struct{}
 
 func (s *ProviderNativeCompactStrategy) Name() string { return "provider_native" }
 
-func (s *ProviderNativeCompactStrategy) ShouldTrigger(msgs []types.MuxMessage, tokenCount, threshold int) bool {
+func (s *ProviderNativeCompactStrategy) ShouldTrigger(msgs []types.RelayMessage, tokenCount, threshold int) bool {
 	return tokenCount >= threshold && len(msgs) >= 8
 }
 
@@ -53,8 +53,8 @@ func (s *ProviderNativeCompactStrategy) Compact(ctx context.Context, sess *Sessi
 	if keepEnd > len(messagesBefore) {
 		keepEnd = len(messagesBefore)
 	}
-	tail := append([]types.MuxMessage(nil), messagesBefore[len(messagesBefore)-keepEnd:]...)
-	messages := append([]types.MuxMessage{{Role: "user", Content: compact.FormatCompactSummary(summary)}}, tail...)
+	tail := append([]types.RelayMessage(nil), messagesBefore[len(messagesBefore)-keepEnd:]...)
+	messages := append([]types.RelayMessage{{Role: "user", Content: compact.FormatCompactSummary(summary)}}, tail...)
 	compact := &compact.CompactResult{
 		Messages:     messages,
 		TokensBefore: tokensBefore,

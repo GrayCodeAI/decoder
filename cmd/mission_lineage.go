@@ -5,9 +5,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/GrayCodeAI/decoder/internal/storage"
+	"github.com/GrayCodeAI/reflect/internal/storage"
 
-	mission "github.com/GrayCodeAI/decoder/internal/multiagent"
+	mission "github.com/GrayCodeAI/reflect/internal/multiagent"
 	"github.com/spf13/cobra"
 )
 

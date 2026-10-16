@@ -136,6 +136,6 @@
     ]
   },
   "ecosystem_compatibility": {
-    "decoder+mux": "full"
+    "reflect+relay": "full"
   }
 }

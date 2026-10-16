@@ -42,7 +42,7 @@ func detectDarkBackground() bool {
 	if bg := os.Getenv("TERMINAL_BACKGROUND"); strings.ToLower(bg) == "dark" {
 		return true
 	}
-	// Default to true for Decoder (dark theme is default)
+	// Default to true for Reflect (dark theme is default)
 	return true
 }
 

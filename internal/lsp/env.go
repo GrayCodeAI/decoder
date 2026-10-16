@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	decodertoken "github.com/GrayCodeAI/decoder/internal/token"
+	reflecttoken "github.com/GrayCodeAI/reflect/internal/token"
 )
 
 var sensitiveKeySubstrings = []string{
@@ -38,7 +38,7 @@ func IsSensitiveEnvEntry(key, val string) bool {
 		return true
 	}
 	if len(val) > 0 {
-		matches := decodertoken.DefaultSecretDetector().DetectSecrets(val)
+		matches := reflecttoken.DefaultSecretDetector().DetectSecrets(val)
 		if len(matches) > 0 {
 			return true
 		}

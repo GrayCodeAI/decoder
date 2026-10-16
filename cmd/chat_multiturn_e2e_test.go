@@ -6,35 +6,35 @@ import (
 	"testing"
 
 	tea "charm.land/bubbletea/v2"
-	decoderconfig "github.com/GrayCodeAI/decoder/internal/config"
-	"github.com/GrayCodeAI/decoder/internal/engine"
-	"github.com/GrayCodeAI/decoder/internal/provider/gateway"
+	reflectconfig "github.com/GrayCodeAI/reflect/internal/config"
+	"github.com/GrayCodeAI/reflect/internal/engine"
+	"github.com/GrayCodeAI/reflect/internal/provider/gateway"
 )
 
 func configureReadyChatState(t *testing.T) {
 	t.Helper()
 	isolateChatCommandSweepEnv(t)
 
-	decoderconfig.InvalidateConfigUICache()
+	reflectconfig.InvalidateConfigUICache()
 	store := &gateway.MapStore{}
 	gateway.SetDefaultStore(store)
 	t.Cleanup(func() {
 		gateway.SetDefaultStore(nil)
-		decoderconfig.InvalidateConfigUICache()
+		reflectconfig.InvalidateConfigUICache()
 	})
 
 	ctx := context.Background()
 	if err := store.Set(ctx, gateway.AccountForEnv("OPENROUTER_API_KEY"), "sk-or-test-key-1234567890"); err != nil {
 		t.Fatal(err)
 	}
-	if err := decoderconfig.SetActiveProvider(ctx, "openrouter"); err != nil {
+	if err := reflectconfig.SetActiveProvider(ctx, "openrouter"); err != nil {
 		t.Fatal(err)
 	}
-	if err := decoderconfig.SetActiveModel(ctx, "gpt-4o"); err != nil {
+	if err := reflectconfig.SetActiveModel(ctx, "gpt-4o"); err != nil {
 		t.Fatal(err)
 	}
-	decoderconfig.InvalidateConfigUICache()
-	decoderconfig.RefreshConfigCredSnapshot(ctx)
+	reflectconfig.InvalidateConfigUICache()
+	reflectconfig.RefreshConfigCredSnapshot(ctx)
 }
 
 func countMessagesByRole(msgs []displayMsg, role string) int {

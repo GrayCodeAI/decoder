@@ -7,20 +7,20 @@ import (
 	tea "charm.land/bubbletea/v2"
 	lipgloss "charm.land/lipgloss/v2"
 
-	decoderconfig "github.com/GrayCodeAI/decoder/internal/config"
-	"github.com/GrayCodeAI/decoder/internal/ui/icons"
+	reflectconfig "github.com/GrayCodeAI/reflect/internal/config"
+	"github.com/GrayCodeAI/reflect/internal/ui/icons"
 )
 
 func (m chatModel) configStatus() (gateway, model string, configured bool) {
 	ctx := context.Background()
-	if !decoderconfig.HasConfiguredDeploymentCached(ctx) {
+	if !reflectconfig.HasConfiguredDeploymentCached(ctx) {
 		return "none", "", false
 	}
 	gw := strings.TrimSpace(m.configModelProvider)
-	if gw != "" && decoderconfig.IsSetupGateway(gw) {
-		gw = decoderconfig.GatewayDisplayName(gw)
-	} else if active := decoderconfig.ActiveGateway(ctx); active != "" {
-		gw = decoderconfig.GatewayDisplayName(active)
+	if gw != "" && reflectconfig.IsSetupGateway(gw) {
+		gw = reflectconfig.GatewayDisplayName(gw)
+	} else if active := reflectconfig.ActiveGateway(ctx); active != "" {
+		gw = reflectconfig.GatewayDisplayName(active)
 	} else {
 		gw = "none"
 	}
@@ -28,7 +28,7 @@ func (m chatModel) configStatus() (gateway, model string, configured bool) {
 		model = strings.TrimSpace(m.session.Model())
 	}
 	if model == "" {
-		model = strings.TrimSpace(decoderconfig.ActiveModel(ctx))
+		model = strings.TrimSpace(reflectconfig.ActiveModel(ctx))
 	}
 	return gw, model, true
 }
@@ -44,7 +44,7 @@ func configTabDot(active bool) string {
 
 func configTabLabelStyle(active bool) lipgloss.Style {
 	if active {
-		return lipgloss.NewStyle().Foreground(decoderColor).Bold(true)
+		return lipgloss.NewStyle().Foreground(reflectColor).Bold(true)
 	}
 	return configMutedStyle()
 }
@@ -90,7 +90,7 @@ func (m chatModel) switchConfigTab(tab int) (chatModel, tea.Cmd) {
 		m = m.stopConfigModelSearch(true)
 	}
 	ctx := context.Background()
-	if tab == configTabModels && !decoderconfig.HasConfiguredDeploymentCached(ctx) {
+	if tab == configTabModels && !reflectconfig.HasConfiguredDeploymentCached(ctx) {
 		tab = configTabGateways
 		m.configNotice = "Select a gateway first · enter · paste API key"
 		m = m.focusConfigActiveGateway()
@@ -122,9 +122,9 @@ func (m chatModel) openConfigAtTab(tab int) (chatModel, tea.Cmd) {
 	m.configSel = 0
 	m.configScroll = 0
 	m.viewDirty = true
-	decoderconfig.RefreshConfigCredSnapshot(ctx)
+	reflectconfig.RefreshConfigCredSnapshot(ctx)
 	m = m.refreshConfigGatewayRows()
-	setup := decoderconfig.EvaluateSetupCached(ctx)
+	setup := reflectconfig.EvaluateSetupCached(ctx)
 
 	if tab < 0 {
 		if setup.HasCredentials {

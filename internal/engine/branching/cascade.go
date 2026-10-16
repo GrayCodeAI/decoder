@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GrayCodeAI/decoder/internal/engine/cost"
-	"github.com/GrayCodeAI/decoder/internal/provider/routing"
+	"github.com/GrayCodeAI/reflect/internal/engine/cost"
+	"github.com/GrayCodeAI/reflect/internal/provider/routing"
 )
 
 // CascadeRouter selects the optimal model for each request based on task complexity.
@@ -211,7 +211,7 @@ func classifyPrompt(prompt string) string {
 }
 
 // modelForTask maps a task type to the appropriate model using configured roles
-// and mux catalog tier defaults.
+// and relay catalog tier defaults.
 func (cr *CascadeRouter) modelForTask(taskType string, frugal bool) string {
 	tier := routing.SuggestTierForTask(taskType)
 
@@ -250,7 +250,7 @@ func (cr *CascadeRouter) modelForTask(taskType string, frugal bool) string {
 	}
 }
 
-// defaultFor returns the best model for a given cost tier via mux catalog tier defaults.
+// defaultFor returns the best model for a given cost tier via relay catalog tier defaults.
 func (cr *CascadeRouter) defaultFor(tier ModelTier) string {
 	provider := ""
 	if info, ok := routing.Find(cr.DefaultModel); ok {

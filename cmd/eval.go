@@ -9,10 +9,10 @@ import (
 	"strings"
 	"time"
 
-	decoderconfig "github.com/GrayCodeAI/decoder/internal/config"
-	"github.com/GrayCodeAI/decoder/internal/features/eval"
-	"github.com/GrayCodeAI/decoder/internal/features/evalloop"
-	"github.com/GrayCodeAI/decoder/internal/tool"
+	reflectconfig "github.com/GrayCodeAI/reflect/internal/config"
+	"github.com/GrayCodeAI/reflect/internal/features/eval"
+	"github.com/GrayCodeAI/reflect/internal/features/evalloop"
+	"github.com/GrayCodeAI/reflect/internal/tool"
 	"github.com/spf13/cobra"
 )
 
@@ -98,22 +98,22 @@ func runEvalLoop(cmd *cobra.Command, _ []string) error {
 	if strings.TrimSpace(evalLoopPrompt) == "" {
 		return fmt.Errorf("--prompt is required")
 	}
-	settings := decoderconfig.LoadGlobalSettings()
+	settings := reflectconfig.LoadGlobalSettings()
 	ctx := context.Background()
 
-	gw, err := decoderconfig.NewMuxEngineForSettings(settings)
+	gw, err := reflectconfig.NewRelayEngineForSettings(settings)
 	if err != nil {
 		return fmt.Errorf("eval loop: build engine client: %w", err)
 	}
 	model := strings.TrimSpace(evalLoopModel)
 	if model == "" {
-		model = strings.TrimSpace(decoderconfig.ActiveModel(ctx))
+		model = strings.TrimSpace(reflectconfig.ActiveModel(ctx))
 	}
 	if model == "" {
 		model = strings.TrimSpace(settings.Model)
 	}
 
-	workDir, err := os.MkdirTemp("", "decoder-eval-loop-*")
+	workDir, err := os.MkdirTemp("", "reflect-eval-loop-*")
 	if err != nil {
 		return fmt.Errorf("eval loop: create temp dir: %w", err)
 	}
@@ -225,7 +225,7 @@ func runEval(_ *cobra.Command, _ []string) error {
 
 	fmt.Printf("%s\n", auditTint(fmt.Sprintf("Running %d tasks with model %s...", len(tasks), modelName), textPrimary))
 
-	suite := &eval.BenchmarkSuite{Name: "decoder-eval", Tasks: tasks}
+	suite := &eval.BenchmarkSuite{Name: "reflect-eval", Tasks: tasks}
 	runner := eval.NewRunner(modelName, "")
 	runner.NoCache = evalNoCache
 	if !evalNoCache {

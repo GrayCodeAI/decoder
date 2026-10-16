@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/GrayCodeAI/decoder/internal/engine/token"
+	"github.com/GrayCodeAI/reflect/internal/engine/token"
 )
 
 func TestNewConversationSummarizer(t *testing.T) {

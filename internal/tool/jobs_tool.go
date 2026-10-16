@@ -11,8 +11,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GrayCodeAI/decoder/internal/env"
-	"github.com/GrayCodeAI/decoder/internal/jobs"
+	"github.com/GrayCodeAI/reflect/internal/env"
+	"github.com/GrayCodeAI/reflect/internal/jobs"
 )
 
 // jobsRegistry is the process-wide background-job registry backing the

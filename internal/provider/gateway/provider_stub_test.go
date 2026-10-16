@@ -4,98 +4,98 @@ import (
 	"context"
 	"testing"
 
-	"github.com/GrayCodeAI/decoder/internal/types"
-	muxengine "github.com/GrayCodeAI/mux/engine"
+	"github.com/GrayCodeAI/reflect/internal/types"
+	relayengine "github.com/GrayCodeAI/relay/engine"
 )
 
 // stubProvider proves the Provider interface is swappable: a test can inject a
 // deterministic fake and drive the ChatClient adapter without constructing any
-// Mux engine. This is the swappable-Engine guarantee Phase 3 delivers.
+// Relay engine. This is the swappable-Engine guarantee Phase 3 delivers.
 type stubProvider struct {
-	resp *muxengine.GenerateResponse
+	resp *relayengine.GenerateResponse
 	err  error
 }
 
-func (s *stubProvider) Resolve(context.Context, muxengine.SelectionRequest) (muxengine.Route, error) {
-	return muxengine.Route{}, nil
+func (s *stubProvider) Resolve(context.Context, relayengine.SelectionRequest) (relayengine.Route, error) {
+	return relayengine.Route{}, nil
 }
 
-func (s *stubProvider) Generate(context.Context, muxengine.GenerateRequest) (*muxengine.GenerateResponse, error) {
+func (s *stubProvider) Generate(context.Context, relayengine.GenerateRequest) (*relayengine.GenerateResponse, error) {
 	return s.resp, s.err
 }
 
-func (s *stubProvider) Stream(context.Context, muxengine.GenerateRequest) (muxengine.EventStreamer, error) {
+func (s *stubProvider) Stream(context.Context, relayengine.GenerateRequest) (relayengine.EventStreamer, error) {
 	return nil, nil
 }
 
-func (s *stubProvider) ListModels(context.Context, string, bool) ([]muxengine.Model, error) {
+func (s *stubProvider) ListModels(context.Context, string, bool) ([]relayengine.Model, error) {
 	return nil, nil
 }
 
-func (s *stubProvider) ListLiveModels(context.Context, string) ([]muxengine.Model, error) {
+func (s *stubProvider) ListLiveModels(context.Context, string) ([]relayengine.Model, error) {
 	return nil, nil
 }
 
-func (s *stubProvider) ListPublicModels(context.Context, string) ([]muxengine.Model, error) {
+func (s *stubProvider) ListPublicModels(context.Context, string) ([]relayengine.Model, error) {
 	return nil, nil
 }
 
-func (s *stubProvider) ModelInfo(context.Context, string) (muxengine.Model, bool, error) {
-	return muxengine.Model{}, false, nil
+func (s *stubProvider) ModelInfo(context.Context, string) (relayengine.Model, bool, error) {
+	return relayengine.Model{}, false, nil
 }
 func (s *stubProvider) ModelProviders(context.Context) ([]string, error)    { return nil, nil }
 func (s *stubProvider) DefaultModel(context.Context, string, string) string { return "" }
-func (s *stubProvider) PreferredModel(context.Context, string, muxengine.ModelClass, string) string {
+func (s *stubProvider) PreferredModel(context.Context, string, relayengine.ModelClass, string) string {
 	return ""
 }
 
-func (s *stubProvider) PreferredModels(context.Context, string, muxengine.ModelClass, int) []string {
+func (s *stubProvider) PreferredModels(context.Context, string, relayengine.ModelClass, int) []string {
 	return nil
 }
 
-func (s *stubProvider) ModelClassOf(context.Context, string) muxengine.ModelClass {
+func (s *stubProvider) ModelClassOf(context.Context, string) relayengine.ModelClass {
 	return ModelClassEconomical
 }
 func (s *stubProvider) ProviderForModel(context.Context, string) string { return "" }
 func (s *stubProvider) PrimaryModel(context.Context) string             { return "" }
 func (s *stubProvider) ModelNames(context.Context) []string             { return nil }
-func (s *stubProvider) StatePaths() muxengine.StatePaths {
-	return muxengine.StatePaths{}
+func (s *stubProvider) StatePaths() relayengine.StatePaths {
+	return relayengine.StatePaths{}
 }
 func (s *stubProvider) DefaultProviderFilter(context.Context) string { return "" }
-func (s *stubProvider) Catalog(context.Context) (muxengine.CatalogSnapshot, error) {
-	return muxengine.CatalogSnapshot{}, nil
+func (s *stubProvider) Catalog(context.Context) (relayengine.CatalogSnapshot, error) {
+	return relayengine.CatalogSnapshot{}, nil
 }
 
-func (s *stubProvider) RefreshCatalog(context.Context, string) (muxengine.CatalogSnapshot, error) {
-	return muxengine.CatalogSnapshot{}, nil
+func (s *stubProvider) RefreshCatalog(context.Context, string) (relayengine.CatalogSnapshot, error) {
+	return relayengine.CatalogSnapshot{}, nil
 }
 
-func (s *stubProvider) ApplyCredentials(context.Context, string) (muxengine.CatalogSnapshot, error) {
-	return muxengine.CatalogSnapshot{}, nil
+func (s *stubProvider) ApplyCredentials(context.Context, string) (relayengine.CatalogSnapshot, error) {
+	return relayengine.CatalogSnapshot{}, nil
 }
 
-func (s *stubProvider) SaveCredential(context.Context, string, string) (muxengine.CredentialStatus, error) {
-	return muxengine.CredentialStatus{}, nil
+func (s *stubProvider) SaveCredential(context.Context, string, string) (relayengine.CredentialStatus, error) {
+	return relayengine.CredentialStatus{}, nil
 }
 func (s *stubProvider) RemoveCredential(context.Context, string) error { return nil }
-func (s *stubProvider) CredentialStatus(context.Context, string) (muxengine.CredentialStatus, error) {
-	return muxengine.CredentialStatus{}, nil
+func (s *stubProvider) CredentialStatus(context.Context, string) (relayengine.CredentialStatus, error) {
+	return relayengine.CredentialStatus{}, nil
 }
 func (s *stubProvider) SaveCredentialEnv(context.Context, string, string) error { return nil }
 func (s *stubProvider) HasCredentialEnv(context.Context, string) bool           { return false }
 func (s *stubProvider) CredentialEnvKeys(string) []string                       { return nil }
-func (s *stubProvider) ResolveCredential(context.Context, string) muxengine.CredentialResolution {
-	return muxengine.CredentialResolution{}
+func (s *stubProvider) ResolveCredential(context.Context, string) relayengine.CredentialResolution {
+	return relayengine.CredentialResolution{}
 }
 
-func (s *stubProvider) CredentialProviders(context.Context) []muxengine.CredentialProvider {
+func (s *stubProvider) CredentialProviders(context.Context) []relayengine.CredentialProvider {
 	return nil
 }
 
-func (s *stubProvider) GatewayDefinitions() []muxengine.Gateway { return nil }
+func (s *stubProvider) GatewayDefinitions() []relayengine.Gateway { return nil }
 
-func (s *stubProvider) Gateways(context.Context) []muxengine.Gateway           { return nil }
+func (s *stubProvider) Gateways(context.Context) []relayengine.Gateway         { return nil }
 func (s *stubProvider) GatewayRegion(string) (string, bool)                    { return "", false }
 func (s *stubProvider) SetGatewayRegion(context.Context, string, string) error { return nil }
 func (s *stubProvider) GatewayForModel(context.Context, string) string         { return "" }
@@ -106,49 +106,49 @@ func (s *stubProvider) DeploymentStatus(context.Context, string) (string, error)
 	return "", nil
 }
 
-func (s *stubProvider) DeploymentSummary(context.Context, string) (muxengine.DeploymentSummary, error) {
-	return muxengine.DeploymentSummary{}, nil
+func (s *stubProvider) DeploymentSummary(context.Context, string) (relayengine.DeploymentSummary, error) {
+	return relayengine.DeploymentSummary{}, nil
 }
 func (s *stubProvider) RoutingPreview(context.Context, string) (string, error) { return "", nil }
-func (s *stubProvider) CatalogHealth(context.Context) muxengine.CatalogHealth {
-	return muxengine.CatalogHealth{}
+func (s *stubProvider) CatalogHealth(context.Context) relayengine.CatalogHealth {
+	return relayengine.CatalogHealth{}
 }
 
-func (s *stubProvider) Preflight(context.Context) muxengine.PreflightReport {
-	return muxengine.PreflightReport{}
+func (s *stubProvider) Preflight(context.Context) relayengine.PreflightReport {
+	return relayengine.PreflightReport{}
 }
 
-func (s *stubProvider) PreflightWithOptions(context.Context, muxengine.PreflightOptions) muxengine.PreflightReport {
-	return muxengine.PreflightReport{}
+func (s *stubProvider) PreflightWithOptions(context.Context, relayengine.PreflightOptions) relayengine.PreflightReport {
+	return relayengine.PreflightReport{}
 }
 
-func (s *stubProvider) ActiveSelection(context.Context) muxengine.Route {
-	return muxengine.Route{}
+func (s *stubProvider) ActiveSelection(context.Context) relayengine.Route {
+	return relayengine.Route{}
 }
 
-func (s *stubProvider) EffectiveSelection(context.Context, muxengine.SelectionOptions) muxengine.Selection {
-	return muxengine.Selection{}
+func (s *stubProvider) EffectiveSelection(context.Context, relayengine.SelectionOptions) relayengine.Selection {
+	return relayengine.Selection{}
 }
 func (s *stubProvider) SetActiveProvider(context.Context, string) error    { return nil }
 func (s *stubProvider) SetActiveModel(context.Context, string) error       { return nil }
 func (s *stubProvider) SetSelection(context.Context, string, string) error { return nil }
 func (s *stubProvider) ClearSelection(context.Context) error               { return nil }
-func (s *stubProvider) ProviderStateSecurityStatus() muxengine.ProviderStateSecurity {
-	return muxengine.ProviderStateSecurity{}
+func (s *stubProvider) ProviderStateSecurityStatus() relayengine.ProviderStateSecurity {
+	return relayengine.ProviderStateSecurity{}
 }
 
 func (s *stubProvider) SupportsNativeCompaction(context.Context, string, string) bool { return false }
 
-func (s *stubProvider) CompactNative(context.Context, muxengine.NativeCompactionRequest) (string, error) {
+func (s *stubProvider) CompactNative(context.Context, relayengine.NativeCompactionRequest) (string, error) {
 	return "", nil
 }
 
 func TestStubProviderDrivesChatClient(t *testing.T) {
-	stub := &stubProvider{resp: &muxengine.GenerateResponse{Content: "from stub", FinishReason: "end_turn"}}
+	stub := &stubProvider{resp: &relayengine.GenerateResponse{Content: "from stub", FinishReason: "end_turn"}}
 	gw := &Gateway{Generator: stub}
 	client := gw.ChatClient()
 
-	got, err := client.Chat(context.Background(), []types.MuxMessage{{Role: "user", Content: "hi"}}, types.ChatOptions{})
+	got, err := client.Chat(context.Background(), []types.RelayMessage{{Role: "user", Content: "hi"}}, types.ChatOptions{})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

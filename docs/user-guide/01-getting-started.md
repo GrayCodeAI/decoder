@@ -1,25 +1,25 @@
 # Getting Started
 
-Decoder is an AI-powered coding agent for your terminal, built for developers by GrayCode AI. It understands your codebase, executes shell commands, edits files, searches the web, and manages tasks — all through natural language.
+Reflect is an AI-powered coding agent for your terminal, built for developers by GrayCode AI. It understands your codebase, executes shell commands, edits files, searches the web, and manages tasks — all through natural language.
 
-You can use Decoder interactively as a full-screen TUI, run it headlessly for scripting and CI/CD, or integrate it into editors via the Agent Client Protocol (ACP).
+You can use Reflect interactively as a full-screen TUI, run it headlessly for scripting and CI/CD, or integrate it into editors via the Agent Client Protocol (ACP).
 
 ---
 
 ## Installation
 
-Decoder is currently in active development. Contributor source builds are the primary path while we harden the product in the open.
+Reflect is currently in active development. Contributor source builds are the primary path while we harden the product in the open.
 
 ### From Source (Recommended for Contributors)
 
 ```bash
-git clone https://github.com/GrayCodeAI/decoder && cd decoder
-GOWORK=off go build -o decoder ./cmd/decoder
-./decoder
+git clone https://github.com/GrayCodeAI/reflect && cd reflect
+GOWORK=off go build -o reflect ./cmd/reflect
+./reflect
 ```
 
 For full cross-repository development, place the nine Go repositories beside
-Decoder in a parent workspace and run `make setup` from `decoder`; `graycode-eco` is
+Reflect in a parent workspace and run `make setup` from `reflect`; `graycode-eco` is
 only a local folder name, not a repository containing those modules.
 
 ### Verification
@@ -27,7 +27,7 @@ only a local folder name, not a repository containing those modules.
 Run the developer path check to verify your setup:
 
 ```bash
-./decoder path
+./reflect path
 ```
 
 This checks setup and security readiness.
@@ -36,15 +36,15 @@ This checks setup and security readiness.
 
 ## First Launch
 
-Start Decoder by running:
+Start Reflect by running:
 
 ```bash
-decoder
+reflect
 ```
 
-On first launch, Decoder opens a TUI where you can configure credentials. Press `/config` (or `/autonomy`) to open the configuration picker. Your API keys are stored in your OS keychain (macOS Keychain or Linux keyring), never in plain text.
+On first launch, Reflect opens a TUI where you can configure credentials. Press `/config` (or `/autonomy`) to open the configuration picker. Your API keys are stored in your OS keychain (macOS Keychain or Linux keyring), never in plain text.
 
-Decoder supports multiple providers:
+Reflect supports multiple providers:
 
 - **xAI Grok** — `XAI_API_KEY`
 - **Anthropic Claude** — `ANTHROPIC_API_KEY`
@@ -58,12 +58,12 @@ See [Authentication](02-authentication.md) for the full set of auth options incl
 
 ## Basic Interaction
 
-Once authenticated, Decoder presents a full-screen TUI powered by Bubble Tea with two main areas:
+Once authenticated, Reflect presents a full-screen TUI powered by Bubble Tea with two main areas:
 
-- **Scrollback** — the conversation history showing your prompts, Decoder's responses, tool calls, file edits, and more
+- **Scrollback** — the conversation history showing your prompts, Reflect's responses, tool calls, file edits, and more
 - **Prompt** — the input area at the bottom where you type messages
 
-Type a message and press `Enter` to send it. Decoder reads files, runs commands, and edits code as needed. Each tool run streams into the scrollback in real time.
+Type a message and press `Enter` to send it. Reflect reads files, runs commands, and edits code as needed. Each tool run streams into the scrollback in real time.
 
 Press `Tab` to move focus between the prompt and the scrollback. While a turn is running, `Ctrl+C` cancels it. In Vim mode, use `j`/`k` to navigate and `h`/`l` to collapse/expand entries.
 
@@ -81,7 +81,7 @@ The `@` operator opens a fuzzy file picker. By default it respects `.gitignore` 
 
 ### Permissions
 
-Decoder exposes two independent control surfaces:
+Reflect exposes two independent control surfaces:
 
 - **`/autonomy`** — Controls the trust tier (Always Ask, Scout, Builder, Operator, Autonomous)
 - **`/spec`** — A workflow gate that blocks Write/Edit/Bash until you approve implementation
@@ -105,21 +105,21 @@ Every conversation is a **session**. Sessions are automatically saved and can be
 
 - Start a new session: `Ctrl+N` or `/new`
 - Resume a previous session: `/resume` in the TUI, or `--resume <ID>` from the CLI
-- Continue the most recent session: `decoder -c`
+- Continue the most recent session: `reflect -c`
 
 ### Scrollback
 
 The scrollback shows:
 
 - **User prompts** — your messages, rendered as sticky headers
-- **Agent messages** — Decoder's responses with markdown rendering
-- **Thinking blocks** — Decoder's reasoning process (collapsible)
+- **Agent messages** — Reflect's responses with markdown rendering
+- **Thinking blocks** — Reflect's reasoning process (collapsible)
 - **Tool calls** — file edits, command executions, search results
 - **Task lists** — TODO items tracking progress
 
 ### Tools
 
-Decoder has built-in tools for:
+Reflect has built-in tools for:
 
 | Tool | Description |
 |------|-------------|
@@ -152,44 +152,44 @@ See [Slash Commands](04-slash-commands.md) for the complete reference.
 
 ```bash
 # Start the interactive TUI
-decoder
+reflect
 
 # Submit an initial prompt as the first turn
-decoder "fix the failing auth test and run it"
+reflect "fix the failing auth test and run it"
 
 # Start in a specific project directory
-decoder --cwd ~/projects/my-app
+reflect --cwd ~/projects/my-app
 
 # Resume a previous session
-decoder -r abc123
+reflect -r abc123
 
 # Continue the most recent session
-decoder -c
+reflect -c
 
 # Use a specific provider/model
-decoder --provider openai --model gpt-4o
+reflect --provider openai --model gpt-4o
 
 # Isolated worktree for changes
-decoder --worktree "refactor module X"
+reflect --worktree "refactor module X"
 
 # Non-interactive (headless) mode
-decoder -p "Explain this codebase"
+reflect -p "Explain this codebase"
 
 # Full auto mode
-decoder exec --auto full "add error handling"
+reflect exec --auto full "add error handling"
 
 # Dry-run mode (denies all tools)
-decoder exec --autonomy dry-run "What would this do?"
+reflect exec --autonomy dry-run "What would this do?"
 ```
 
 ---
 
 ## Headless Mode
 
-Run Decoder non-interactively for scripting, CI/CD, and automation:
+Run Reflect non-interactively for scripting, CI/CD, and automation:
 
 ```bash
-decoder -p "Your prompt here"
+reflect -p "Your prompt here"
 ```
 
 Output formats:
@@ -204,15 +204,15 @@ Output formats:
 
 ## Project Rules (AGENTS.md)
 
-Add per-project instructions by creating an `AGENTS.md` file in your repository. Decoder reads these files and injects their contents as a project-instructions message at the start of the conversation:
+Add per-project instructions by creating an `AGENTS.md` file in your repository. Reflect reads these files and injects their contents as a project-instructions message at the start of the conversation:
 
 ```
-~/.decoder/AGENTS.md           # Global rules (apply to all projects)
+~/.reflect/AGENTS.md           # Global rules (apply to all projects)
 <repo-root>/AGENTS.md       # Repository-level rules
 <cwd>/AGENTS.md             # Directory-level rules (highest priority)
 ```
 
-Deeper files take precedence. Decoder also reads `CLAUDE.md` files for compatibility.
+Deeper files take precedence. Reflect also reads `CLAUDE.md` files for compatibility.
 
 ---
 

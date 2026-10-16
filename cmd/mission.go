@@ -10,13 +10,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GrayCodeAI/decoder/internal/engine/safety"
+	"github.com/GrayCodeAI/reflect/internal/engine/safety"
 
-	decoderconfig "github.com/GrayCodeAI/decoder/internal/config"
-	mission "github.com/GrayCodeAI/decoder/internal/multiagent"
-	"github.com/GrayCodeAI/decoder/internal/observability/logger"
-	"github.com/GrayCodeAI/decoder/internal/tool"
-	"github.com/GrayCodeAI/decoder/internal/ui/icons"
+	reflectconfig "github.com/GrayCodeAI/reflect/internal/config"
+	mission "github.com/GrayCodeAI/reflect/internal/multiagent"
+	"github.com/GrayCodeAI/reflect/internal/observability/logger"
+	"github.com/GrayCodeAI/reflect/internal/tool"
+	"github.com/GrayCodeAI/reflect/internal/ui/icons"
 	"github.com/spf13/cobra"
 )
 
@@ -38,10 +38,10 @@ Each feature runs in its own worktree with a full engine session.
 Results are committed on separate branches for review/merge.
 
 Examples:
-  decoder mission "Add auth, rate limiting, and logging to the API"
-  decoder mission --workers 6 "Refactor the database layer into 3 services"
-  decoder mission --model claude-sonnet-4-6 "Add tests for all untested packages"
-  decoder mission --from-tasks`,
+  reflect mission "Add auth, rate limiting, and logging to the API"
+  reflect mission --workers 6 "Refactor the database layer into 3 services"
+  reflect mission --model claude-sonnet-4-6 "Add tests for all untested packages"
+  reflect mission --from-tasks`,
 	Args: cobra.ArbitraryArgs,
 	RunE: runMission,
 }
@@ -64,7 +64,7 @@ func runMission(_ *cobra.Command, args []string) error {
 	cwd, _ := os.Getwd()
 	baseBranch := getCurrentBranch(cwd)
 
-	settings := decoderconfig.LoadSettings()
+	settings := reflectconfig.LoadSettings()
 	effectiveModel, effectiveProvider := effectiveModelAndProvider(settings)
 	if missionModel != "" {
 		effectiveModel = missionModel
@@ -82,7 +82,7 @@ func runMission(_ *cobra.Command, args []string) error {
 
 	m := mission.New(prompt, cfg)
 	// Clean up the mission's temp directory when the command finishes,
-	// whether it succeeded or failed. Without this, /tmp/decoder-missions/
+	// whether it succeeded or failed. Without this, /tmp/reflect-missions/
 	// accumulates one directory per run indefinitely (C6 fix).
 	defer func() { _ = m.Cleanup() }()
 
@@ -193,7 +193,7 @@ func runMission(_ *cobra.Command, args []string) error {
 
 	// Propagate feature failures as a non-zero exit so CI sees a real
 	// failure instead of green: Mission.Run historically returned nil even
-	// when every feature failed (H9), so `decoder mission` exited 0.
+	// when every feature failed (H9), so `reflect mission` exited 0.
 	failed := 0
 	for _, f := range m.Features {
 		if f.Status == mission.FeatureFailed {
@@ -207,7 +207,7 @@ func runMission(_ *cobra.Command, args []string) error {
 	return nil
 }
 
-func planWithLLM(ctx context.Context, prompt, provider, model string, settings decoderconfig.Settings) ([]mission.Feature, error) {
+func planWithLLM(ctx context.Context, prompt, provider, model string, settings reflectconfig.Settings) ([]mission.Feature, error) {
 	planPrompt := fmt.Sprintf(
 		"Decompose this task into independent features that can be implemented in parallel.\n\n"+
 			"Task: %s\n\n"+
@@ -221,7 +221,7 @@ func planWithLLM(ctx context.Context, prompt, provider, model string, settings d
 	)
 
 	registry, _ := defaultRegistry(settings)
-	sess, err := newConfiguredDecoderSession(settings, provider, model, planPrompt, registry, logger.New(io.Discard, logger.Error))
+	sess, err := newConfiguredReflectSession(settings, provider, model, planPrompt, registry, logger.New(io.Discard, logger.Error))
 	if err != nil {
 		return nil, err
 	}

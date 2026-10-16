@@ -1,6 +1,6 @@
 # Terminal Support and Troubleshooting
 
-Decoder runs as a full-screen TUI powered by Bubble Tea. This covers terminal compatibility and common fixes.
+Reflect runs as a full-screen TUI powered by Bubble Tea. This covers terminal compatibility and common fixes.
 
 ---
 
@@ -13,10 +13,10 @@ Decoder runs as a full-screen TUI powered by Bubble Tea. This covers terminal co
 export COLORTERM=truecolor
 ```
 
-Inside tmux, add to `~/.tmux.conf`:
+Inside __TRELAY_PROTECT__, add to `~/.__TRELAY_PROTECT__.conf`:
 
-```tmux
-set -g default-terminal "tmux-256color"
+```__TRELAY_PROTECT__
+set -g default-terminal "__TRELAY_PROTECT__-256color"
 set -as terminal-features ",*:RGB"
 ```
 
@@ -24,7 +24,7 @@ set -as terminal-features ",*:RGB"
 
 ## Terminal Detection
 
-Decoder detects these terminals:
+Reflect detects these terminals:
 
 - Apple Terminal
 - iTerm2
@@ -46,7 +46,7 @@ Run `/terminal-setup` for diagnostics.
 
 **Cause**: Terminal not configured for truecolor.
 
-**Fix**: Set `COLORTERM=truecolor` and configure tmux for RGB.
+**Fix**: Set `COLORTERM=truecolor` and configure __TRELAY_PROTECT__ for RGB.
 
 ### Clipboard Not Working
 
@@ -55,13 +55,13 @@ Run `/terminal-setup` for diagnostics.
 **Fix**:
 - iTerm2: Enable "Applications in terminal may access clipboard"
 - Ghostty: Add `clipboard-provider = "work-area"` to config
-- tmux: Add `set -g set-clipboard on`
+- __TRELAY_PROTECT__: Add `set -g set-clipboard on`
 
 ### Fullscreen Not Activating
 
-**Cause**: Zellij, tmux control mode, or config.
+**Cause**: Zellij, __TRELAY_PROTECT__ control mode, or config.
 
-**Fix**: Set in `~/.decoder/settings.json`:
+**Fix**: Set in `~/.reflect/settings.json`:
 
 ```json
 { "terminal": { "alt_screen": "always" } }
@@ -75,12 +75,12 @@ Run `/terminal-setup` for diagnostics.
 
 ---
 
-## tmux Configuration
+## __TRELAY_PROTECT__ Configuration
 
-Recommended settings in `~/.tmux.conf`:
+Recommended settings in `~/.__TRELAY_PROTECT__.conf`:
 
-```tmux
-set -g default-terminal "tmux-256color"
+```__TRELAY_PROTECT__
+set -g default-terminal "__TRELAY_PROTECT__-256color"
 set -as terminal-features ",*:RGB"
 set -g set-clipboard on
 set -g allow-passthrough on
@@ -116,10 +116,10 @@ Zellij intercepts many Ctrl/Alt keys. Use:
 - Press `Ctrl+O` then `C` to enter configuration
 - Select "Unlock-First (non-colliding)"
 
-### tmux
+### __TRELAY_PROTECT__
 
 Add to config:
-```tmux
+```__TRELAY_PROTECT__
 set -g allow-passthrough on
 set -g set-clipboard on
 ```
@@ -128,7 +128,7 @@ set -g set-clipboard on
 
 ## Diagnostics
 
-Run in Decoder:
+Run in Reflect:
 
 ```
 /terminal-setup

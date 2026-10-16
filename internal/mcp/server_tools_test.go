@@ -13,7 +13,7 @@ import (
 // ---------------------------------------------------------------------------
 
 func TestRegisterDefaultTools_RegistersAllTools(t *testing.T) {
-	server := NewMCPServer(ServerInfo{Name: "decoder", Version: "test"})
+	server := NewMCPServer(ServerInfo{Name: "reflect", Version: "test"})
 	RegisterDefaultTools(server, nil)
 
 	// Send tools/list
@@ -27,11 +27,11 @@ func TestRegisterDefaultTools_RegistersAllTools(t *testing.T) {
 	tools := result["tools"].([]interface{})
 
 	expectedNames := map[string]bool{
-		"decoder_chat":          false,
-		"decoder_search":        false,
-		"decoder_memory_recall": false,
-		"decoder_memory_store":  false,
-		"decoder_compress":      false,
+		"reflect_chat":          false,
+		"reflect_search":        false,
+		"reflect_memory_recall": false,
+		"reflect_memory_store":  false,
+		"reflect_compress":      false,
 	}
 
 	for _, raw := range tools {
@@ -53,11 +53,11 @@ func TestRegisterDefaultTools_RegistersAllTools(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// decoder_chat tool
+// reflect_chat tool
 // ---------------------------------------------------------------------------
 
-func TestDecoderChatTool_ValidPrompt(t *testing.T) {
-	server := NewMCPServer(ServerInfo{Name: "decoder", Version: "test"})
+func TestReflectChatTool_ValidPrompt(t *testing.T) {
+	server := NewMCPServer(ServerInfo{Name: "reflect", Version: "test"})
 	executor := func(ctx context.Context, name string, params json.RawMessage) (string, error) {
 		if name != "agent" {
 			return "", fmt.Errorf("expected agent, got %s", name)
@@ -66,36 +66,36 @@ func TestDecoderChatTool_ValidPrompt(t *testing.T) {
 	}
 	RegisterDefaultTools(server, executor)
 
-	req := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"decoder_chat","arguments":{"prompt":"hello"}}}` + "\n"
+	req := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"reflect_chat","arguments":{"prompt":"hello"}}}` + "\n"
 	resp := sendRequest(t, server, req)
 	assertNoError(t, resp)
 	assertResponseContains(t, resp, "chat response")
 }
 
-func TestDecoderChatTool_EmptyPrompt(t *testing.T) {
-	server := NewMCPServer(ServerInfo{Name: "decoder", Version: "test"})
+func TestReflectChatTool_EmptyPrompt(t *testing.T) {
+	server := NewMCPServer(ServerInfo{Name: "reflect", Version: "test"})
 	RegisterDefaultTools(server, nil)
 
-	req := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"decoder_chat","arguments":{"prompt":""}}}` + "\n"
+	req := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"reflect_chat","arguments":{"prompt":""}}}` + "\n"
 	resp := sendRequest(t, server, req)
 	assertIsError(t, resp)
 }
 
-func TestDecoderChatTool_MissingPrompt(t *testing.T) {
-	server := NewMCPServer(ServerInfo{Name: "decoder", Version: "test"})
+func TestReflectChatTool_MissingPrompt(t *testing.T) {
+	server := NewMCPServer(ServerInfo{Name: "reflect", Version: "test"})
 	RegisterDefaultTools(server, nil)
 
-	req := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"decoder_chat","arguments":{}}}` + "\n"
+	req := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"reflect_chat","arguments":{}}}` + "\n"
 	resp := sendRequest(t, server, req)
 	assertIsError(t, resp)
 }
 
 // ---------------------------------------------------------------------------
-// decoder_search tool
+// reflect_search tool
 // ---------------------------------------------------------------------------
 
-func TestDecoderSearchTool_ValidQuery(t *testing.T) {
-	server := NewMCPServer(ServerInfo{Name: "decoder", Version: "test"})
+func TestReflectSearchTool_ValidQuery(t *testing.T) {
+	server := NewMCPServer(ServerInfo{Name: "reflect", Version: "test"})
 	executor := func(ctx context.Context, name string, params json.RawMessage) (string, error) {
 		if name != "code_search" {
 			return "", fmt.Errorf("expected code_search, got %s", name)
@@ -104,102 +104,102 @@ func TestDecoderSearchTool_ValidQuery(t *testing.T) {
 	}
 	RegisterDefaultTools(server, executor)
 
-	req := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"decoder_search","arguments":{"query":"auth middleware"}}}` + "\n"
+	req := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"reflect_search","arguments":{"query":"auth middleware"}}}` + "\n"
 	resp := sendRequest(t, server, req)
 	assertNoError(t, resp)
 	assertResponseContains(t, resp, "search results")
 }
 
-func TestDecoderSearchTool_EmptyQuery(t *testing.T) {
-	server := NewMCPServer(ServerInfo{Name: "decoder", Version: "test"})
+func TestReflectSearchTool_EmptyQuery(t *testing.T) {
+	server := NewMCPServer(ServerInfo{Name: "reflect", Version: "test"})
 	RegisterDefaultTools(server, nil)
 
-	req := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"decoder_search","arguments":{"query":""}}}` + "\n"
+	req := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"reflect_search","arguments":{"query":""}}}` + "\n"
 	resp := sendRequest(t, server, req)
 	assertIsError(t, resp)
 }
 
 // ---------------------------------------------------------------------------
-// decoder_memory_recall tool
+// reflect_memory_recall tool
 // ---------------------------------------------------------------------------
 
-func TestDecoderMemoryRecallTool_EmptyQuery(t *testing.T) {
-	server := NewMCPServer(ServerInfo{Name: "decoder", Version: "test"})
+func TestReflectMemoryRecallTool_EmptyQuery(t *testing.T) {
+	server := NewMCPServer(ServerInfo{Name: "reflect", Version: "test"})
 	RegisterDefaultTools(server, nil)
 
-	req := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"decoder_memory_recall","arguments":{"query":""}}}` + "\n"
+	req := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"reflect_memory_recall","arguments":{"query":""}}}` + "\n"
 	resp := sendRequest(t, server, req)
 	assertIsError(t, resp)
 }
 
-func TestDecoderMemoryRecallTool_NoMatches(t *testing.T) {
-	t.Setenv("DECODER_STATE_DIR", t.TempDir())
-	server := NewMCPServer(ServerInfo{Name: "decoder", Version: "test"})
+func TestReflectMemoryRecallTool_NoMatches(t *testing.T) {
+	t.Setenv("REFLECT_STATE_DIR", t.TempDir())
+	server := NewMCPServer(ServerInfo{Name: "reflect", Version: "test"})
 	RegisterDefaultTools(server, nil)
 
-	req := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"decoder_memory_recall","arguments":{"query":"definitely-not-stored"}}}` + "\n"
+	req := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"reflect_memory_recall","arguments":{"query":"definitely-not-stored"}}}` + "\n"
 	resp := sendRequest(t, server, req)
 	assertNoError(t, resp)
 	assertResponseContains(t, resp, "No memories matched")
 }
 
 // ---------------------------------------------------------------------------
-// decoder_memory_store tool
+// reflect_memory_store tool
 // ---------------------------------------------------------------------------
 
-func TestDecoderMemoryStoreTool_RoundTrip(t *testing.T) {
-	t.Setenv("DECODER_STATE_DIR", t.TempDir())
-	server := NewMCPServer(ServerInfo{Name: "decoder", Version: "test"})
+func TestReflectMemoryStoreTool_RoundTrip(t *testing.T) {
+	t.Setenv("REFLECT_STATE_DIR", t.TempDir())
+	server := NewMCPServer(ServerInfo{Name: "reflect", Version: "test"})
 	RegisterDefaultTools(server, nil)
 
-	storeReq := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"decoder_memory_store","arguments":{"key":"decision","content":"use Go for the backend"}}}` + "\n"
+	storeReq := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"reflect_memory_store","arguments":{"key":"decision","content":"use Go for the backend"}}}` + "\n"
 	storeResp := sendRequest(t, server, storeReq)
 	assertNoError(t, storeResp)
 	assertResponseContains(t, storeResp, "Stored memory")
 
-	recallReq := `{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"decoder_memory_recall","arguments":{"query":"backend"}}}` + "\n"
+	recallReq := `{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"reflect_memory_recall","arguments":{"query":"backend"}}}` + "\n"
 	recallResp := sendRequest(t, server, recallReq)
 	assertNoError(t, recallResp)
 	assertResponseContains(t, recallResp, "use Go for the backend")
 }
 
-func TestDecoderMemoryStoreTool_MissingKey(t *testing.T) {
-	server := NewMCPServer(ServerInfo{Name: "decoder", Version: "test"})
+func TestReflectMemoryStoreTool_MissingKey(t *testing.T) {
+	server := NewMCPServer(ServerInfo{Name: "reflect", Version: "test"})
 	RegisterDefaultTools(server, nil)
 
-	req := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"decoder_memory_store","arguments":{"content":"some content"}}}` + "\n"
+	req := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"reflect_memory_store","arguments":{"content":"some content"}}}` + "\n"
 	resp := sendRequest(t, server, req)
 	assertIsError(t, resp)
 }
 
-func TestDecoderMemoryStoreTool_MissingContent(t *testing.T) {
-	server := NewMCPServer(ServerInfo{Name: "decoder", Version: "test"})
+func TestReflectMemoryStoreTool_MissingContent(t *testing.T) {
+	server := NewMCPServer(ServerInfo{Name: "reflect", Version: "test"})
 	RegisterDefaultTools(server, nil)
 
-	req := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"decoder_memory_store","arguments":{"key":"some-key"}}}` + "\n"
+	req := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"reflect_memory_store","arguments":{"key":"some-key"}}}` + "\n"
 	resp := sendRequest(t, server, req)
 	assertIsError(t, resp)
 }
 
 // ---------------------------------------------------------------------------
-// decoder_compress tool
+// reflect_compress tool
 // ---------------------------------------------------------------------------
 
-func TestDecoderCompressTool_ValidText(t *testing.T) {
-	server := NewMCPServer(ServerInfo{Name: "decoder", Version: "test"})
+func TestReflectCompressTool_ValidText(t *testing.T) {
+	server := NewMCPServer(ServerInfo{Name: "reflect", Version: "test"})
 	RegisterDefaultTools(server, nil)
 
-	req := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"decoder_compress","arguments":{"text":"the quick brown fox jumps over the lazy dog. the quick brown fox jumps over the lazy dog."}}}` + "\n"
+	req := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"reflect_compress","arguments":{"text":"the quick brown fox jumps over the lazy dog. the quick brown fox jumps over the lazy dog."}}}` + "\n"
 	resp := sendRequest(t, server, req)
 	assertNoError(t, resp)
 	assertResponseContains(t, resp, "original_tokens")
 }
 
-func TestDecoderCompressTool_EmptyText(t *testing.T) {
-	server := NewMCPServer(ServerInfo{Name: "decoder", Version: "test"})
+func TestReflectCompressTool_EmptyText(t *testing.T) {
+	server := NewMCPServer(ServerInfo{Name: "reflect", Version: "test"})
 	RegisterDefaultTools(server, nil)
 
-	req := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"decoder_compress","arguments":{"text":""}}}` + "\n"
+	req := `{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"reflect_compress","arguments":{"text":""}}}` + "\n"
 	resp := sendRequest(t, server, req)
 	assertIsError(t, resp)
 }
@@ -246,7 +246,7 @@ func TestDelegateToExecutor_ExecutorError(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 func TestToolSchemas_HaveRequiredFields(t *testing.T) {
-	server := NewMCPServer(ServerInfo{Name: "decoder", Version: "test"})
+	server := NewMCPServer(ServerInfo{Name: "reflect", Version: "test"})
 	RegisterDefaultTools(server, nil)
 
 	req := `{"jsonrpc":"2.0","id":1,"method":"tools/list"}` + "\n"

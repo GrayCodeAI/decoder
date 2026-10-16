@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GrayCodeAI/decoder/internal/mathutil"
+	"github.com/GrayCodeAI/reflect/internal/mathutil"
 )
 
 // RawMemory represents an unprocessed memory ingested from a session.

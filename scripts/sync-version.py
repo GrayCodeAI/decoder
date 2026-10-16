@@ -21,14 +21,14 @@ def stamp_json(path):
     data = json.loads(path.read_text())
     data["version"] = version
     for name in data.get("optionalDependencies", {}):
-        if name.startswith("@graycodeai/decoder-"):
+        if name.startswith("@graycodeai/reflect-"):
             data["optionalDependencies"][name] = version
-    indent = 4 if project == "decoder" else 2
+    indent = 4 if project == "reflect" else 2
     outputs[path] = json.dumps(data, indent=indent) + "\n"
 
 for path in sorted((root / "npm").glob("*/package.json")):
     stamp_json(path)
-if project == "mux":
+if project == "relay":
     stamp_json(root / "internal/sdk/typescript/package.json")
     path = root / "internal/sdk/python/pyproject.toml"
     outputs[path] = re.sub(r'^version = ".*"$', 'version = "' + version + '"', path.read_text(), count=1, flags=re.M)

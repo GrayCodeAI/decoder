@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/GrayCodeAI/decoder/internal/testutil"
+	"github.com/GrayCodeAI/reflect/internal/testutil"
 )
 
 func TestAdaptivePrompt_New(t *testing.T) {

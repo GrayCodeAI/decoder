@@ -16,11 +16,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GrayCodeAI/decoder/internal/eventlog"
-	"github.com/GrayCodeAI/decoder/internal/eventlog/zstdz"
-	"github.com/GrayCodeAI/decoder/internal/storage"
-	"github.com/GrayCodeAI/decoder/internal/types"
-	contracts "github.com/GrayCodeAI/mux/tools"
+	"github.com/GrayCodeAI/reflect/internal/eventlog"
+	"github.com/GrayCodeAI/reflect/internal/eventlog/zstdz"
+	"github.com/GrayCodeAI/reflect/internal/storage"
+	"github.com/GrayCodeAI/reflect/internal/types"
+	contracts "github.com/GrayCodeAI/relay/tools"
 )
 
 // Message is a persisted conversation message.
@@ -127,7 +127,7 @@ func saveWithCompression(s *Session, compress bool) error {
 
 	// Write to temp file, then atomic rename. The temp name is namespaced
 	// with getpid() so two processes (or two saves of the same session from
-	// different decoder instances) don't clobber each other's temp file.
+	// different reflect instances) don't clobber each other's temp file.
 	target := jsonlPathFor(s.ID)
 	tmp := fmt.Sprintf("%s.tmp.%d", target, os.Getpid())
 
@@ -291,7 +291,7 @@ func saveWithCompression(s *Session, compress bool) error {
 }
 
 // WAL (Write-Ahead Log) appends messages incrementally for crash recovery.
-// Each message is appended immediately — if decoder crashes, the WAL has everything.
+// Each message is appended immediately — if reflect crashes, the WAL has everything.
 type WAL struct {
 	mu   sync.Mutex
 	f    *os.File
@@ -1009,7 +1009,7 @@ func loadZstdJSONLFile(path, id string) (*Session, error) {
 	remaining := scanner.Remaining()
 	if len(remaining) > 0 {
 		scan := zstdz.ScanFrames(remaining, 0)
-		dec := zstdz.NewFrameDecoder()
+		dec := zstdz.NewFrameReflect()
 		defer dec.Close()
 		for frameData := range dec.Decode(remaining, scan.Frames) {
 			for _, raw := range bytes.Split(bytes.TrimRight(frameData, "\n"), []byte("\n")) {

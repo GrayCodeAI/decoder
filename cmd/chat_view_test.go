@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestFormatDecoderTokenCount(t *testing.T) {
+func TestFormatReflectTokenCount(t *testing.T) {
 	t.Parallel()
 	cases := []struct {
 		in   int
@@ -25,9 +25,9 @@ func TestFormatDecoderTokenCount(t *testing.T) {
 		tc := tc
 		t.Run("", func(t *testing.T) {
 			t.Parallel()
-			got := formatDecoderTokenCount(tc.in)
+			got := formatReflectTokenCount(tc.in)
 			if got != tc.want {
-				t.Fatalf("formatDecoderTokenCount(%d) = %q, want %q", tc.in, got, tc.want)
+				t.Fatalf("formatReflectTokenCount(%d) = %q, want %q", tc.in, got, tc.want)
 			}
 		})
 	}

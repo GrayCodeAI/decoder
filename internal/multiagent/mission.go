@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GrayCodeAI/decoder/internal/storage"
+	"github.com/GrayCodeAI/reflect/internal/storage"
 	"github.com/google/uuid"
 )
 
@@ -181,7 +181,7 @@ func (m *Mission) Plan(ctx context.Context, planFn PlanFunc) error {
 			features[i].ID = fmt.Sprintf("feat-%d", i+1)
 		}
 		features[i].Status = FeaturePending
-		features[i].Branch = fmt.Sprintf("decoder-mission/%s/%s", m.ID, features[i].ID)
+		features[i].Branch = fmt.Sprintf("reflect-mission/%s/%s", m.ID, features[i].ID)
 	}
 	m.Features = features
 	return nil
@@ -274,7 +274,7 @@ func (m *Mission) runFeatureSet(ctx context.Context, workerFn WorkerFunc, missio
 				// guaranteed to fail and leaked the branch. Attempt-suffixed
 				// names make retries fresh; cleanup deletes the branch.
 				m.mu.Lock()
-				feat.Branch = fmt.Sprintf("decoder-mission/%s/%s/attempt-%d", m.ID, feat.ID, attempt+1)
+				feat.Branch = fmt.Sprintf("reflect-mission/%s/%s/attempt-%d", m.ID, feat.ID, attempt+1)
 				m.mu.Unlock()
 
 				workerCtx := ctx
@@ -599,14 +599,14 @@ func (m *Mission) DetectOverlaps() []Overlap {
 }
 
 func (m *Mission) createDir() (string, error) {
-	dir := filepath.Join(os.TempDir(), "decoder-missions", m.ID)
+	dir := filepath.Join(os.TempDir(), "reflect-missions", m.ID)
 	if err := os.MkdirAll(dir, 0o750); err != nil {
 		return "", err
 	}
 	return dir, nil
 }
 
-// Cleanup removes the mission's temporary directory from /tmp/decoder-missions/.
+// Cleanup removes the mission's temporary directory from /tmp/reflect-missions/.
 // Call this after the mission is complete (success or failure) to prevent
 // unbounded accumulation of mission artifacts. Safe to call multiple times.
 func (m *Mission) Cleanup() error {
@@ -614,7 +614,7 @@ func (m *Mission) Cleanup() error {
 		return nil
 	}
 	// Best-effort durable snapshot: copy mission state and its portable graph
-	// out of the (deleted) temp directory so `decoder mission lineage` can
+	// out of the (deleted) temp directory so `reflect mission lineage` can
 	// explain the run after cleanup. Failures never block cleanup.
 	if durableDir := filepath.Join(storage.StateDir(), "missions", m.ID); durableDir != "" {
 		_ = os.MkdirAll(durableDir, 0o700)

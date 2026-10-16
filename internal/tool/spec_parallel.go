@@ -9,8 +9,8 @@ import (
 	"sync"
 	"time"
 
-	agentcontracts "github.com/GrayCodeAI/decoder/internal/contracts/agent"
-	"github.com/GrayCodeAI/decoder/internal/spec"
+	agentcontracts "github.com/GrayCodeAI/reflect/internal/contracts/agent"
+	"github.com/GrayCodeAI/reflect/internal/spec"
 )
 
 type SpecParallelTool struct{}

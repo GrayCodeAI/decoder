@@ -1,6 +1,6 @@
 # Learned Preferences
 
-Decoder can learn coding-style tendencies from feedback through its taste system.
+Reflect can learn coding-style tendencies from feedback through its taste system.
 These preferences are advisory context, not policy.
 
 ## Policy Boundaries

@@ -11,10 +11,10 @@ import (
 // These tests exercise the file tools' use of the sensitive-path policy, so
 // they live in package tool (the policy itself is tested in toolsafety).
 
-func TestFileToolsBlockMuxProviderConfig(t *testing.T) {
-	muxDir := filepath.Join(t.TempDir(), "mux")
-	t.Setenv("MUX_CONFIG_DIR", muxDir)
-	providerPath := filepath.Join(muxDir, "provider.json")
+func TestFileToolsBlockRelayProviderConfig(t *testing.T) {
+	relayDir := filepath.Join(t.TempDir(), "relay")
+	t.Setenv("RELAY_CONFIG_DIR", relayDir)
+	providerPath := filepath.Join(relayDir, "provider.json")
 
 	readInput, _ := json.Marshal(map[string]string{"path": providerPath})
 	editInput, _ := json.Marshal(map[string]string{
@@ -55,12 +55,12 @@ func TestFileToolsBlockMuxProviderConfig(t *testing.T) {
 // symlinks before opening (M13): reading through a symlink that points at a
 // sensitive target is blocked, while a symlink to an ordinary file works.
 func TestFileRead_BlocksSymlinkToSensitiveFile(t *testing.T) {
-	muxDir := filepath.Join(t.TempDir(), "mux")
-	if err := os.MkdirAll(muxDir, 0o755); err != nil {
+	relayDir := filepath.Join(t.TempDir(), "relay")
+	if err := os.MkdirAll(relayDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("MUX_CONFIG_DIR", muxDir)
-	providerPath := filepath.Join(muxDir, "provider.json")
+	t.Setenv("RELAY_CONFIG_DIR", relayDir)
+	providerPath := filepath.Join(relayDir, "provider.json")
 	if err := os.WriteFile(providerPath, []byte(`{"key":"x"}`), 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -111,17 +111,17 @@ func TestBashSensitivePathIntegration(t *testing.T) {
 	}
 }
 
-func TestCommandReferencesSensitivePath_MuxConfigDir(t *testing.T) {
-	muxDir := filepath.Join(t.TempDir(), "mux config with spaces")
-	t.Setenv("MUX_CONFIG_DIR", muxDir)
+func TestCommandReferencesSensitivePath_RelayConfigDir(t *testing.T) {
+	relayDir := filepath.Join(t.TempDir(), "relay config with spaces")
+	t.Setenv("RELAY_CONFIG_DIR", relayDir)
 
 	commands := []string{
-		`cat "` + filepath.Join(muxDir, "provider.json") + `"`,
-		`cat "$MUX_CONFIG_DIR/provider.json"`,
-		`cat "${MUX_CONFIG_DIR}/provider.json"`,
-		`cat "${MUX_CONFIG_DIR%/}/provider.json"`,
-		`printf '%s\n' "$MUX_CONFIG_DIR"`,
-		"cat " + strings.ReplaceAll(filepath.Join(muxDir, "provider.json"), " ", `\ `),
+		`cat "` + filepath.Join(relayDir, "provider.json") + `"`,
+		`cat "$RELAY_CONFIG_DIR/provider.json"`,
+		`cat "${RELAY_CONFIG_DIR}/provider.json"`,
+		`cat "${RELAY_CONFIG_DIR%/}/provider.json"`,
+		`printf '%s\n' "$RELAY_CONFIG_DIR"`,
+		"cat " + strings.ReplaceAll(filepath.Join(relayDir, "provider.json"), " ", `\ `),
 	}
 	for _, command := range commands {
 		if reason := CommandReferencesSensitivePath(command); reason == "" {

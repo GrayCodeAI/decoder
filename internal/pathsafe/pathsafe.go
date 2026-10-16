@@ -1,7 +1,7 @@
 // Package pathsafe centralizes sensitive-path policy so low-level packages
 // (for example config) can consult it without depending on the large tool
 // package. It blocks reads and writes to credential-bearing files such as
-// ~/.ssh keys, cloud credentials, and decoder's own provider/env files.
+// ~/.ssh keys, cloud credentials, and reflect's own provider/env files.
 package pathsafe
 
 import (
@@ -9,9 +9,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/GrayCodeAI/decoder/internal/env"
-	"github.com/GrayCodeAI/decoder/internal/home"
-	"github.com/GrayCodeAI/decoder/internal/storage"
+	"github.com/GrayCodeAI/reflect/internal/env"
+	"github.com/GrayCodeAI/reflect/internal/home"
+	"github.com/GrayCodeAI/reflect/internal/storage"
 )
 
 // BlockedPathSuffixes are path suffixes that should never be read or written.
@@ -94,17 +94,17 @@ func IsSensitivePath(path string) string {
 	homeDir := home.MustDir()
 
 	if homeDir != "" {
-		decoderProv := filepath.Join(homeDir, ".decoder", "provider.json")
-		if clean == decoderProv {
-			return "access to ~/.decoder/provider.json is blocked for security (API credentials)"
+		reflectProv := filepath.Join(homeDir, ".reflect", "provider.json")
+		if clean == reflectProv {
+			return "access to ~/.reflect/provider.json is blocked for security (API credentials)"
 		}
-		decoderEnv := filepath.Join(homeDir, ".decoder", "env")
-		if clean == decoderEnv {
-			return "access to ~/.decoder/env is blocked for security (API keys)"
+		reflectEnv := filepath.Join(homeDir, ".reflect", "env")
+		if clean == reflectEnv {
+			return "access to ~/.reflect/env is blocked for security (API keys)"
 		}
-		decoderDotEnv := filepath.Join(homeDir, ".decoder", ".env")
-		if clean == decoderDotEnv {
-			return "access to ~/.decoder/.env is blocked for security (API keys)"
+		reflectDotEnv := filepath.Join(homeDir, ".reflect", ".env")
+		if clean == reflectDotEnv {
+			return "access to ~/.reflect/.env is blocked for security (API keys)"
 		}
 	}
 
@@ -112,14 +112,14 @@ func IsSensitivePath(path string) string {
 		return "access to provider.json is blocked for security (API credentials)"
 	}
 
-	if cfgDir := strings.TrimSpace(env.Getenv("DECODER_CONFIG_DIR")); cfgDir != "" {
+	if cfgDir := strings.TrimSpace(env.Getenv("REFLECT_CONFIG_DIR")); cfgDir != "" {
 		customEnv := filepath.Join(cfgDir, "env")
 		if matchesResolvedPath(clean, customEnv) {
-			return "access to decoder env file is blocked for security (API keys)"
+			return "access to reflect env file is blocked for security (API keys)"
 		}
 		customDotEnv := filepath.Join(cfgDir, ".env")
 		if matchesResolvedPath(clean, customDotEnv) {
-			return "access to decoder .env is blocked for security (API keys)"
+			return "access to reflect .env is blocked for security (API keys)"
 		}
 	}
 

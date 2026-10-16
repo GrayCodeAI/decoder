@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/GrayCodeAI/decoder/internal/minify"
+	"github.com/GrayCodeAI/reflect/internal/minify"
 )
 
 const maxFileSize = 10 << 20 // 10 MiB

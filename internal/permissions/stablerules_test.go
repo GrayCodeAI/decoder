@@ -9,7 +9,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/GrayCodeAI/decoder/internal/permissions/stableid"
+	"github.com/GrayCodeAI/reflect/internal/permissions/stableid"
 )
 
 func newTempStore(t *testing.T) *StableRuleStore {

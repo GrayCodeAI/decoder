@@ -4,10 +4,10 @@ import (
 	"context"
 	"strings"
 
-	"github.com/GrayCodeAI/decoder/internal/provider/gateway"
+	"github.com/GrayCodeAI/reflect/internal/provider/gateway"
 )
 
-// Role identifies the purpose of a model within a Decoder multi-model workflow.
+// Role identifies the purpose of a model within a Reflect multi-model workflow.
 type Role string
 
 const (
@@ -26,7 +26,7 @@ type ModelRoles struct {
 	Commit   string `json:"commit,omitempty"`
 }
 
-// DefaultRoles keeps Decoder's workflow policy while asking Mux for the
+// DefaultRoles keeps Reflect's workflow policy while asking Relay for the
 // economical same-provider model used for commit/summarization work.
 func DefaultRoles(primaryModel string) ModelRoles {
 	primaryModel = strings.TrimSpace(primaryModel)

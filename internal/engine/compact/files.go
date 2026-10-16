@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/GrayCodeAI/decoder/internal/permissions"
-	"github.com/GrayCodeAI/decoder/internal/types"
+	"github.com/GrayCodeAI/reflect/internal/permissions"
+	"github.com/GrayCodeAI/reflect/internal/types"
 )
 
 type FileTracker struct {
@@ -36,7 +36,7 @@ func (ft *FileTracker) RecordModified(path string) {
 	ft.ModifiedFiles[path]++
 }
 
-func (ft *FileTracker) ExtractFromMessages(messages []types.MuxMessage) {
+func (ft *FileTracker) ExtractFromMessages(messages []types.RelayMessage) {
 	for _, msg := range messages {
 		if msg.Role != "assistant" {
 			continue

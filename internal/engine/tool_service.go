@@ -10,19 +10,19 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/GrayCodeAI/decoder/internal/engine/safety"
+	"github.com/GrayCodeAI/reflect/internal/engine/safety"
 
-	"github.com/GrayCodeAI/decoder/internal/engine/token"
+	"github.com/GrayCodeAI/reflect/internal/engine/token"
 
-	"github.com/GrayCodeAI/decoder/internal/engine/planning"
-	"github.com/GrayCodeAI/decoder/internal/hooks"
-	"github.com/GrayCodeAI/decoder/internal/intelligence/repomap"
-	"github.com/GrayCodeAI/decoder/internal/observability/metrics"
-	"github.com/GrayCodeAI/decoder/internal/observability/oteltrace"
-	"github.com/GrayCodeAI/decoder/internal/prompts"
-	"github.com/GrayCodeAI/decoder/internal/securitylog"
-	"github.com/GrayCodeAI/decoder/internal/tool"
-	"github.com/GrayCodeAI/decoder/internal/types"
+	"github.com/GrayCodeAI/reflect/internal/engine/planning"
+	"github.com/GrayCodeAI/reflect/internal/hooks"
+	"github.com/GrayCodeAI/reflect/internal/intelligence/repomap"
+	"github.com/GrayCodeAI/reflect/internal/observability/metrics"
+	"github.com/GrayCodeAI/reflect/internal/observability/oteltrace"
+	"github.com/GrayCodeAI/reflect/internal/prompts"
+	"github.com/GrayCodeAI/reflect/internal/securitylog"
+	"github.com/GrayCodeAI/reflect/internal/tool"
+	"github.com/GrayCodeAI/reflect/internal/types"
 )
 
 // ToolService is the Session's view of the tool execution surface:
@@ -474,7 +474,7 @@ func (s *ToolService) ExecuteOne(ctx context.Context, tc types.ToolCall, overrid
 	var commitChat func(context.Context, string) (string, error)
 	if s.deps.chat != nil {
 		commitChat = func(chatCtx context.Context, prompt string) (string, error) {
-			resp, err := s.deps.chat.Chat(chatCtx, []types.MuxMessage{{Role: "user", Content: prompt}}, types.ChatOptions{Provider: s.deps.chat.Provider(), Model: s.deps.chat.Model(), MaxTokens: 256})
+			resp, err := s.deps.chat.Chat(chatCtx, []types.RelayMessage{{Role: "user", Content: prompt}}, types.ChatOptions{Provider: s.deps.chat.Provider(), Model: s.deps.chat.Model(), MaxTokens: 256})
 			if err != nil {
 				return "", err
 			}

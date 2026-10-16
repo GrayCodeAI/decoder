@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GrayCodeAI/decoder/internal/textutil"
+	"github.com/GrayCodeAI/reflect/internal/textutil"
 )
 
 // ModelBenchmark orchestrates benchmarking multiple LLM models on standardized tasks.

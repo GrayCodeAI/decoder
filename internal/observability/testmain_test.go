@@ -7,7 +7,7 @@ import (
 
 func TestMain(m *testing.M) {
 	if _, err := os.UserHomeDir(); err != nil {
-		dir, mkErr := os.MkdirTemp("", "decoder-observability-home-*")
+		dir, mkErr := os.MkdirTemp("", "reflect-observability-home-*")
 		if mkErr != nil {
 			os.Exit(1)
 		}

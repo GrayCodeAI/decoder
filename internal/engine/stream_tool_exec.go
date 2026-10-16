@@ -7,11 +7,11 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/GrayCodeAI/decoder/internal/engine/diff"
-	"github.com/GrayCodeAI/decoder/internal/tool"
-	"github.com/GrayCodeAI/decoder/internal/types"
+	"github.com/GrayCodeAI/reflect/internal/engine/diff"
+	"github.com/GrayCodeAI/reflect/internal/tool"
+	"github.com/GrayCodeAI/reflect/internal/types"
 
-	"github.com/GrayCodeAI/decoder/internal/observability/oteltrace"
+	"github.com/GrayCodeAI/reflect/internal/observability/oteltrace"
 )
 
 // ToolState describes the lifecycle phase of one tool call.

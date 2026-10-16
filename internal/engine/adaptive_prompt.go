@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GrayCodeAI/decoder/internal/storage"
-	"github.com/GrayCodeAI/decoder/internal/textutil"
+	"github.com/GrayCodeAI/reflect/internal/storage"
+	"github.com/GrayCodeAI/reflect/internal/textutil"
 )
 
 // AdaptivePrompt adjusts system prompt sections based on user corrections.
@@ -32,7 +32,7 @@ type PromptAdjustment struct {
 	LastUsed   time.Time `json:"last_used"`
 }
 
-// NewAdaptivePrompt creates an adaptive prompt backed by Decoder user state.
+// NewAdaptivePrompt creates an adaptive prompt backed by Reflect user state.
 func NewAdaptivePrompt() *AdaptivePrompt {
 	ap := &AdaptivePrompt{
 		path: filepath.Join(storage.StateDir(), "adaptive_prompt.json"),
