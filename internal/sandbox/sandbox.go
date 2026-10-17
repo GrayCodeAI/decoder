@@ -53,7 +53,7 @@ func DockerAvailable() bool {
 	if _, err := exec.LookPath("docker"); err != nil {
 		return false
 	}
-	return exec.Command("docker", "info").Run() == nil
+	return exec.CommandContext(context.Background(), "docker", "info").Run() == nil
 }
 
 // Run executes command inside a container with workdir bind-mounted at /work.
@@ -79,7 +79,7 @@ func Run(ctx context.Context, cfg Config, workdir, command string) (string, erro
 		image,
 		"sh", "-c", command,
 	}
-	out, err := exec.CommandContext(ctx, "docker", args...).CombinedOutput()
+	out, err := exec.CommandContext(ctx, "docker", args...).CombinedOutput() // #nosec G204 -- args are controlled (image + bind mount + sh -c)
 	return string(out), err
 }
 

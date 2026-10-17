@@ -8,6 +8,7 @@
 package hosttools
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -67,12 +68,12 @@ func Load() ([]Manifest, error) {
 // constructor returning an opaque value. Callers should use hosttools.AsTool.
 //
 // Run executes a host tool with the given JSON input and returns stdout.
-func Run(m Manifest, input string) (string, error) {
+func Run(ctx context.Context, m Manifest, input string) (string, error) {
 	args := make([]string, len(m.Args))
 	for i, a := range m.Args {
 		args[i] = strings.ReplaceAll(a, "{input}", input)
 	}
-	cmd := exec.Command(m.Command, args...)
+	cmd := exec.CommandContext(ctx, m.Command, args...) // #nosec G204 -- command comes from a trusted local manifest
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return string(out), fmt.Errorf("host tool %s failed: %w: %s", m.Name, err, string(out))

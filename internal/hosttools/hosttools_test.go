@@ -31,7 +31,7 @@ func TestLoadAndRun(t *testing.T) {
 	if err != nil || len(m) != 1 {
 		t.Fatalf("load: %v len=%d", err, len(m))
 	}
-	out, err := Run(m[0], "hello")
+	out, err := Run(t.Context(), m[0], "hello")
 	if err != nil {
 		t.Fatal(err)
 	}

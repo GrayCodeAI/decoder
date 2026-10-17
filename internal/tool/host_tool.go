@@ -34,7 +34,7 @@ func (h HostTool) Parameters() map[string]interface{} {
 }
 
 func (h HostTool) Execute(ctx context.Context, input json.RawMessage) (string, error) {
-	return hosttools.Run(h.Manifest, string(input))
+	return hosttools.Run(ctx, h.Manifest, string(input))
 }
 
 // LoadHostTools returns registered host tools.
