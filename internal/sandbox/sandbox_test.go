@@ -60,12 +60,12 @@ func TestRunDockerIfAvailable(t *testing.T) {
 }
 
 func contains(s, sub string) bool {
-	return len(s) >= len(sub) && (func() bool {
+	return len(s) >= len(sub) && func() bool {
 		for i := 0; i+len(sub) <= len(s); i++ {
 			if s[i:i+len(sub)] == sub {
 				return true
 			}
 		}
 		return false
-	})()
+	}()
 }
