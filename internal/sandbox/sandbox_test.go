@@ -41,11 +41,6 @@ func TestRunOffReturnsError(t *testing.T) {
 	}
 }
 
-func TestDockerAvailableSmoke(t *testing.T) {
-	// Just ensure the helper doesn't panic.
-	_ = DockerAvailable()
-}
-
 func TestRunDockerIfAvailable(t *testing.T) {
 	if !DockerAvailable() {
 		t.Skip("docker not available")
