@@ -12,10 +12,12 @@ import (
 // hostToolsSubcommand lists registered host tools.
 type hostToolsSubcommand struct{}
 
-func (c *hostToolsSubcommand) Name() string        { return "host-tools" }
-func (c *hostToolsSubcommand) Aliases() []string   { return []string{"hosttools"} }
-func (c *hostToolsSubcommand) Description() string { return "list host-provided tools (~/.reflect/host_tools)" }
-func (c *hostToolsSubcommand) Usage() string       { return "/host-tools" }
+func (c *hostToolsSubcommand) Name() string      { return "host-tools" }
+func (c *hostToolsSubcommand) Aliases() []string { return []string{"hosttools"} }
+func (c *hostToolsSubcommand) Description() string {
+	return "list host-provided tools (~/.reflect/host_tools)"
+}
+func (c *hostToolsSubcommand) Usage() string { return "/host-tools" }
 
 func (c *hostToolsSubcommand) Handle(m *chatModel, args []string, text string) (tea.Model, tea.Cmd) {
 	manifests, err := hosttools.Load()

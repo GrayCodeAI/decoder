@@ -7,7 +7,10 @@ import (
 )
 
 func TestNormalizeMode(t *testing.T) {
-	cases := []struct{ in string; want Mode }{
+	cases := []struct {
+		in   string
+		want Mode
+	}{
 		{"", ModeOff},
 		{"off", ModeOff},
 		{"docker", ModeDocker},

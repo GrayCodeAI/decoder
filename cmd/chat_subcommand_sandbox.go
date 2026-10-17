@@ -13,10 +13,12 @@ import (
 // sandboxSubcommand reports and toggles sandboxed tool execution.
 type sandboxSubcommand struct{}
 
-func (c *sandboxSubcommand) Name() string        { return "sandbox" }
-func (c *sandboxSubcommand) Aliases() []string   { return nil }
-func (c *sandboxSubcommand) Description() string { return "show sandbox status (Mirror-style isolated execution)" }
-func (c *sandboxSubcommand) Usage() string       { return "/sandbox" }
+func (c *sandboxSubcommand) Name() string      { return "sandbox" }
+func (c *sandboxSubcommand) Aliases() []string { return nil }
+func (c *sandboxSubcommand) Description() string {
+	return "show sandbox status (Mirror-style isolated execution)"
+}
+func (c *sandboxSubcommand) Usage() string { return "/sandbox" }
 
 func (c *sandboxSubcommand) Handle(m *chatModel, args []string, text string) (tea.Model, tea.Cmd) {
 	s := config.LoadSettings()
